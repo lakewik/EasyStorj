@@ -1,5 +1,5 @@
 # storj-gui-client
-GUI Client for Storj Network written in Python and PyQt4
+GUI Client for Storj Distributed Storage Network written in Python and PyQt4. This app finally will work on most desktop platforms: Linux, Windows, Mac OS X
 
 # Software features:
 - list buckets +
