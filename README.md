@@ -2,15 +2,16 @@
 GUI Client for Storj Network written in Python and PyQt4
 
 # Software features:
-- list buckets
-- create buckets
-- register user
-- list files in buckets
+- list buckets +
+- create buckets +
+- register user +
+- list files in buckets +
 - upload file
 - download file
 - list file pointers
-- list file mirrors
+- list file mirrors +
 - manage buckets
+- advanced configuration and bandwith limiting +/-
 
 # Planned features:
 - analyzing geodistribution of nodes, mirrors
