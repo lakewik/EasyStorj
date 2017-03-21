@@ -12,6 +12,7 @@ GUI Client for Storj Distributed Storage Network written in Python and PyQt4. Th
 - list file mirrors +
 - manage buckets
 - advanced configuration and bandwith limiting +/-
+- specified node details
 
 # Planned features:
 - analyzing geodistribution of nodes, mirrors
