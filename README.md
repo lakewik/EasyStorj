@@ -11,7 +11,7 @@ GUI Client for Storj Distributed Storage Network written in Python and PyQt4. Th
 - list file pointers
 - list file mirrors +
 - manage buckets
-- advanced configuration and bandwith limiting +/-
+- advanced configuration and bandwidth limiting +/-
 - specified farmer node details +
 
 # Planned features:
@@ -19,5 +19,5 @@ GUI Client for Storj Distributed Storage Network written in Python and PyQt4. Th
 - file syncing
 
 # Support
-You can open issue (feature request), if you want some feature that haven't been yet implemented. If you find bug in this app please open issue. Please note that this software is currently in Alpha stage. Thank you for your support!
+You can submit issue (feature request), if you want implementation of a feature that haven't been yet implemented. If you find any bugs in this app, please submit issue or a pull request containing a fix. Please note that this software is currently in Alpha Version. Thank you for your support!
 
