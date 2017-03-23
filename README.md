@@ -4,7 +4,7 @@ GUI Client for Storj Distributed Storage Network written in Python and PyQt4. Th
 # How to run (Alpha version)
 - git clone https://github.com/lakewik/storj-gui-client.git
 - cd storj-gui-client
-- install python dependencies, including Storj Python SDK with this updated pull request: https://github.com/Storj/storj-python-sdk/pull/79
+- install python dependencies, including Storj Python SDK (pip install storj)
 - excute: python main.py
 
 
