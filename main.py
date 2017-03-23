@@ -630,7 +630,10 @@ class BucketCreateUI(QtGui.QMainWindow):
             bucekt_cerated = False
 
         if bucekt_cerated:
-            QMessageBox.about(self, "Success", "Bucket was created successfully!")
+            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success", "Bucket was created successfully!",
+                                       QtGui.QMessageBox.Ok)
+            msgBox.exec_()
+            #QMessageBox.about(self, "Success", "Bucket was created successfully!", QMessageBox.Ok)
 
 
         print 1
