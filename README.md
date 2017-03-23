@@ -26,5 +26,5 @@ GUI Client for Storj Distributed Storage Network written in Python and PyQt4. Th
 - file syncing
 
 # Support
-You can submit issue (feature request), if you want implementation of a feature that haven't been yet implemented. If you find any bugs in this app, please submit issue or a pull request containing a fix. Please note that this software is currently in Alpha Version. Thank you for your support!
+You can submit issue (feature request), if you want implementation of a feature that haven't been yet implemented or planned. If you find any bugs in this app, please submit issue or a pull request containing a fix. Please note that this software is currently in Alpha Version. Also I accept donations in SJCX, BTC: 1LWMe1AuQSNQq6zUEtC8vMaV3LhS8r1uFw , Monero (XMR): 42VP4x4CRtwf9PXD3J73ntQHb2f2BYHVR75ovjeSNWzRF4X34mdf367VWD74kD4zDT3ReY6t5uQxAC9FWCPnMQjpQ3xFsV9.  Thank you very much for your support!
 
