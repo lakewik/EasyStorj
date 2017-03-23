@@ -46,7 +46,6 @@ import requests
 
 
 # ext libs
-from treeview_lib import GroupNode
 
 # Defina CONSTANS
 global html_format_begin, html_format_end
