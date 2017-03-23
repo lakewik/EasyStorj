@@ -191,15 +191,19 @@ class RegisterUI(QtGui.QMainWindow):
         self.register_ui = Ui_Register()
         self.register_ui.setupUi(self)
 
-        QtCore.QObject.connect(self.register_ui.pushButton, QtCore.SIGNAL("clicked()"), self.register) # valudate and register user
+        self.register_ui.password.setEchoMode(QLineEdit.Password)
+        self.register_ui.password_2.setEchoMode(QLineEdit.Password)
+
+
+        QtCore.QObject.connect(self.register_ui.register_bt, QtCore.SIGNAL("clicked()"), self.register) # valudate and register user
 
     def register (self):
         #validate fields
 
 
-        self.email = self.register_ui.lineEdit_4.text()
-        self.password = self.register_ui.lineEdit_2.text()
-        self.password_repeat = self.register_ui.lineEdit_3.text()
+        self.email = self.register_ui.email.text()
+        self.password = self.register_ui.password.text()
+        self.password_repeat = self.register_ui.password_2.text()
 
         self.tools = Tools()
         success = False
@@ -262,6 +266,7 @@ class LoginUI(QtGui.QMainWindow):
 
         # Account manager
 
+        self.login_ui.password.setEchoMode(QLineEdit.Password)
 
 
         QtCore.QObject.connect(self.login_ui.login_bt, QtCore.SIGNAL("clicked()"), self.login) # take login action
@@ -378,6 +383,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
 
         self.file_mirrors_list_ui.mirror_details_bt.clicked.connect (lambda: self.open_mirror_details_window("established"))
         self.file_mirrors_list_ui.mirror_details_bt_2.clicked.connect (lambda: self.open_mirror_details_window("available"))
+        self.file_mirrors_list_ui.quit_bt.clicked.connect (self.close)
 
 
         #self.connect(self.file_mirrors_list_ui.established_mirrors_tree, QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.open_mirror_details_window)
@@ -597,6 +603,7 @@ class BucketCreateUI(QtGui.QMainWindow):
         self.bucket_create_ui.setupUi(self)
 
         QtCore.QObject.connect(self.bucket_create_ui.create_bucket_bt, QtCore.SIGNAL("clicked()"), self.createNewBucketCreateThread)  #create bucket action
+        QtCore.QObject.connect(self.bucket_create_ui.cancel_bt, QtCore.SIGNAL("clicked()"), self.close)  #create bucket action
 
         self.storj_engine = StorjEngine() #init StorjEngine
 
@@ -725,7 +732,6 @@ class InitialWindowUI(QtGui.QMainWindow):
         #QtCore.QObject.connect(self.ui.pushButton_3, QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine() #init StorjEngine
 
-
         QtCore.QObject.connect(self.ui_initial_window.login_bt, QtCore.SIGNAL("clicked()"), self.open_login_window) # open login window
         QtCore.QObject.connect(self.ui_initial_window.register_bt, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
         #QtCore.QObject.connect(self.ui_initial_window.about_bt, QtCore.SIGNAL("clicked()"), self.open_about_window) # open login window
@@ -752,14 +758,17 @@ class MainUI(QtGui.QMainWindow):
         self.storj_engine = StorjEngine() #init StorjEngine
         #self.storj_engine.storj_client.
 
+        self.account_manager = AccountManager()  # init AccountManager
 
+        user_email = self.account_manager.get_user_email()
+        self.ui.account_label.setText(html_format_begin + str(user_email) + html_format_end)
 
-        QtCore.QObject.connect(self.ui.pushButton_3, QtCore.SIGNAL("clicked()"), self.open_login_window) # open login window
-        QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
-        QtCore.QObject.connect(self.ui.pushButton_5, QtCore.SIGNAL("clicked()"), self.open_bucket_manager_window) # open bucket manager window
-        QtCore.QObject.connect(self.ui.pushButton_6, QtCore.SIGNAL("clicked()"), self.open_file_manager_window) # open file manager window
-        QtCore.QObject.connect(self.ui.pushButton_7, QtCore.SIGNAL("clicked()"), self.open_bucket_create_window) # open bucket create window
-        QtCore.QObject.connect(self.ui.pushButton_7, QtCore.SIGNAL("clicked()"), self.open_file_mirrors_list_window) # open file mirrors list window
+        #QtCore.QObject.connect(self.ui., QtCore.SIGNAL("clicked()"), self.open_login_window) # open login window
+        #QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
+        QtCore.QObject.connect(self.ui.bucket_menager_bt, QtCore.SIGNAL("clicked()"), self.open_bucket_manager_window) # open bucket manager window
+        QtCore.QObject.connect(self.ui.file_manager_bt, QtCore.SIGNAL("clicked()"), self.open_file_manager_window) # open file manager window
+        QtCore.QObject.connect(self.ui.create_bucket_bt, QtCore.SIGNAL("clicked()"), self.open_bucket_create_window) # open bucket create window
+        #QtCore.QObject.connect(self.ui.pushButton_7, QtCore.SIGNAL("clicked()"), self.open_file_mirrors_list_window) # open file mirrors list window
 
     def open_login_window (self):
         self.login_window = LoginUI(self)
