@@ -33,6 +33,9 @@ from node_details_ui import  Ui_NodeDetails
 from client_configuration_ui import  Ui_ClientConfiguration
 from initial_window_ui import  Ui_InitialWindow
 
+from single_file_downloader_ui import  Ui_SingleFileDownload
+
+
 import socket
 
 import pingparser
@@ -44,10 +47,18 @@ from ipwhois import IPWhois
 from io import BytesIO
 import requests
 
+import math
 
 # ext libs
 
-# Defina CONSTANS
+# Define CONSTANS
+
+
+global SHARD_MULTIPLES_BACK, MAX_SHARD_SIZE
+
+MAX_SHARD_SIZE = 4294967296 # 4Gb
+SHARD_MULTIPLES_BACK = 4
+
 global html_format_begin, html_format_end
 html_format_begin = "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">"
 html_format_end = "</span></p></body></html>"
@@ -67,6 +78,60 @@ class Tools():
         return ping_data_parsed
 
 
+#Sharding Tools
+class ShardingTools():
+    def get_optimal_shard_parametrs(self, file_size):
+        shard_parameters = {}
+        accumulator = 0
+        shard_size = None
+        while (shard_size == None):
+            shard_size = self.determine_shard_size(file_size, accumulator)
+            accumulator += 1
+        shard_parameters["shard_size"] = str(shard_size)
+        shard_parameters["shars_count"] =  math.ceil(file_size / shard_size)
+        return shard_parameters
+
+
+    def determine_shard_size(self, file_size, accumulator):
+
+        #Based on <https://github.com/aleitner/shard-size-calculator/blob/master/src/shard_size.c>
+
+        hops = 0
+
+        if (file_size <= 0):
+            return 0
+        #if accumulator != True:
+            #accumulator  = 0
+        print accumulator
+
+        # Determine hops back by accumulator
+        if ((accumulator - SHARD_MULTIPLES_BACK) < 0 ):
+            hops = 0
+        else:
+            hops = accumulator - SHARD_MULTIPLES_BACK
+
+        #accumulator = 10
+        byte_multiple = self.shard_size(accumulator)
+
+        check =  file_size / byte_multiple
+        #print check
+        if (check > 0 and check <= 1):
+            while (hops > 0 and self.shard_size(hops) > MAX_SHARD_SIZE):
+                if hops - 1 <= 0:
+                    hops = 0
+                else:
+                    hops = hops - 1
+            return  self.shard_size(hops)
+
+        # Maximum of 2 ^ 41 * 8 * 1024 * 1024
+        if (accumulator > 41):
+            return 0
+
+        #return self.determine_shard_size(file_size, ++accumulator)
+
+
+    def shard_size (self, hops):
+        return (8 * (1024 * 1024)) * pow(2, hops)
 
 #Configuration backend section
 class Configuration ():
@@ -649,6 +714,7 @@ class FileManagerUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.file_manager_ui.bucket_select_combo_box, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.createNewFileListUpdateThread) #connect ComboBox change listener
         QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt, QtCore.SIGNAL("clicked()"), self.open_mirrors_list_window)  #create bucket action
         QtCore.QObject.connect(self.file_manager_ui.quit_bt, QtCore.SIGNAL("clicked()"), self.close)  #create bucket action
+        QtCore.QObject.connect(self.file_manager_ui.file_download_bt, QtCore.SIGNAL("clicked()"), self.open_single_file_download_window)  #create bucket action
 
         self.storj_engine = StorjEngine() #init StorjEngine
         self.createNewBucketResolveThread()
@@ -724,6 +790,9 @@ class FileManagerUI(QtGui.QMainWindow):
 
         self.file_manager_ui.bucket_select_combo_box.addItems(self.buckets_list)
 
+    def open_single_file_download_window (self):
+        self.single_file_download_window = SingleFileDownloadUI(self)
+        self.single_file_download_window.show()
 #Initial window section
 
 class InitialWindowUI(QtGui.QMainWindow):
@@ -753,13 +822,18 @@ class InitialWindowUI(QtGui.QMainWindow):
 # Main UI section
 class MainUI(QtGui.QMainWindow):
     def __init__(self, parent=None):
+        EXIT_CODE_REBOOT = -123
         QtGui.QWidget.__init__(self, parent)
         self.ui = Ui_MainMenu()
         self.ui.setupUi(self)
         #QtCore.QObject.connect(self.ui.pushButton_3, QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine() #init StorjEngine
         #self.storj_engine.storj_client.
+        self.sharding_tools = ShardingTools()
 
+
+        print self.sharding_tools.get_optimal_shard_parametrs(40000000)
+        #print self.sharding_tools.determine_shard_size(12343446576, 10)
         self.account_manager = AccountManager()  # init AccountManager
 
         user_email = self.account_manager.get_user_email()
@@ -806,7 +880,54 @@ class MainUI(QtGui.QMainWindow):
         self.file_mirrors_list_window = FileMirrorsListUI(self)
         self.file_mirrors_list_window.show()
 
+class SingleFileDownloadUI(QtGui.QMainWindow):
+    def __init__(self, parent=None, bucketid=None, fileid=None):
+        QtGui.QWidget.__init__(self, parent)
+        self.ui_single_file_download = Ui_SingleFileDownload()
+        self.ui_single_file_download.setupUi(self)
+        #QtCore.QObject.connect(self.ui.pushButton_3, QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
+        self.storj_engine = StorjEngine() #init StorjEngine
 
+        file_pointers = self.storj_engine.storj_client.file_pointers("6acfcdc62499144929cf9b4a", "8f9e6b75bdd0bf4aa1982728")
+
+        self.initialize_shard_queue_table(file_pointers)
+
+    def initialize_shard_queue_table (self, file_pointers):
+        i = 0
+        for pointer in file_pointers:
+
+            model = QStandardItemModel(1, 1)  # initialize model for inserting to table
+
+            model.setHorizontalHeaderLabels(['Progress', 'Shard hash', 'Farmer addres', 'State'])
+
+
+            item = QStandardItem(str(""))
+            model.setItem(i, 0, item)  # row, column, item (QStandardItem)
+
+            item = QStandardItem(str(pointer))
+            model.setItem(i, 1, item)  # row, column, item (QStandardItem)
+
+            item = QStandardItem(str(pointer))
+            model.setItem(i, 2, item)  # row, column, item (QStandardItem)
+
+            item = QStandardItem(str(pointer))
+            model.setItem(i, 3, item)  # row, column, item (QStandardItem)
+
+            i = i + 1
+            self.ui_single_file_download.shard_queue_table.clearFocus()
+            self.ui_single_file_download.shard_queue_table.setModel(model)
+            self.ui_single_file_download.shard_queue_table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+
+            print  pointer
+        i = 0
+        progressbar_list = []
+        for pointer in file_pointers:
+            tablemodel = self.ui_single_file_download.shard_queue_table.model()
+            index = tablemodel.index(i, 0)
+            progressbar_list.append(QProgressBar())
+            self.ui_single_file_download.shard_queue_table.setIndexWidget(index, progressbar_list[i])
+            i = i + 1
+        progressbar_list[0].setValue(20)
 
 class StorjSDKImplementationsOverrides():
     def __init__(self, parent=None):
