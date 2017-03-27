@@ -54,6 +54,10 @@ import requests
 
 import math
 
+
+import hashlib, hmac
+import base64
+
 # ext libs
 
 # Define CONSTANS
@@ -850,6 +854,7 @@ class MainUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.bucket_menager_bt, QtCore.SIGNAL("clicked()"), self.open_bucket_manager_window) # open bucket manager window
         QtCore.QObject.connect(self.ui.file_manager_bt, QtCore.SIGNAL("clicked()"), self.open_file_manager_window) # open file manager window
         QtCore.QObject.connect(self.ui.create_bucket_bt, QtCore.SIGNAL("clicked()"), self.open_bucket_create_window) # open bucket create window
+        QtCore.QObject.connect(self.ui.uploader_bt, QtCore.SIGNAL("clicked()"), self.open_single_file_upload_window) # open single file upload ui
         #QtCore.QObject.connect(self.ui.pushButton_7, QtCore.SIGNAL("clicked()"), self.open_file_mirrors_list_window) # open file mirrors list window
 
     def open_login_window (self):
@@ -866,6 +871,10 @@ class MainUI(QtGui.QMainWindow):
     def open_register_window(self):
         self.register_window = RegisterUI(self)
         self.register_window.show()
+
+    def open_single_file_upload_window(self):
+        self.single_file_upload_window = SingleFileUploadUI(self)
+        self.single_file_upload_window.show()
 
     def open_bucket_manager_window(self):
         self.bucket_manager_window = BucketManagerUI(self)
@@ -894,7 +903,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         #QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine() #init StorjEngine
 
-        file_pointers = self.storj_engine.storj_client.file_pointers("6acfcdc62499144929cf9b4a", "dfba26ab34466b1211c60d02")
+        file_pointers = self.storj_engine.storj_client.file_pointers("ec59966c2850a0fd74714ef8", "9dd275cef928fd6ab9102d93")
 
         self.initialize_shard_queue_table(file_pointers)
 
@@ -1007,9 +1016,66 @@ class DownloadTaskQtThread(QtCore.QThread):
             f.close()
             return
 
+
+
+class CryptoTools():
+    def calculate_hmac(self, base_string, key):
+        """
+        HMAC hash calculation and returning the results in dictionary collection
+        FROM: <https://janusznawrat.wordpress.com/2015/04/08/wyliczanie-kryptograficznych-sum-kontrolnych-hmac-plikow-i-lancuchow-znakowych/>
+        """
+        hmacs = dict()
+        # --- MD5 ---
+        hashed = hmac.new(key, base_string, hashlib.md5)
+        hmac_md5 = hashed.digest().encode("base64").rstrip('\n')
+        hmacs['MD5'] = hmac_md5
+        # --- SHA-1 ---
+        hashed = hmac.new(key, base_string, hashlib.sha1)
+        hmac_sha1 = hashed.digest().encode("base64").rstrip('\n')
+        hmacs['SHA-1'] = hmac_sha1
+        # --- SHA-224 ---
+        hashed = hmac.new(key, base_string, hashlib.sha224)
+        hmac_sha224 = hashed.digest().encode("base64").rstrip('\n')
+        hmacs['SHA-224'] = hmac_sha224
+        # --- SHA-256 ---
+        hashed = hmac.new(key, base_string, hashlib.sha256)
+        hmac_sha256 = hashed.digest().encode("base64").rstrip('\n')
+        hmacs['SHA-256'] = hmac_sha256
+        # --- SHA-384 ---
+        hashed = hmac.new(key, base_string, hashlib.sha384)
+        hmac_sha384 = hashed.digest().encode("base64").rstrip('\n')
+        hmacs['SHA-384'] = hmac_sha384
+        # --- SHA-512 ---
+        hashed = hmac.new(key, base_string, hashlib.sha512)
+        hmac_sha512 = hashed.digest().encode("base64").rstrip('\n')
+        hmacs['SHA-512'] = hmac_sha512
+        return hmacs
+
+
+
+    def prepare_bucket_entry_hmac (self, shard_array):
+        storj_keyring = storj.model.Keyring()
+        encryption_key = storj_keyring.get_encryption_key("test")
+        current_hmac = ""
+        for shard in shard_array:
+            base64_decoded = str(base64.decodestring(shard.hash)) + str(current_hmac)
+            current_hmac = self.calculate_hmac(base64_decoded, encryption_key)
+
+        print current_hmac
+        return current_hmac
+
+
+
 class StorjSDKImplementationsOverrides():
     def __init__(self, parent=None):
         self.storj_engine = StorjEngine()  # init StorjEngine
+
+
+    def calculate_final_hmac (self):
+        return 1
+
+
+
     def shard_file (self, file_path, shard_save_path, tmp_dir):
 
         #TEST PARAMETERS
@@ -1137,84 +1203,6 @@ class StorjSDKImplementationsOverrides():
 
         return True
 
-    def file_upload (self, file_path, bucket_id):
-        def get_size(file_like_object):
-            return os.stat(file_like_object.name).st_size
-
-        #file_size = get_size(file)
-        file_size = os.stat(file_path).st_size
-        # TODO:
-        # encrypt file
-
-        # shard file
-        #shards_count = self.shard_file(file, "1", 1)
-
-        push_token = self.storj_engine.storj_client.token_create(bucket_id, 'PUSH')
-        print push_token.id
-        frame = self.storj_engine.storj_client.frame_create()
-        print frame.id
-        shards_manager = model.ShardManager(file_path, 1)
-        shards_manager._make_shards()
-        shards_count = shards_manager.index
-        # create file hash
-        self.storj_engine.storj_client.logger.debug('file_upload() push_token=%s', push_token)
-
-        # upload shards to frame
-
-        # Open the file as a memory mapped string. Looks like a string, but
-        # actually accesses the file behind the scenes.
-        chapters = 0
-        for shard in shards_manager.shards:
-            frame_content = self.storj_engine.storj_client.frame_add_shard(shard, frame.id)
-
-            print frame_content
-
-            #frame_content.
-            print frame_content["farmer"]["address"]
-
-            url = "http://" +  frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"]["port"]) + "/shards/" + frame_content["hash"] + "?token=" + frame_content["token"]
-            print url
-            files = {'file': open(file_path + '.part%s' % chapters)}
-
-            response = requests.post(url, files=files, timeout=1)
-
-            chapters = chapters + 1
-            time.sleep(5)
-
-        # delete encrypted file
-
-        #hash_sha512_hmac = self.storj_engine.storj_client.get_custom_checksum(file_path)
-        hash_sha512_hmac = "dxjcdj"
-        # save
-
-        #import magic
-        #mime = magic.Magic(mime=True)
-        #mime.from_file(file_path)
-
-        print frame.id
-        print "Now upload file"
-
-        data = {
-             'x-token': push_token.id,
-                'x-filesize': str(file_size),
-                'frame': frame.id,
-                'mimetype': 'application/pdf',
-                'filename': "test3",
-                'hmac': {
-                    'type': "sha512",
-                    'value': hash_sha512_hmac["sha512_checksum"]
-                },
-        }
-
-        response = self.storj_engine.storj_client._request(
-            method='POST', path='/buckets/%s/files' % bucket_id,
-            # files={'file' : file},
-            headers={
-                'x-token': push_token.id,
-                'x-filesize': str(file_size),
-            },
-            json=data,
-           )
 
 
 
@@ -1223,14 +1211,152 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_upload = Ui_SingleFileUpload()
         self.ui_single_file_upload.setupUi(self)
-        #QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
+        QtCore.QObject.connect(self.ui_single_file_upload.start_upload_bt, QtCore.SIGNAL("clicked()"), self.createNewUploadThread) # open bucket manager
         self.storj_engine = StorjEngine() #init StorjEngine
 
+        self.initialize_upload_queue_table()
         #file_pointers = self.storj_engine.storj_client.file_pointers("6acfcdc62499144929cf9b4a", "dfba26ab34466b1211c60d02")
 
         #self.initialize_shard_queue_table(file_pointers)
-    def start_upload(self):
-        return 1
+    def createNewUploadThread(self):
+        #self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
+        #self.download_thread.start()
+        #self.download_thread.connect(self.download_thread, SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
+        #self.download_thread.tick.connect(progress_bars_list.setValue)
+
+        # Refactor to QtTrhead
+         upload_thread = threading.Thread(target=self.file_upload_begin, args=())
+         upload_thread.start()
+
+
+    def initialize_upload_queue_table (self):
+        model = QStandardItemModel(1, 1)  # initialize model for inserting to table
+
+        model.setHorizontalHeaderLabels(['Progress', 'Hash', 'Farmer addres', 'State', 'Token'])
+
+        self.ui_single_file_upload.shard_queue_table.clearFocus()
+        self.ui_single_file_upload.shard_queue_table.setModel(model)
+        self.ui_single_file_upload.shard_queue_table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+
+    def file_upload_begin(self):
+        file_path = "/home/lakewik/dozrobienia"
+        bucket_id = "ec59966c2850a0fd74714ef8"
+
+        # TODO:
+        # encrypt file
+        def get_size(file_like_object):
+            return os.stat(file_like_object.name).st_size
+
+        # file_size = get_size(file)
+        file_size = os.stat(file_path).st_size
+        self.ui_single_file_upload.current_state.setText(html_format_begin + "Resolving PUSH token..." + html_format_end)
+        push_token = self.storj_engine.storj_client.token_create(bucket_id, 'PUSH')  # get the PUSH token from Storj Bridge
+        self.ui_single_file_upload.push_token.setText(html_format_begin + str(push_token.id) + html_format_end) # set the PUSH Token
+
+        print push_token.id
+
+        self.ui_single_file_upload.current_state.setText(html_format_begin + "Resolving frame for file..." + html_format_end)
+        frame = self.storj_engine.storj_client.frame_create()  # Create file frame
+        self.ui_single_file_upload.file_frame_id.setText(html_format_begin + str(frame.id) + html_format_end)
+
+        print frame.id
+        # Now encrypt file
+
+        # Now generate shards
+        shards_manager = model.ShardManager(file_path, 1)
+        self.ui_single_file_upload.current_state.setText(html_format_begin + "Generating shards..." + html_format_end)
+        shards_manager._make_shards()
+        shards_count = shards_manager.index
+        # create file hash
+        self.storj_engine.storj_client.logger.debug('file_upload() push_token=%s', push_token)
+
+        # upload shards to frame
+        print shards_count
+        chapters = 0
+        for shard in shards_manager.shards:
+            self.ui_single_file_upload.current_state.setText(html_format_begin + "Adding shard " + str(chapters) +" to file frame..." + html_format_end)
+            frame_content = self.storj_engine.storj_client.frame_add_shard(shard, frame.id)
+
+            #self.tabledata = []
+            #self.tabledata.append([1, 1, 1, 1, 1])
+            #self.ui_single_file_upload.shard_queue_table.model().layoutChanged.emit()
+
+            #rowPosition = self.ui_single_file_upload.shard_queue_table.model()
+            #self.ui_single_file_upload.shard_queue_table.insertRow(rowPosition)
+            #self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 0, QtGui.QTableWidgetItem("text1"))
+            #self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 1, QtGui.QTableWidgetItem("text2"))
+            #self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 2, QtGui.QTableWidgetItem(str(frame_content["farmer"]["address"])))
+            #self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 3, QtGui.QTableWidgetItem("text3"))
+            #self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 4, QtGui.QTableWidgetItem("text3"))
+
+            #tablemodel = MyTableModel(tabledata, header, self)
+            #rowcount = tablemodel.rowCount(None)
+            #tabledata.append([rowcount + 1, str(self.ui4.lineEdit.text()), str(self.ui4.lineEdit_2.text()), 2])
+            #tv.setModel(tablemodel)
+            print frame_content
+            print shard
+            # frame_content.
+            print frame_content["farmer"]["address"]
+
+            url = "http://" + frame_content["farmer"]["address"] + ":" + str(
+                frame_content["farmer"]["port"]) + "/shards/" + frame_content["hash"] + "?token=" + frame_content["token"]
+            print url
+            files = {'file': open(file_path + '.part%s' % chapters)}
+
+            response = requests.post(url, files=files, timeout=1)
+
+            chapters = chapters + 1
+            #time.sleep(5)
+
+        # delete encrypted file
+
+        # hash_sha512_hmac = self.storj_engine.storj_client.get_custom_checksum(file_path)
+        hash_sha512_hmac = "dxjcdj"
+
+        self.crypto_tools = CryptoTools()
+        self.ui_single_file_upload.current_state.setText(html_format_begin + "Generating SHA5212 HMAC..." + html_format_end)
+        hash_sha512_hmac_b64 = self.crypto_tools.prepare_bucket_entry_hmac(shards_manager.shards)
+        hash_sha512_hmac = hashlib.sha224(str(hash_sha512_hmac_b64["SHA-512"])).hexdigest()
+        print hash_sha512_hmac
+        # save
+
+        # import magic
+        # mime = magic.Magic(mime=True)
+        # mime.from_file(file_path)
+
+        print frame.id
+        print "Now upload file"
+
+        data = {
+            'x-token': push_token.id,
+            'x-filesize': str(file_size),
+            'frame': frame.id,
+            'mimetype': 'application/pdf',
+            'filename': "test3",
+            'hmac': {
+                'type': "sha512",
+                #'value': hash_sha512_hmac["sha512_checksum"]
+                'value': hash_sha512_hmac
+            },
+        }
+        self.ui_single_file_upload.current_state.setText(html_format_begin + "Adding file to bucket..." + html_format_end)
+
+        try:
+            response = self.storj_engine.storj_client._request(
+                method='POST', path='/buckets/%s/files' % bucket_id,
+                # files={'file' : file},
+                headers={
+                    'x-token': push_token.id,
+                    'x-filesize': str(file_size),
+                },
+                json=data,
+            )
+            success = True
+        except storj.exception.StorjBridgeApiError, e:
+                QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
+        if success:
+            self.ui_single_file_upload.current_state.setText(
+                html_format_begin + "Upload success! Waiting for user..." + html_format_end)
 
 
 if __name__ == "__main__":
