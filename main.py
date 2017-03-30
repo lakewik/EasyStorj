@@ -87,8 +87,11 @@ class Tools():
         return ping_data_parsed
 
 
+
+
 #Sharding Tools
 class ShardingTools():
+
     def get_optimal_shard_parametrs(self, file_size):
         shard_parameters = {}
         accumulator = 0
@@ -142,6 +145,72 @@ class ShardingTools():
 
     def shard_size (self, hops):
         return (8 * (1024 * 1024)) * pow(2, hops)
+
+
+    def sort_index(self, f1, f2):
+
+        index1 = f1.rfind('-')
+        index2 = f2.rfind('-')
+
+        if index1 != -1 and index2 != -1:
+            i1 = int(f1[index1:len(f1)])
+            i2 = int(f2[index2:len(f2)])
+            return i2 - i1
+
+    def join_shards (self, shards_filenames, pattern, destination_file_path):
+        # Based on <http://code.activestate.com/recipes/224800-simple-file-splittercombiner-module/>
+        import re
+
+        print 'Creating file', destination_file_path
+
+        bname = (os.path.split(destination_file_path))[1]
+        bname2 = bname
+
+        # bugfix: if file contains characters like +,.,[]
+        # properly escape them, otherwise re will fail to match.
+        for a, b in zip(['+', '.', '[', ']', '$', '(', ')'],
+                        ['\+', '\.', '\[', '\]', '\$', '\(', '\)']):
+            bname2 = bname2.replace(a, b)
+
+        chunkre = re.compile(bname2 + '-' + '[0-9]+')
+
+        chunkfiles = []
+        for f in os.listdir("."):
+            print f
+            if chunkre.match(f):
+                chunkfiles.append(f)
+
+        print 'Number of chunks', len(chunkfiles), '\n'
+        chunkfiles.sort(self.sort_index)
+
+        data = ''
+        for f in chunkfiles:
+
+            try:
+                print 'Appending chunk', os.path.join(".", f)
+                data += open(f, 'rb').read()
+            except (OSError, IOError, EOFError), e:
+                print e
+                continue
+
+        try:
+            f = open(bname, 'wb')
+            f.write(data)
+            f.close()
+        except (OSError, IOError, EOFError), e:
+            raise ShardingException, str(e)
+
+        print 'Wrote file', bname
+        return 1
+
+
+class ShardingException(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return str(self.value)
+
 
 #Configuration backend section
 class Configuration ():
@@ -1239,7 +1308,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.shard_queue_table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
 
     def file_upload_begin(self):
-        file_path = "/home/lakewik/dozrobienia"
+        file_path = "/home/lakewik/config.json"
         bucket_id = "ec59966c2850a0fd74714ef8"
 
         # TODO:
@@ -1332,7 +1401,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             'x-filesize': str(file_size),
             'frame': frame.id,
             'mimetype': 'application/pdf',
-            'filename': "test3",
+            'filename': "python2",
             'hmac': {
                 'type': "sha512",
                 #'value': hash_sha512_hmac["sha512_checksum"]
