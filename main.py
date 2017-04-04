@@ -89,6 +89,7 @@ class Tools():
 
 
 
+############# SHARDING TOOLS ################################################################
 #Sharding Tools
 class ShardingTools():
 
@@ -244,6 +245,7 @@ class Configuration ():
         ET.SubElement(doc, "advanced_view_enabled").text = str("test")
         ET.SubElement(doc, "max_download_bandwith").text = str("test")
         ET.SubElement(doc, "max_upload_bandwith").text = str("test")
+        ET.SubElement(doc, "default_file_encryption_algorithm").text = str("AES")
         tree = ET.ElementTree(root)
         tree.write("storj_client_config.xml")
 
@@ -695,6 +697,8 @@ class BucketManagerUI(QtGui.QMainWindow):
         self.createNewBucketGetThread()
 
         QtCore.QObject.connect(self.bucket_manager_ui.quit_bt, QtCore.SIGNAL("clicked()"), self.quit) # open login window
+        QtCore.QObject.connect(self.bucket_manager_ui.delete_bucket_bt, QtCore.SIGNAL("clicked()"), self.delete_bucket) # delete bucket
+        QtCore.QObject.connect(self.bucket_manager_ui.edit_bucket_bt, QtCore.SIGNAL("clicked()"), self.open_bucket_edit_window) # open bucket edit window
         #QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
 
     def createNewBucketGetThread(self):
@@ -703,6 +707,12 @@ class BucketManagerUI(QtGui.QMainWindow):
 
     def quit (self):
         self.close()
+
+    def delete_bucket (self):
+        print 1
+
+    def open_bucket_edit_window (self):
+        print 1
 
     def initialize_buckets_table (self):
         self.storj_engine = StorjEngine()  # init StorjEngine
@@ -737,7 +747,8 @@ class BucketManagerUI(QtGui.QMainWindow):
         self.bucket_manager_ui.bucket_list_tableview.setModel(model)
         self.bucket_manager_ui.bucket_list_tableview.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
 
-
+######################################################################################################################################
+####################### BUCKET CREATE UI ##################################
 
 class BucketCreateUI(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -782,6 +793,11 @@ class BucketCreateUI(QtGui.QMainWindow):
 
         print 1
 
+
+
+
+######################################################################################################################################
+####################### FILE MANAGER UI ##################################
 
 #Files section
 class FileManagerUI(QtGui.QMainWindow):
@@ -972,9 +988,22 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         #QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine() #init StorjEngine
 
-        file_pointers = self.storj_engine.storj_client.file_pointers("ec59966c2850a0fd74714ef8", "9dd275cef928fd6ab9102d93")
+        file_pointers = self.storj_engine.storj_client.file_pointers("6acfcdc62499144929cf9b4a", "9c44a14c4104b97df47bef02")
 
         self.initialize_shard_queue_table(file_pointers)
+
+        #QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"),
+         #                      self.select_file_path)  # open file select dialog
+        #QtCore.QObject.connect(self.ui_single_file_upload.tmp_path_select_bt, QtCore.SIGNAL("clicked()"), self.select_tmp_directory)  # open tmp directory select dialog
+
+    def select_tmp_directory(self):
+        self.selected_tmp_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:', '', QtGui.QFileDialog.ShowDirsOnly)
+        self.ui_single_file_upload.tmp_path.setText(str(self.selected_tmp_dir))
+
+    def select_file_save_path(self):
+        self.ui_single_file_upload.file_path.setText(QFileDialog.getOpenFileName())
+
+
 
     def initialize_shard_queue_table(self, file_pointers):
 
@@ -1039,9 +1068,6 @@ class DownloadTaskQtThread(QtCore.QThread):
         self.options_chain = options_chain
         self.progress_bar = progress_bar
 
-
-
-
     #def run(self):
        # self.client.create_download_connection(self, None, None, None, None)
 
@@ -1077,7 +1103,7 @@ class DownloadTaskQtThread(QtCore.QThread):
                 print str(int(round((100.0*i) / t1))) + " %"
                 percent_downloaded = int(round((100.0*i) / t1))
                 # Refactor for fix SIGSEGV
-                self.tick.emit(percent_downloaded)
+                #self.tick.emit(percent_downloaded)
                 #self.emit(SIGNAL("setStatus"), percent_downloaded , "information")
                 # Old
                 #progress_bar.setValue (percent_downloaded)
@@ -1086,7 +1112,7 @@ class DownloadTaskQtThread(QtCore.QThread):
             return
 
 
-
+##################### CRYPTOGRAPHY TOOLS ################################
 class CryptoTools():
     def calculate_hmac(self, base_string, key):
         """
@@ -1142,8 +1168,6 @@ class StorjSDKImplementationsOverrides():
 
     def calculate_final_hmac (self):
         return 1
-
-
 
     def shard_file (self, file_path, shard_save_path, tmp_dir):
 
@@ -1274,19 +1298,29 @@ class StorjSDKImplementationsOverrides():
 
 
 
-
+################################################################# SINGLE FILE UPLOADER UI SECTION ###################################################################
 class SingleFileUploadUI(QtGui.QMainWindow):
     def __init__(self, parent=None, bucketid=None, fileid=None):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_upload = Ui_SingleFileUpload()
         self.ui_single_file_upload.setupUi(self)
         QtCore.QObject.connect(self.ui_single_file_upload.start_upload_bt, QtCore.SIGNAL("clicked()"), self.createNewUploadThread) # open bucket manager
+        QtCore.QObject.connect(self.ui_single_file_upload.file_path_select_bt, QtCore.SIGNAL("clicked()"), self.select_file_path) # open file select dialog
+        QtCore.QObject.connect(self.ui_single_file_upload.tmp_path_select_bt, QtCore.SIGNAL("clicked()"), self.select_tmp_directory) # open tmp directory select dialog
         self.storj_engine = StorjEngine() #init StorjEngine
 
         self.initialize_upload_queue_table()
         #file_pointers = self.storj_engine.storj_client.file_pointers("6acfcdc62499144929cf9b4a", "dfba26ab34466b1211c60d02")
 
         #self.initialize_shard_queue_table(file_pointers)
+
+    def select_tmp_directory (self):
+        self.selected_tmp_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:', '', QtGui.QFileDialog.ShowDirsOnly)
+        self.ui_single_file_upload.tmp_path.setText(str(self.selected_tmp_dir))
+
+    def select_file_path (self):
+        self.ui_single_file_upload.file_path.setText(QFileDialog.getOpenFileName())
+
     def createNewUploadThread(self):
         #self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
         #self.download_thread.start()
