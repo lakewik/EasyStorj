@@ -879,6 +879,7 @@ class FileManagerUI(QtGui.QMainWindow):
         tablemodel = self.file_manager_ui.files_list_tableview.model()
         rows = sorted(set(index.row() for index in
                           self.file_manager_ui.files_list_tableview.selectedIndexes()))
+        i = 0
         for row in rows:
             print('Row %d is selected' % row)
             index = tablemodel.index(row, 3)  #get file ID
@@ -886,6 +887,11 @@ class FileManagerUI(QtGui.QMainWindow):
             selected_file_id = str(tablemodel.data(index).toString())
             self.file_mirrors_list_window = FileMirrorsListUI(self, str(self.current_selected_bucket_id), selected_file_id)
             self.file_mirrors_list_window.show()
+            i += 1
+
+        if i == 0:
+            QMessageBox.about(self, "Warning!", "Please select file from file list!")
+
         print 1
 
 
@@ -985,7 +991,7 @@ class MainUI(QtGui.QMainWindow):
         self.sharding_tools = ShardingTools()
 
 
-        print self.sharding_tools.get_optimal_shard_parametrs(40000000)
+        print self.sharding_tools.get_optimal_shard_parametrs(18888888888)
         #print self.sharding_tools.determine_shard_size(12343446576, 10)
         self.account_manager = AccountManager()  # init AccountManager
 
@@ -1442,7 +1448,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # Now generate shards
         shards_manager = model.ShardManager(file_path, 1)
         self.ui_single_file_upload.current_state.setText(html_format_begin + "Generating shards..." + html_format_end)
-        shards_manager._make_shards()
+        #shards_manager._make_shards()
         shards_count = shards_manager.index
         # create file hash
         self.storj_engine.storj_client.logger.debug('file_upload() push_token=%s', push_token)
