@@ -33,6 +33,10 @@ from node_details_ui import  Ui_NodeDetails
 from client_configuration_ui import  Ui_ClientConfiguration
 from initial_window_ui import  Ui_InitialWindow
 
+from file_crypto_tools import FileCrypto # file ancryption and decryption lib
+
+#from configuration_ui_core import
+
 from tqdm import tqdm
 
 from single_file_downloader_ui import  Ui_SingleFileDownload
@@ -240,7 +244,8 @@ class Configuration ():
         doc = ET.SubElement(root, "client")
         i = 0
 
-        ET.SubElement(doc, "max_shard_size").text = str("test")
+        #settings_ui = Ui_
+        ET.SubElement(doc, "max_shard_size").text = str("")
         ET.SubElement(doc, "max_connections_onetime").text = str("test")
         ET.SubElement(doc, "advanced_view_enabled").text = str("test")
         ET.SubElement(doc, "max_download_bandwith").text = str("test")
@@ -599,7 +604,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         self.mirror_tree_view_header = ['Shard Hash / Address', 'User agent', 'Last seed', 'Node ID']
 
 
-        # set the model for established mirrors
+        ######################### set the model for established mirrors ##################################
         self.established_mirrors_model = QStandardItemModel()
         self.established_mirrors_model.setHorizontalHeaderLabels(self.mirror_tree_view_header)
 
@@ -644,7 +649,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
 
         #dbQueryModel.itemData(treeView.selectedIndexes()[0])
 
-        # set the model for available mirrors
+        ################################### set the model for available mirrors #########################################
         self.available_mirrors_model = QStandardItemModel()
         self.available_mirrors_model.setHorizontalHeaderLabels(self.mirror_tree_view_header)
 
@@ -709,7 +714,40 @@ class BucketManagerUI(QtGui.QMainWindow):
         self.close()
 
     def delete_bucket (self):
-        print 1
+        # initialize variables
+        bucket_id = ""
+        bucket_name = ""
+
+        tablemodel = self.bucket_manager_ui.bucket_list_tableview.model()
+        rows = sorted(set(index.row() for index in self.bucket_manager_ui.bucket_list_tableview.selectedIndexes()))
+        i = 0
+        for row in rows:
+            index = tablemodel.index(row, 3)  # get bucket ID
+            index2 = tablemodel.index(row, 2)  # get bucket name
+            # We suppose data are strings
+            bucket_id = str(tablemodel.data(index).toString())
+            bucket_name = str(tablemodel.data(index2).toString())
+            i = i + 1
+            break
+
+        if i != 0:
+            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Are you sure?",
+                                       "Are you sure to delete this bucket? Bucket name: '" + bucket_name + "'", QtGui.QMessageBox.Ok)
+            result = msgBox.exec_()
+            if result == QtGui.QMessageBox.Ok:
+                success = False
+                try:
+                    self.storj_engine.storj_client.bucket_delete(str(bucket_id))
+                    success = True
+                except storj.exception.StorjBridgeApiError, e:
+                    QMessageBox.about(self, "Unhandled exception deleting bucket", "Exception: " + str(e))
+                    success = False
+
+                if success:
+                    QMessageBox.about(self, "Success", "Bucket was deleted successfully!")
+        else:
+            QMessageBox.about(self, "Warning", "Please select bucket which you want to delete.")
+
 
     def open_bucket_edit_window (self):
         print 1
@@ -810,9 +848,29 @@ class FileManagerUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt, QtCore.SIGNAL("clicked()"), self.open_mirrors_list_window)  #create bucket action
         QtCore.QObject.connect(self.file_manager_ui.quit_bt, QtCore.SIGNAL("clicked()"), self.close)  #create bucket action
         QtCore.QObject.connect(self.file_manager_ui.file_download_bt, QtCore.SIGNAL("clicked()"), self.open_single_file_download_window)  #create bucket action
+        QtCore.QObject.connect(self.file_manager_ui.file_delete_bt, QtCore.SIGNAL("clicked()"), self.delete_selected_file)  # delete selected file
 
         self.storj_engine = StorjEngine() #init StorjEngine
         self.createNewBucketResolveThread()
+
+    def delete_selected_file (self):
+
+        self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()
+        self.current_selected_bucket_id = self.bucket_id_list[self.current_bucket_index]
+
+        tablemodel = self.file_manager_ui.files_list_tableview.model()
+        rows = sorted(set(index.row() for index in
+                          self.file_manager_ui.files_list_tableview.selectedIndexes()))
+
+
+        for row in rows:
+            index = tablemodel.index(row, 3)  # get file ID
+            # We suppose data are strings
+            selected_file_id = str(tablemodel.data(index).toString())
+
+            self.storj_engine.storj_client.file_remove(str(self.current_selected_bucket_id), str(selected_file_id))
+
+        return  True
 
     def open_mirrors_list_window (self):
         self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()
@@ -940,6 +998,7 @@ class MainUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.file_manager_bt, QtCore.SIGNAL("clicked()"), self.open_file_manager_window) # open file manager window
         QtCore.QObject.connect(self.ui.create_bucket_bt, QtCore.SIGNAL("clicked()"), self.open_bucket_create_window) # open bucket create window
         QtCore.QObject.connect(self.ui.uploader_bt, QtCore.SIGNAL("clicked()"), self.open_single_file_upload_window) # open single file upload ui
+        QtCore.QObject.connect(self.ui.settings_bt, QtCore.SIGNAL("clicked()"), self.open_settings_window) # open single file upload ui
         #QtCore.QObject.connect(self.ui.pushButton_7, QtCore.SIGNAL("clicked()"), self.open_file_mirrors_list_window) # open file mirrors list window
 
     def open_login_window (self):
@@ -980,6 +1039,11 @@ class MainUI(QtGui.QMainWindow):
         self.file_mirrors_list_window = FileMirrorsListUI(self)
         self.file_mirrors_list_window.show()
 
+
+    def open_settings_window(self):
+        self.settings_window = ClientConfigurationUI(self)
+        self.settings_window.show()
+
 class SingleFileDownloadUI(QtGui.QMainWindow):
     def __init__(self, parent=None, bucketid=None, fileid=None):
         QtGui.QWidget.__init__(self, parent)
@@ -992,16 +1056,15 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         self.initialize_shard_queue_table(file_pointers)
 
-        #QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"),
-         #                      self.select_file_path)  # open file select dialog
-        #QtCore.QObject.connect(self.ui_single_file_upload.tmp_path_select_bt, QtCore.SIGNAL("clicked()"), self.select_tmp_directory)  # open tmp directory select dialog
+        QtCore.QObject.connect(self.ui_single_file_download.file_save_path_bt, QtCore.SIGNAL("clicked()"), self.select_file_save_path)  # open file select dialog
+        QtCore.QObject.connect(self.ui_single_file_download.tmp_dir_bt, QtCore.SIGNAL("clicked()"), self.select_tmp_directory)  # open tmp directory select dialog
 
     def select_tmp_directory(self):
         self.selected_tmp_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:', '', QtGui.QFileDialog.ShowDirsOnly)
-        self.ui_single_file_upload.tmp_path.setText(str(self.selected_tmp_dir))
+        self.ui_single_file_download.tmp_dir.setText(str(self.selected_tmp_dir))
 
     def select_file_save_path(self):
-        self.ui_single_file_upload.file_path.setText(QFileDialog.getOpenFileName())
+        self.ui_single_file_download.file_save_path.setText(QFileDialog.getOpenFileName())
 
 
 
@@ -1235,20 +1298,20 @@ class StorjSDKImplementationsOverrides():
                 print round (float(i)/float(t1), 1)
                 print str(int(round((100.0*i) / t1))) + " %"
                 percent_downloaded = int(round((100.0*i) / t1))
-                #progress_bar.setValue (percent_downloaded)
+                progress_bar.setValue (percent_downloaded)
                 i += 1
             f.close()
             return
 
     def createNewDownloadThread(self,  url, filelocation, options_chain, progress_bars_list):
-        self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
-        self.download_thread.start()
-        self.download_thread.connect(self.download_thread, SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
-        self.download_thread.tick.connect(progress_bars_list.setValue)
+        #self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
+        #self.download_thread.start()
+        #self.download_thread.connect(self.download_thread, SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
+        #self.download_thread.tick.connect(progress_bars_list.setValue)
 
         # Refactor to QtTrhead
-        # download_thread = threading.Thread(target=self.create_download_connection, args=(url, filelocation, options_chain, progress_bars_list))
-        # download_thread.start()
+         download_thread = threading.Thread(target=self.create_download_connection, args=(url, filelocation, options_chain, progress_bars_list))
+         download_thread.start()
 
 
     def test1(self, value1, value2):
@@ -1343,7 +1406,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
     def file_upload_begin(self):
         file_path = "/home/lakewik/config.json"
-        bucket_id = "ec59966c2850a0fd74714ef8"
+        bucket_id = "b421441c3744bcc02a6a0ae1"
 
         # TODO:
         # encrypt file
@@ -1353,13 +1416,24 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # file_size = get_size(file)
         file_size = os.stat(file_path).st_size
         self.ui_single_file_upload.current_state.setText(html_format_begin + "Resolving PUSH token..." + html_format_end)
-        push_token = self.storj_engine.storj_client.token_create(bucket_id, 'PUSH')  # get the PUSH token from Storj Bridge
+
+        push_token = None
+
+        try:
+            push_token = self.storj_engine.storj_client.token_create(bucket_id, 'PUSH')  # get the PUSH token from Storj Bridge
+        except storj.exception.StorjBridgeApiError, e:
+            QMessageBox.about(self, "Unhandled PUSH token create exception", "Exception: " + str(e))
+
         self.ui_single_file_upload.push_token.setText(html_format_begin + str(push_token.id) + html_format_end) # set the PUSH Token
 
         print push_token.id
 
         self.ui_single_file_upload.current_state.setText(html_format_begin + "Resolving frame for file..." + html_format_end)
-        frame = self.storj_engine.storj_client.frame_create()  # Create file frame
+        try:
+            frame = self.storj_engine.storj_client.frame_create()  # Create file frame
+        except storj.exception.StorjBridgeApiError, e:
+            QMessageBox.about(self, "Unhandled exception while creating file staging frame", "Exception: " + str(e))
+
         self.ui_single_file_upload.file_frame_id.setText(html_format_begin + str(frame.id) + html_format_end)
 
         print frame.id
