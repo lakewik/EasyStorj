@@ -1,66 +1,40 @@
+import base64
+import hashlib
+import hmac
+import json
+import math
+import os
+import platform
+import re  # for regex
+import socket
 import sys
+import threading
+import xml.etree.cElementTree as ET
 from PyQt4 import QtCore, QtGui
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-
-import re # for regex
-
-import  threading
-
-import json
+import pycountry
+import requests
 import storj
-from storj import  model
-from storj import  exception
-
-import string
-
-from xml.dom import minidom
-from xml.etree import ElementTree
-import lxml
+from PyQt4.QtGui import *
+from ipwhois import IPWhois
 from lxml import etree
-import xml.etree.cElementTree as ET
-
-import os, platform
-from main_menu_ui import Ui_MainMenu
-from storj_login_ui import Ui_Login
-from storj_register_ui import Ui_Register
-from bucket_manage_ui import Ui_BucketManager
-from file_manager_ui import Ui_FileManager
-from create_bucket_ui import Ui_BucketCreate
-from file_mirrors_list_ui import  Ui_FileMirrorsList
-from node_details_ui import  Ui_NodeDetails
-from client_configuration_ui import  Ui_ClientConfiguration
-from initial_window_ui import  Ui_InitialWindow
-
-from file_crypto_tools import FileCrypto # file ancryption and decryption lib
-
-#from configuration_ui_core import
-
-from tqdm import tqdm
-
-from single_file_downloader_ui import  Ui_SingleFileDownload
-from single_file_upload_ui import  Ui_SingleFileUpload
-
-
-import socket
-
-import time
+from storj import exception
+from storj import model
 
 import pingparser
-
-import pycountry
-
-from ipwhois import IPWhois
-
-from io import BytesIO
-import requests
-
-import math
-
-
-import hashlib, hmac
-import base64
+from bucket_manage_ui import Ui_BucketManager
+from client_configuration_ui import Ui_ClientConfiguration
+from create_bucket_ui import Ui_BucketCreate
+from file_crypto_tools import FileCrypto  # file ancryption and decryption lib
+from file_manager_ui import Ui_FileManager
+from file_mirrors_list_ui import Ui_FileMirrorsList
+from initial_window_ui import Ui_InitialWindow
+from main_menu_ui import Ui_MainMenu
+from node_details_ui import Ui_NodeDetails
+from single_file_downloader_ui import Ui_SingleFileDownload
+from single_file_upload_ui import Ui_SingleFileUpload
+from storj_login_ui import Ui_Login
+from storj_register_ui import Ui_Register
 
 # ext libs
 
@@ -69,34 +43,33 @@ import base64
 
 global SHARD_MULTIPLES_BACK, MAX_SHARD_SIZE
 
-MAX_SHARD_SIZE = 4294967296 # 4Gb
+MAX_SHARD_SIZE = 4294967296  # 4Gb
 SHARD_MULTIPLES_BACK = 4
 
 global html_format_begin, html_format_end
 html_format_begin = "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">"
 html_format_end = "</span></p></body></html>"
 
+
 class Tools():
-    def check_email (self, email):
+    def check_email(self, email):
         if not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email):
             return False
         else:
             return True
 
-    def measure_ping_latency (self, destination_host):
-        ping_latency = str(os.system("ping " + ("-n 1 " if platform.system().lower() == "windows" else "-c 1 ") + str(destination_host)))
+    def measure_ping_latency(self, destination_host):
+        ping_latency = str(os.system(
+            "ping " + ("-n 1 " if platform.system().lower() == "windows" else "-c 1 ") + str(destination_host)))
 
         ping_data_parsed = pingparser.parse(ping_latency)
 
         return ping_data_parsed
 
 
-
-
 ############# SHARDING TOOLS ################################################################
-#Sharding Tools
+# Sharding Tools
 class ShardingTools():
-
     def get_optimal_shard_parametrs(self, file_size):
         shard_parameters = {}
         accumulator = 0
@@ -105,52 +78,49 @@ class ShardingTools():
             shard_size = self.determine_shard_size(file_size, accumulator)
             accumulator += 1
         shard_parameters["shard_size"] = str(shard_size)
-        shard_parameters["shard_count"] =  math.ceil(file_size / shard_size)
+        shard_parameters["shard_count"] = math.ceil(file_size / shard_size)
         shard_parameters["file_size"] = file_size
         return shard_parameters
 
-
     def determine_shard_size(self, file_size, accumulator):
 
-        #Based on <https://github.com/aleitner/shard-size-calculator/blob/master/src/shard_size.c>
+        # Based on <https://github.com/aleitner/shard-size-calculator/blob/master/src/shard_size.c>
 
         hops = 0
 
         if (file_size <= 0):
             return 0
-        #if accumulator != True:
-            #accumulator  = 0
+            # if accumulator != True:
+            # accumulator  = 0
         print accumulator
 
         # Determine hops back by accumulator
-        if ((accumulator - SHARD_MULTIPLES_BACK) < 0 ):
+        if ((accumulator - SHARD_MULTIPLES_BACK) < 0):
             hops = 0
         else:
             hops = accumulator - SHARD_MULTIPLES_BACK
 
-        #accumulator = 10
+        # accumulator = 10
         byte_multiple = self.shard_size(accumulator)
 
-        check =  file_size / byte_multiple
-        #print check
+        check = file_size / byte_multiple
+        # print check
         if (check > 0 and check <= 1):
             while (hops > 0 and self.shard_size(hops) > MAX_SHARD_SIZE):
                 if hops - 1 <= 0:
                     hops = 0
                 else:
                     hops = hops - 1
-            return  self.shard_size(hops)
+            return self.shard_size(hops)
 
         # Maximum of 2 ^ 41 * 8 * 1024 * 1024
         if (accumulator > 41):
             return 0
 
-        #return self.determine_shard_size(file_size, ++accumulator)
+            # return self.determine_shard_size(file_size, ++accumulator)
 
-
-    def shard_size (self, hops):
+    def shard_size(self, hops):
         return (8 * (1024 * 1024)) * pow(2, hops)
-
 
     def sort_index(self, f1, f2):
 
@@ -162,7 +132,7 @@ class ShardingTools():
             i2 = int(f2[index2:len(f2)])
             return i2 - i1
 
-    def join_shards (self, shards_filenames, pattern, destination_file_path):
+    def join_shards(self, shards_filenames, pattern, destination_file_path):
         # Based on <http://code.activestate.com/recipes/224800-simple-file-splittercombiner-module/>
         import re
 
@@ -217,9 +187,9 @@ class ShardingException(Exception):
         return str(self.value)
 
 
-#Configuration backend section
-class Configuration ():
-    def get_config_parametr_value (self, parametr):
+# Configuration backend section
+class Configuration():
+    def get_config_parametr_value(self, parametr):
         output = ""
         try:
             et = etree.parse("storj_client_config.xml")
@@ -230,8 +200,7 @@ class Configuration ():
 
         return output
 
-
-    def load_config_from_xml (self):
+    def load_config_from_xml(self):
         try:
             et = etree.parse("storj_client_config.xml")
             for tags in et.iter('password'):
@@ -244,7 +213,7 @@ class Configuration ():
         doc = ET.SubElement(root, "client")
         i = 0
 
-        #settings_ui = Ui_
+        # settings_ui = Ui_
         ET.SubElement(doc, "max_shard_size").text = str("")
         ET.SubElement(doc, "max_connections_onetime").text = str("test")
         ET.SubElement(doc, "advanced_view_enabled").text = str("test")
@@ -271,7 +240,7 @@ class AccountManager():
         tree = ET.ElementTree(root)
         tree.write("storj_account_conf.xml")
 
-    def if_logged_in (self):
+    def if_logged_in(self):
         logged_in = "0"
         try:
             et = etree.parse("storj_account_conf.xml")
@@ -286,11 +255,10 @@ class AccountManager():
         else:
             return False
 
-
-    def logout (self):
+    def logout(self):
         print  1
 
-    def get_user_password (self):
+    def get_user_password(self):
         password = ""
         try:
             et = etree.parse("storj_account_conf.xml")
@@ -298,7 +266,7 @@ class AccountManager():
                 password = tags.text
         except:
             print "Unspecified error"
-        return  password
+        return password
 
     def get_user_email(self):
         email = ""
@@ -311,6 +279,7 @@ class AccountManager():
         return email
         print 1
 
+
 # Configuration Ui section
 class ClientConfigurationUI(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -322,17 +291,19 @@ class ClientConfigurationUI(QtGui.QMainWindow):
 
         self.configuration_manager = Configuration()
 
-        QtCore.QObject.connect(self.client_configuration_ui.apply_bt, QtCore.SIGNAL("clicked()"),self.save_settings)  # valudate and register user
+        QtCore.QObject.connect(self.client_configuration_ui.apply_bt, QtCore.SIGNAL("clicked()"),
+                               self.save_settings)  # valudate and register user
 
-    def save_settings (self):
-        #validate settings
+    def save_settings(self):
+        # validate settings
 
-        self.configuration_manager.save_client_configuration(self.client_configuration_ui) #save configuration
+        self.configuration_manager.save_client_configuration(self.client_configuration_ui)  # save configuration
 
-    def reset_settings_to_default (self):
+    def reset_settings_to_default(self):
         print 1
 
-#Register section
+
+# Register section
 class RegisterUI(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -344,11 +315,11 @@ class RegisterUI(QtGui.QMainWindow):
         self.register_ui.password.setEchoMode(QLineEdit.Password)
         self.register_ui.password_2.setEchoMode(QLineEdit.Password)
 
+        QtCore.QObject.connect(self.register_ui.register_bt, QtCore.SIGNAL("clicked()"),
+                               self.register)  # valudate and register user
 
-        QtCore.QObject.connect(self.register_ui.register_bt, QtCore.SIGNAL("clicked()"), self.register) # valudate and register user
-
-    def register (self):
-        #validate fields
+    def register(self):
+        # validate fields
 
 
         self.email = self.register_ui.email.text()
@@ -363,6 +334,7 @@ class RegisterUI(QtGui.QMainWindow):
                     # take login action
                     try:
                         self.storj_client = storj.Client(str(self.email), str(self.password))
+                        print self.email
                         success = True
                         # self.storj_client.user_create("wiktest15@gmail.com", "kotek1")
                     except storj.exception.StorjBridgeApiError, e:
@@ -370,14 +342,14 @@ class RegisterUI(QtGui.QMainWindow):
                         if (j["error"] == "Email is already registered"):
                             success = False
                             QMessageBox.about(self, "Warning",
-                                          "User with this e-mail is already registered! Please login or try different e-mail!")
+                                              "User with this e-mail is already registered! Please login or try different e-mail!")
                         else:
                             success = False
                             QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
                 else:
                     success = False
                     QMessageBox.about(self, "Warning",
-                                  "Your e-mail seems to be invalid! Please chech e-mail  and try again")
+                                      "Your e-mail seems to be invalid! Please chech e-mail  and try again")
             else:
                 success = False
                 QMessageBox.about(self, "Warning",
@@ -387,11 +359,11 @@ class RegisterUI(QtGui.QMainWindow):
             QMessageBox.about(self, "Warning",
                               "Please fill out all fields!")
 
-
         if success:
-            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success", "Successfully registered in Storj Distributed Storage Network! "
-                                                                                 "Now, yo must verify your email by clicking link, that been send to you. "
-                                                                                 "Then you can login", QtGui.QMessageBox.Ok)
+            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success",
+                                       "Successfully registered in Storj Distributed Storage Network! "
+                                       "Now, yo must verify your email by clicking link, that been send to you. "
+                                       "Then you can login", QtGui.QMessageBox.Ok)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
                 self.login_window = LoginUI(self)
@@ -399,13 +371,10 @@ class RegisterUI(QtGui.QMainWindow):
                 self.close()
                 initial_window.hide()
 
-
-
         print self.email
 
 
-
-#Login section
+# Login section
 class LoginUI(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -418,14 +387,13 @@ class LoginUI(QtGui.QMainWindow):
 
         self.login_ui.password.setEchoMode(QLineEdit.Password)
 
+        QtCore.QObject.connect(self.login_ui.login_bt, QtCore.SIGNAL("clicked()"), self.login)  # take login action
 
-        QtCore.QObject.connect(self.login_ui.login_bt, QtCore.SIGNAL("clicked()"), self.login) # take login action
+    def login(self):
+        # take login action
 
-    def login (self):
-        #take login action
-
-        self.email = self.login_ui.email.text() #get login
-        self.password = self.login_ui.password.text() #get password
+        self.email = self.login_ui.email.text()  # get login
+        self.password = self.login_ui.password.text()  # get password
 
         self.storj_client = storj.Client(email=str(self.email), password=str(self.password))
         success = False
@@ -442,10 +410,11 @@ class LoginUI(QtGui.QMainWindow):
                 QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
 
         if success:
-            self.account_manager = AccountManager(str(self.email), str(self.password)) # init account manager
-            self.account_manager.save_account_credentials() # save login credentials and state
-            #login_msg_box = QMessageBox.about(self, "Success", "Successfully loged in!")
-            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information,"Success", "Successfully loged in!", QtGui.QMessageBox.Ok)
+            self.account_manager = AccountManager(str(self.email), str(self.password))  # init account manager
+            self.account_manager.save_account_credentials()  # save login credentials and state
+            # login_msg_box = QMessageBox.about(self, "Success", "Successfully loged in!")
+            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success", "Successfully loged in!",
+                                       QtGui.QMessageBox.Ok)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
                 self.main_ui_window = MainUI(self)
@@ -453,13 +422,14 @@ class LoginUI(QtGui.QMainWindow):
                 self.close()
                 initial_window.hide()
 
-            #self.account_manager.get_login_state()
+                # self.account_manager.get_login_state()
 
-        #print self.storj_client.bucket_list()
+        # print self.storj_client.bucket_list()
         print 1;
 
-#StorjEngine section
-class StorjEngine ():
+
+# StorjEngine section
+class StorjEngine():
     def __init__(self):
         account_manager = AccountManager()
         if account_manager.if_logged_in():
@@ -468,7 +438,8 @@ class StorjEngine ():
             # initialize Storj
             self.storj_client = storj.Client(email=str(self.email), password=str(self.password))
 
-#Node details section
+
+# Node details section
 class NodeDetailsUI(QtGui.QMainWindow):
     def __init__(self, parent=None, nodeid=None):
         QtGui.QWidget.__init__(self, parent)
@@ -481,8 +452,7 @@ class NodeDetailsUI(QtGui.QMainWindow):
         self.nodeid = nodeid
         self.tools = Tools()
 
-        QtCore.QObject.connect(self.node_details_ui.ok_bt, QtCore.SIGNAL("clicked()"), self.close) # close window
-
+        QtCore.QObject.connect(self.node_details_ui.ok_bt, QtCore.SIGNAL("clicked()"), self.close)  # close window
 
         self.createNewNodeDetailsResolveThread()
 
@@ -492,20 +462,27 @@ class NodeDetailsUI(QtGui.QMainWindow):
         download_thread = threading.Thread(target=self.initialize_node_details, args=())
         download_thread.start()
 
-
-    def initialize_node_details (self):
+    def initialize_node_details(self):
         self.node_details_content = self.storj_engine.storj_client.contact_lookup(str(self.nodeid))
 
-        self.node_details_ui.address_label.setText(html_format_begin +  str(self.node_details_content.address ) + html_format_end) #get given node address
-        self.node_details_ui.last_timeout_label.setText(html_format_begin + str(self.node_details_content.lastTimeout) + html_format_end) #get last timeout
-        self.node_details_ui.timeout_rate_label.setText(html_format_begin + str(self.node_details_content.timeoutRate) + html_format_end) #get timeout rate
-        self.node_details_ui.user_agent_label.setText(html_format_begin + str(self.node_details_content.userAgent) + html_format_end) #get user agent
-        self.node_details_ui.protocol_version_label.setText(html_format_begin + str(self.node_details_content.protocol) + html_format_end) #get protocol version
-        self.node_details_ui.response_time_label.setText(html_format_begin + str(self.node_details_content.responseTime) + html_format_end) #get farmer node response time
-        self.node_details_ui.port_label.setText(html_format_begin + str(self.node_details_content.port) + html_format_end) #get farmer node port
-        self.node_details_ui.node_id_label.setText(html_format_begin + str(self.nodeid) + html_format_end) #get farmer node response time
+        self.node_details_ui.address_label.setText(
+            html_format_begin + str(self.node_details_content.address) + html_format_end)  # get given node address
+        self.node_details_ui.last_timeout_label.setText(
+            html_format_begin + str(self.node_details_content.lastTimeout) + html_format_end)  # get last timeout
+        self.node_details_ui.timeout_rate_label.setText(
+            html_format_begin + str(self.node_details_content.timeoutRate) + html_format_end)  # get timeout rate
+        self.node_details_ui.user_agent_label.setText(
+            html_format_begin + str(self.node_details_content.userAgent) + html_format_end)  # get user agent
+        self.node_details_ui.protocol_version_label.setText(
+            html_format_begin + str(self.node_details_content.protocol) + html_format_end)  # get protocol version
+        self.node_details_ui.response_time_label.setText(html_format_begin + str(
+            self.node_details_content.responseTime) + html_format_end)  # get farmer node response time
+        self.node_details_ui.port_label.setText(
+            html_format_begin + str(self.node_details_content.port) + html_format_end)  # get farmer node port
+        self.node_details_ui.node_id_label.setText(
+            html_format_begin + str(self.nodeid) + html_format_end)  # get farmer node response time
 
-        #ping_to_node = self.tools.measure_ping_latency(str(self.node_details_content.address))
+        # ping_to_node = self.tools.measure_ping_latency(str(self.node_details_content.address))
 
         ip_addr = socket.gethostbyname(str(self.node_details_content.address))
 
@@ -517,7 +494,29 @@ class NodeDetailsUI(QtGui.QMainWindow):
 
         country_full_name = country_parsed.name
 
-        self.node_details_ui.country_label.setText(html_format_begin + str(country_full_name) + html_format_end)  # set full country name
+        self.node_details_ui.country_label.setText(
+            html_format_begin + str(country_full_name) + html_format_end)  # set full country name
+
+        ### Display country flag ###
+
+        self.scene = QtGui.QGraphicsScene()
+
+        # scene.setSceneRect(-600,-600, 600,600)
+        # self.scene.setSceneRect(-600, -600, 1200, 1200)
+
+        # pic = QtGui.QPixmap("PL.png")
+        # self.scene.addItem(QtGui.QGraphicsPixmapItem(pic))
+        # self.view = self.node_details_ui.country_graphicsView
+        # self.view.setScene(self.scene)
+        # self.view.setRenderHint(QtGui.QPainter.Antialiasing)
+        # self.view.show()
+
+        grview = self.node_details_ui.country_graphicsView()
+        scene = QGraphicsScene()
+        scene.addPixmap(QPixmap('PL.png'))
+        grview.setScene(scene)
+
+        grview.show()
 
         print country_full_name
 
@@ -528,24 +527,25 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         QtGui.QWidget.__init__(self, parent)
         self.file_mirrors_list_ui = Ui_FileMirrorsList()
         self.file_mirrors_list_ui.setupUi(self)
-        #model = self.file_mirrors_list_ui.established_mirrors_tree.model()
+        # model = self.file_mirrors_list_ui.established_mirrors_tree.model()
 
 
-        self.file_mirrors_list_ui.mirror_details_bt.clicked.connect (lambda: self.open_mirror_details_window("established"))
-        self.file_mirrors_list_ui.mirror_details_bt_2.clicked.connect (lambda: self.open_mirror_details_window("available"))
-        self.file_mirrors_list_ui.quit_bt.clicked.connect (self.close)
+        self.file_mirrors_list_ui.mirror_details_bt.clicked.connect(
+            lambda: self.open_mirror_details_window("established"))
+        self.file_mirrors_list_ui.mirror_details_bt_2.clicked.connect(
+            lambda: self.open_mirror_details_window("available"))
+        self.file_mirrors_list_ui.quit_bt.clicked.connect(self.close)
+
+        # self.connect(self.file_mirrors_list_ui.established_mirrors_tree, QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.open_mirror_details_window)
+
+        # self.connect(self.file_mirrors_list_ui.established_mirrors_tree, QtCore.SIGNAL('selectionChanged()'), self.open_mirror_details_window)
 
 
-        #self.connect(self.file_mirrors_list_ui.established_mirrors_tree, QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.open_mirror_details_window)
-
-        #self.connect(self.file_mirrors_list_ui.established_mirrors_tree, QtCore.SIGNAL('selectionChanged()'), self.open_mirror_details_window)
-
-
-        #QtCore.QObject.connect(self.file_mirrors_list_ui.established_mirrors_tree.selectionModel(), QtCore.SIGNAL('selectionChanged(QItemSelection, QItemSelection)'),
-                              #self.open_mirror_details_window)
+        # QtCore.QObject.connect(self.file_mirrors_list_ui.established_mirrors_tree.selectionModel(), QtCore.SIGNAL('selectionChanged(QItemSelection, QItemSelection)'),
+        # self.open_mirror_details_window)
 
 
-        #self.file_mirrors_list_ui.established_mirrors_tree.
+        # self.file_mirrors_list_ui.established_mirrors_tree.
 
         self.bucketid = bucketid
         self.fileid = fileid
@@ -553,18 +553,18 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         self.file_mirrors_list_ui.file_id_label.setText(html_format_begin + str(self.fileid) + html_format_end)
 
         print self.fileid
-        self.storj_engine = StorjEngine() #init StorjEngine
+        self.storj_engine = StorjEngine()  # init StorjEngine
         self.createNewMirrorListInitializationThread()
 
-    def open_mirror_details_window (self, mirror_state):
-        #self.established_mirrors_tree_view = self.file_mirrors_list_ui.established_mirrors_tree
+    def open_mirror_details_window(self, mirror_state):
+        # self.established_mirrors_tree_view = self.file_mirrors_list_ui.established_mirrors_tree
 
 
-        #daat = self.file_mirrors_list_ui.established_mirrors_tree.selectedIndexes()
-        #model = self.file_mirrors_list_ui.established_mirrors_tree.model()
-        #data = []
+        # daat = self.file_mirrors_list_ui.established_mirrors_tree.selectedIndexes()
+        # model = self.file_mirrors_list_ui.established_mirrors_tree.model()
+        # data = []
 
-        #initialize variables
+        # initialize variables
         item = ""
         index = ""
         try:
@@ -588,21 +588,19 @@ class FileMirrorsListUI(QtGui.QMainWindow):
             QMessageBox.about(self, "Warning", "Please select farmer node from list")
             print "Unhandled error"
 
-
     def createNewMirrorListInitializationThread(self):
         mirror_list_initialization_thread = threading.Thread(target=self.initialize_mirrors_tree, args=())
         mirror_list_initialization_thread.start()
 
-    def initialize_mirrors_tree (self):
+    def initialize_mirrors_tree(self):
         # create model
-        #model = QtGui.QFileSystemModel()
-        #model.setRootPath(QtCore.QDir.currentPath())
+        # model = QtGui.QFileSystemModel()
+        # model.setRootPath(QtCore.QDir.currentPath())
 
-        self.file_mirrors_list_ui.loading_label_mirrors_established.setStyleSheet('color: red') #set loading color
-        self.file_mirrors_list_ui.loading_label_mirrors_available.setStyleSheet('color: red') #set loading color
+        self.file_mirrors_list_ui.loading_label_mirrors_established.setStyleSheet('color: red')  # set loading color
+        self.file_mirrors_list_ui.loading_label_mirrors_available.setStyleSheet('color: red')  # set loading color
 
         self.mirror_tree_view_header = ['Shard Hash / Address', 'User agent', 'Last seed', 'Node ID']
-
 
         ######################### set the model for established mirrors ##################################
         self.established_mirrors_model = QStandardItemModel()
@@ -614,10 +612,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         self.established_mirrors_tree_view.setModel(self.established_mirrors_model)
         self.established_mirrors_tree_view.setUniformRowHeights(True)
 
-
         self.file_mirrors_list_ui.available_mirrors_tree.setModel(self.established_mirrors_model)
-
-
 
         divider = 0
         group = 1
@@ -639,15 +634,14 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                 child4 = QStandardItem(str(mirror["contact"]["nodeID"]))
                 parent1.appendRow([child1, child2, child3, child4])
 
-
                 # span container columns
-                #self.established_mirrors_tree_view.setFirstColumnSpanned(1, self.established_mirrors_tree_view.rootIndex(), True)
+                # self.established_mirrors_tree_view.setFirstColumnSpanned(1, self.established_mirrors_tree_view.rootIndex(), True)
 
                 recent_shard_hash = mirror["shardHash"]
 
         self.file_mirrors_list_ui.loading_label_mirrors_established.setText("")
 
-        #dbQueryModel.itemData(treeView.selectedIndexes()[0])
+        # dbQueryModel.itemData(treeView.selectedIndexes()[0])
 
         ################################### set the model for available mirrors #########################################
         self.available_mirrors_model = QStandardItemModel()
@@ -659,9 +653,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         self.available_mirrors_tree_view.setModel(self.available_mirrors_model)
         self.available_mirrors_tree_view.setUniformRowHeights(True)
 
-
         self.file_mirrors_list_ui.available_mirrors_tree.setModel(self.available_mirrors_model)
-
 
         divider = 0
         self.available_mirrors_count_for_file = 0
@@ -681,15 +673,16 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                 child4 = QStandardItem(str(mirror_2["contact"]["nodeID"]))
                 parent2.appendRow([child1, child2, child3, child4])
 
-
                 # span container columns
-                #self.established_mirrors_tree_view.setFirstColumnSpanned(1, self.established_mirrors_tree_view.rootIndex(), True)
+                # self.established_mirrors_tree_view.setFirstColumnSpanned(1, self.established_mirrors_tree_view.rootIndex(), True)
 
                 recent_shard_hash_2 = mirror_2["shardHash"]
         self.file_mirrors_list_ui.loading_label_mirrors_available.setText("")
 
-        self.file_mirrors_list_ui.established_mirrors_count.setText(html_format_begin + str(self.established_mirrors_count_for_file) + html_format_end)
-        self.file_mirrors_list_ui.available_mirrors_count.setText(html_format_begin + str(self.available_mirrors_count_for_file) + html_format_end)
+        self.file_mirrors_list_ui.established_mirrors_count.setText(
+            html_format_begin + str(self.established_mirrors_count_for_file) + html_format_end)
+        self.file_mirrors_list_ui.available_mirrors_count.setText(
+            html_format_begin + str(self.available_mirrors_count_for_file) + html_format_end)
         print QtCore.QDir.currentPath()
 
 
@@ -701,19 +694,22 @@ class BucketManagerUI(QtGui.QMainWindow):
         self.bucket_manager_ui.setupUi(self)
         self.createNewBucketGetThread()
 
-        QtCore.QObject.connect(self.bucket_manager_ui.quit_bt, QtCore.SIGNAL("clicked()"), self.quit) # open login window
-        QtCore.QObject.connect(self.bucket_manager_ui.delete_bucket_bt, QtCore.SIGNAL("clicked()"), self.delete_bucket) # delete bucket
-        QtCore.QObject.connect(self.bucket_manager_ui.edit_bucket_bt, QtCore.SIGNAL("clicked()"), self.open_bucket_edit_window) # open bucket edit window
-        #QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
+        QtCore.QObject.connect(self.bucket_manager_ui.quit_bt, QtCore.SIGNAL("clicked()"),
+                               self.quit)  # open login window
+        QtCore.QObject.connect(self.bucket_manager_ui.delete_bucket_bt, QtCore.SIGNAL("clicked()"),
+                               self.delete_bucket)  # delete bucket
+        QtCore.QObject.connect(self.bucket_manager_ui.edit_bucket_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_bucket_edit_window)  # open bucket edit window
+        # QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
 
     def createNewBucketGetThread(self):
         download_thread = threading.Thread(target=self.initialize_buckets_table, args=())
         download_thread.start()
 
-    def quit (self):
+    def quit(self):
         self.close()
 
-    def delete_bucket (self):
+    def delete_bucket(self):
         # initialize variables
         bucket_id = ""
         bucket_name = ""
@@ -732,7 +728,8 @@ class BucketManagerUI(QtGui.QMainWindow):
 
         if i != 0:
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Are you sure?",
-                                       "Are you sure to delete this bucket? Bucket name: '" + bucket_name + "'", QtGui.QMessageBox.Ok)
+                                       "Are you sure to delete this bucket? Bucket name: '" + bucket_name + "'",
+                                       QtGui.QMessageBox.Ok)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
                 success = False
@@ -748,15 +745,12 @@ class BucketManagerUI(QtGui.QMainWindow):
         else:
             QMessageBox.about(self, "Warning", "Please select bucket which you want to delete.")
 
-
-    def open_bucket_edit_window (self):
+    def open_bucket_edit_window(self):
         print 1
 
-    def initialize_buckets_table (self):
+    def initialize_buckets_table(self):
         self.storj_engine = StorjEngine()  # init StorjEngine
-        model = QStandardItemModel(1, 1) # initialize model for inserting to table
-
-
+        model = QStandardItemModel(1, 1)  # initialize model for inserting to table
 
         model.setHorizontalHeaderLabels(['Name', 'Storage', 'Transfer', 'ID'])
 
@@ -764,7 +758,7 @@ class BucketManagerUI(QtGui.QMainWindow):
         try:
             for bucket in self.storj_engine.storj_client.bucket_list():
                 item = QStandardItem(bucket.name)
-                model.setItem(i, 0, item) # row, column, item (QStandardItem)
+                model.setItem(i, 0, item)  # row, column, item (QStandardItem)
 
                 item = QStandardItem(str(bucket.storage))
                 model.setItem(i, 1, item)  # row, column, item (QStandardItem)
@@ -779,11 +773,10 @@ class BucketManagerUI(QtGui.QMainWindow):
         except storj.exception.StorjBridgeApiError, e:
             QMessageBox.about(self, "Unhandled bucket resolving exception", "Exception: " + str(e))
 
-
-
-        self.bucket_manager_ui.total_buckets_label.setText(str(i)) #set label of user buckets number
+        self.bucket_manager_ui.total_buckets_label.setText(str(i))  # set label of user buckets number
         self.bucket_manager_ui.bucket_list_tableview.setModel(model)
         self.bucket_manager_ui.bucket_list_tableview.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+
 
 ######################################################################################################################################
 ####################### BUCKET CREATE UI ##################################
@@ -794,25 +787,28 @@ class BucketCreateUI(QtGui.QMainWindow):
         self.bucket_create_ui = Ui_BucketCreate()
         self.bucket_create_ui.setupUi(self)
 
-        QtCore.QObject.connect(self.bucket_create_ui.create_bucket_bt, QtCore.SIGNAL("clicked()"), self.createNewBucketCreateThread)  #create bucket action
-        QtCore.QObject.connect(self.bucket_create_ui.cancel_bt, QtCore.SIGNAL("clicked()"), self.close)  #create bucket action
+        QtCore.QObject.connect(self.bucket_create_ui.create_bucket_bt, QtCore.SIGNAL("clicked()"),
+                               self.createNewBucketCreateThread)  # create bucket action
+        QtCore.QObject.connect(self.bucket_create_ui.cancel_bt, QtCore.SIGNAL("clicked()"),
+                               self.close)  # create bucket action
 
-        self.storj_engine = StorjEngine() #init StorjEngine
+        self.storj_engine = StorjEngine()  # init StorjEngine
 
     def createNewBucketCreateThread(self):
         bucket_create_thread = threading.Thread(target=self.create_bucket, args=())
         bucket_create_thread.start()
 
-    def create_bucket (self):
+    def create_bucket(self):
         self.bucket_name = self.bucket_create_ui.bucket_name.text()
         self.bucket_storage = self.bucket_create_ui.bucket_storage_size.text()
         self.bucket_transfer = self.bucket_create_ui.bucket_transfer.text()
 
-        bucekt_cerated = False # init boolean
+        bucekt_cerated = False  # init boolean
         if self.bucket_name != "" and self.bucket_transfer != "" and self.bucket_storage != "":
 
             try:
-                self.storj_engine.storj_client.bucket_create(str(self.bucket_name), int(self.bucket_storage), int(self.bucket_transfer))
+                self.storj_engine.storj_client.bucket_create(str(self.bucket_name), int(self.bucket_storage),
+                                                             int(self.bucket_transfer))
                 bucekt_cerated = True
             except  storj.exception.StorjBridgeApiError, e:
                 bucekt_cerated = False
@@ -826,34 +822,37 @@ class BucketCreateUI(QtGui.QMainWindow):
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success", "Bucket was created successfully!",
                                        QtGui.QMessageBox.Ok)
             msgBox.exec_()
-            #QMessageBox.about(self, "Success", "Bucket was created successfully!", QMessageBox.Ok)
-
+            # QMessageBox.about(self, "Success", "Bucket was created successfully!", QMessageBox.Ok)
 
         print 1
-
-
 
 
 ######################################################################################################################################
 ####################### FILE MANAGER UI ##################################
 
-#Files section
+# Files section
 class FileManagerUI(QtGui.QMainWindow):
     def __init__(self, parent=None, bucketid=None):
         QtGui.QWidget.__init__(self, parent)
         self.file_manager_ui = Ui_FileManager()
         self.file_manager_ui.setupUi(self)
 
-        QtCore.QObject.connect(self.file_manager_ui.bucket_select_combo_box, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.createNewFileListUpdateThread) #connect ComboBox change listener
-        QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt, QtCore.SIGNAL("clicked()"), self.open_mirrors_list_window)  #create bucket action
-        QtCore.QObject.connect(self.file_manager_ui.quit_bt, QtCore.SIGNAL("clicked()"), self.close)  #create bucket action
-        QtCore.QObject.connect(self.file_manager_ui.file_download_bt, QtCore.SIGNAL("clicked()"), self.open_single_file_download_window)  #create bucket action
-        QtCore.QObject.connect(self.file_manager_ui.file_delete_bt, QtCore.SIGNAL("clicked()"), self.delete_selected_file)  # delete selected file
+        QtCore.QObject.connect(self.file_manager_ui.bucket_select_combo_box,
+                               QtCore.SIGNAL("currentIndexChanged(const QString&)"),
+                               self.createNewFileListUpdateThread)  # connect ComboBox change listener
+        QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_mirrors_list_window)  # create bucket action
+        QtCore.QObject.connect(self.file_manager_ui.quit_bt, QtCore.SIGNAL("clicked()"),
+                               self.close)  # create bucket action
+        QtCore.QObject.connect(self.file_manager_ui.file_download_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_single_file_download_window)  # create bucket action
+        QtCore.QObject.connect(self.file_manager_ui.file_delete_bt, QtCore.SIGNAL("clicked()"),
+                               self.delete_selected_file)  # delete selected file
 
-        self.storj_engine = StorjEngine() #init StorjEngine
+        self.storj_engine = StorjEngine()  # init StorjEngine
         self.createNewBucketResolveThread()
 
-    def delete_selected_file (self):
+    def delete_selected_file(self):
 
         self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()
         self.current_selected_bucket_id = self.bucket_id_list[self.current_bucket_index]
@@ -862,7 +861,6 @@ class FileManagerUI(QtGui.QMainWindow):
         rows = sorted(set(index.row() for index in
                           self.file_manager_ui.files_list_tableview.selectedIndexes()))
 
-
         for row in rows:
             index = tablemodel.index(row, 3)  # get file ID
             # We suppose data are strings
@@ -870,9 +868,9 @@ class FileManagerUI(QtGui.QMainWindow):
 
             self.storj_engine.storj_client.file_remove(str(self.current_selected_bucket_id), str(selected_file_id))
 
-        return  True
+        return True
 
-    def open_mirrors_list_window (self):
+    def open_mirrors_list_window(self):
         self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()
         self.current_selected_bucket_id = self.bucket_id_list[self.current_bucket_index]
 
@@ -882,10 +880,11 @@ class FileManagerUI(QtGui.QMainWindow):
         i = 0
         for row in rows:
             print('Row %d is selected' % row)
-            index = tablemodel.index(row, 3)  #get file ID
+            index = tablemodel.index(row, 3)  # get file ID
             # We suppose data are strings
             selected_file_id = str(tablemodel.data(index).toString())
-            self.file_mirrors_list_window = FileMirrorsListUI(self, str(self.current_selected_bucket_id), selected_file_id)
+            self.file_mirrors_list_window = FileMirrorsListUI(self, str(self.current_selected_bucket_id),
+                                                              selected_file_id)
             self.file_mirrors_list_window.show()
             i += 1
 
@@ -894,12 +893,11 @@ class FileManagerUI(QtGui.QMainWindow):
 
         print 1
 
-
     def createNewFileListUpdateThread(self):
         download_thread = threading.Thread(target=self.update_files_list, args=())
         download_thread.start()
 
-    def update_files_list (self):
+    def update_files_list(self):
         model = QStandardItemModel(1, 1)  # initialize model for inserting to table
 
         model.setHorizontalHeaderLabels(['File name', 'File size', 'Mimetype', 'File ID'])
@@ -934,7 +932,7 @@ class FileManagerUI(QtGui.QMainWindow):
         download_thread = threading.Thread(target=self.initialize_bucket_select_combobox, args=())
         download_thread.start()
 
-    def initialize_bucket_select_combobox (self):
+    def initialize_bucket_select_combobox(self):
         self.buckets_list = []
         self.bucket_id_list = []
         self.storj_engine = StorjEngine()  # init StorjEngine
@@ -949,34 +947,38 @@ class FileManagerUI(QtGui.QMainWindow):
 
         self.file_manager_ui.bucket_select_combo_box.addItems(self.buckets_list)
 
-    def open_single_file_download_window (self):
+    def open_single_file_download_window(self):
         self.single_file_download_window = SingleFileDownloadUI(self)
         self.single_file_download_window.show()
-#Initial window section
+
+
+# Initial window section
 
 class InitialWindowUI(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.ui_initial_window = Ui_InitialWindow()
         self.ui_initial_window.setupUi(self)
-        #QtCore.QObject.connect(self.ui.pushButton_3, QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
-        self.storj_engine = StorjEngine() #init StorjEngine
+        # QtCore.QObject.connect(self.ui.pushButton_3, QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
+        self.storj_engine = StorjEngine()  # init StorjEngine
 
-        QtCore.QObject.connect(self.ui_initial_window.login_bt, QtCore.SIGNAL("clicked()"), self.open_login_window) # open login window
-        QtCore.QObject.connect(self.ui_initial_window.register_bt, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
-        #QtCore.QObject.connect(self.ui_initial_window.about_bt, QtCore.SIGNAL("clicked()"), self.open_about_window) # open login window
+        QtCore.QObject.connect(self.ui_initial_window.login_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_login_window)  # open login window
+        QtCore.QObject.connect(self.ui_initial_window.register_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_register_window)  # open login window
+        # QtCore.QObject.connect(self.ui_initial_window.about_bt, QtCore.SIGNAL("clicked()"), self.open_about_window) # open login window
 
 
-        #self.storj_engine.storj_client.
+        # self.storj_engine.storj_client.
 
     def open_login_window(self):
         self.login_window = LoginUI(self)
         self.login_window.show()
 
-
     def open_register_window(self):
         self.register_window = RegisterUI(self)
         self.register_window.show()
+
 
 # Main UI section
 class MainUI(QtGui.QMainWindow):
@@ -985,37 +987,40 @@ class MainUI(QtGui.QMainWindow):
         QtGui.QWidget.__init__(self, parent)
         self.ui = Ui_MainMenu()
         self.ui.setupUi(self)
-        #QtCore.QObject.connect(self.ui.pushButton_3, QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
-        self.storj_engine = StorjEngine() #init StorjEngine
-        #self.storj_engine.storj_client.
+        # QtCore.QObject.connect(self.ui.pushButton_3, QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
+        self.storj_engine = StorjEngine()  # init StorjEngine
+        # self.storj_engine.storj_client.
         self.sharding_tools = ShardingTools()
 
-
         print self.sharding_tools.get_optimal_shard_parametrs(18888888888)
-        #print self.sharding_tools.determine_shard_size(12343446576, 10)
+        # print self.sharding_tools.determine_shard_size(12343446576, 10)
         self.account_manager = AccountManager()  # init AccountManager
 
         user_email = self.account_manager.get_user_email()
         self.ui.account_label.setText(html_format_begin + str(user_email) + html_format_end)
 
-        #QtCore.QObject.connect(self.ui., QtCore.SIGNAL("clicked()"), self.open_login_window) # open login window
-        #QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
-        QtCore.QObject.connect(self.ui.bucket_menager_bt, QtCore.SIGNAL("clicked()"), self.open_bucket_manager_window) # open bucket manager window
-        QtCore.QObject.connect(self.ui.file_manager_bt, QtCore.SIGNAL("clicked()"), self.open_file_manager_window) # open file manager window
-        QtCore.QObject.connect(self.ui.create_bucket_bt, QtCore.SIGNAL("clicked()"), self.open_bucket_create_window) # open bucket create window
-        QtCore.QObject.connect(self.ui.uploader_bt, QtCore.SIGNAL("clicked()"), self.open_single_file_upload_window) # open single file upload ui
-        QtCore.QObject.connect(self.ui.settings_bt, QtCore.SIGNAL("clicked()"), self.open_settings_window) # open single file upload ui
-        #QtCore.QObject.connect(self.ui.pushButton_7, QtCore.SIGNAL("clicked()"), self.open_file_mirrors_list_window) # open file mirrors list window
+        # QtCore.QObject.connect(self.ui., QtCore.SIGNAL("clicked()"), self.open_login_window) # open login window
+        # QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
+        QtCore.QObject.connect(self.ui.bucket_menager_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_bucket_manager_window)  # open bucket manager window
+        QtCore.QObject.connect(self.ui.file_manager_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_file_manager_window)  # open file manager window
+        QtCore.QObject.connect(self.ui.create_bucket_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_bucket_create_window)  # open bucket create window
+        QtCore.QObject.connect(self.ui.uploader_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_single_file_upload_window)  # open single file upload ui
+        QtCore.QObject.connect(self.ui.settings_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_settings_window)  # open single file upload ui
+        # QtCore.QObject.connect(self.ui.pushButton_7, QtCore.SIGNAL("clicked()"), self.open_file_mirrors_list_window) # open file mirrors list window
 
-    def open_login_window (self):
+    def open_login_window(self):
         self.login_window = LoginUI(self)
         self.login_window.show()
 
         self.login_window = ClientConfigurationUI(self)
         self.login_window.show()
 
-
-        #take login action
+        # take login action
         print 1;
 
     def open_register_window(self):
@@ -1030,49 +1035,52 @@ class MainUI(QtGui.QMainWindow):
         self.bucket_manager_window = BucketManagerUI(self)
         self.bucket_manager_window.show()
 
-
     def open_file_manager_window(self):
         self.file_manager_window = FileManagerUI(self)
         self.file_manager_window.show()
-
 
     def open_bucket_create_window(self):
         self.bucket_create_window = BucketCreateUI(self)
         self.bucket_create_window.show()
 
-
     def open_file_mirrors_list_window(self):
         self.file_mirrors_list_window = FileMirrorsListUI(self)
         self.file_mirrors_list_window.show()
 
-
     def open_settings_window(self):
         self.settings_window = ClientConfigurationUI(self)
         self.settings_window.show()
+
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
     def __init__(self, parent=None, bucketid=None, fileid=None):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_download = Ui_SingleFileDownload()
         self.ui_single_file_download.setupUi(self)
-        #QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
-        self.storj_engine = StorjEngine() #init StorjEngine
+        # QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
+        self.storj_engine = StorjEngine()  # init StorjEngine
 
-        file_pointers = self.storj_engine.storj_client.file_pointers("6acfcdc62499144929cf9b4a", "9c44a14c4104b97df47bef02")
+        file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49",
+                                                                     "38009389bb163ab574231a28")
 
         self.initialize_shard_queue_table(file_pointers)
 
-        QtCore.QObject.connect(self.ui_single_file_download.file_save_path_bt, QtCore.SIGNAL("clicked()"), self.select_file_save_path)  # open file select dialog
-        QtCore.QObject.connect(self.ui_single_file_download.tmp_dir_bt, QtCore.SIGNAL("clicked()"), self.select_tmp_directory)  # open tmp directory select dialog
+        QtCore.QObject.connect(self.ui_single_file_download.file_save_path_bt, QtCore.SIGNAL("clicked()"),
+                               self.select_file_save_path)  # open file select dialog
+        QtCore.QObject.connect(self.ui_single_file_download.tmp_dir_bt, QtCore.SIGNAL("clicked()"),
+                               self.select_tmp_directory)  # open tmp directory select dialog
+
+
+    def set_current_status(self, current_status):
+        self.ui_single_file_download.current_state.setText(html_format_begin + current_status + html_format_end)
 
     def select_tmp_directory(self):
-        self.selected_tmp_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:', '', QtGui.QFileDialog.ShowDirsOnly)
+        self.selected_tmp_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:', '',
+                                                                       QtGui.QFileDialog.ShowDirsOnly)
         self.ui_single_file_download.tmp_dir.setText(str(self.selected_tmp_dir))
 
     def select_file_save_path(self):
         self.ui_single_file_download.file_save_path.setText(QFileDialog.getOpenFileName())
-
-
 
     def initialize_shard_queue_table(self, file_pointers):
 
@@ -1103,7 +1111,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.ui_single_file_download.shard_queue_table.setModel(model)
         self.ui_single_file_download.shard_queue_table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
 
-
         i = 0
         progressbar_list = []
         for pointer in file_pointers:
@@ -1113,7 +1120,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             self.ui_single_file_download.shard_queue_table.setIndexWidget(index, progressbar_list[i])
             i = i + 1
 
-
         options_array["file_pointers"] = file_pointers
         options_array["file_pointers_is_given"] = "1"
         options_array["progressbars_enabled"] = "1"
@@ -1122,8 +1128,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         storj_sdk_overrides = StorjSDKImplementationsOverrides()
         storj_sdk_overrides.file_download(None, None, "/home/lakewik/rudasek1", options_array, progressbar_list)
-        #progressbar_list[0].setValue(20)
-        #progressbar_list[2].setValue(17)
+        # progressbar_list[0].setValue(20)
+        # progressbar_list[2].setValue(17)
 
 
 class DownloadTaskQtThread(QtCore.QThread):
@@ -1137,11 +1143,10 @@ class DownloadTaskQtThread(QtCore.QThread):
         self.options_chain = options_chain
         self.progress_bar = progress_bar
 
-    #def run(self):
-       # self.client.create_download_connection(self, None, None, None, None)
+        # def run(self):
+        # self.client.create_download_connection(self, None, None, None, None)
 
-
-    #def create_download_connection(self, url, path_to_save, options_chain, progress_bar):
+    # def create_download_connection(self, url, path_to_save, options_chain, progress_bar):
     def run(self):
         print "test"
         local_filename = self.path_to_save
@@ -1168,14 +1173,14 @@ class DownloadTaskQtThread(QtCore.QThread):
             for chunk in r.iter_content(32 * 1024):
                 f.write(chunk)
                 print str(i) + " " + str(t1)
-                print round (float(i)/float(t1), 1)
-                print str(int(round((100.0*i) / t1))) + " %"
-                percent_downloaded = int(round((100.0*i) / t1))
+                print round(float(i) / float(t1), 1)
+                print str(int(round((100.0 * i) / t1))) + " %"
+                percent_downloaded = int(round((100.0 * i) / t1))
                 # Refactor for fix SIGSEGV
-                #self.tick.emit(percent_downloaded)
-                #self.emit(SIGNAL("setStatus"), percent_downloaded , "information")
+                # self.tick.emit(percent_downloaded)
+                # self.emit(SIGNAL("setStatus"), percent_downloaded , "information")
                 # Old
-                #progress_bar.setValue (percent_downloaded)
+                # progress_bar.setValue (percent_downloaded)
                 i += 1
             f.close()
             return
@@ -1215,9 +1220,7 @@ class CryptoTools():
         hmacs['SHA-512'] = hmac_sha512
         return hmacs
 
-
-
-    def prepare_bucket_entry_hmac (self, shard_array):
+    def prepare_bucket_entry_hmac(self, shard_array):
         storj_keyring = storj.model.Keyring()
         encryption_key = storj_keyring.get_encryption_key("test")
         current_hmac = ""
@@ -1229,18 +1232,16 @@ class CryptoTools():
         return current_hmac
 
 
-
 class StorjSDKImplementationsOverrides():
     def __init__(self, parent=None):
         self.storj_engine = StorjEngine()  # init StorjEngine
 
-
-    def calculate_final_hmac (self):
+    def calculate_final_hmac(self):
         return 1
 
-    def shard_file (self, file_path, shard_save_path, tmp_dir):
+    def shard_file(self, file_path, shard_save_path, tmp_dir):
 
-        #TEST PARAMETERS
+        # TEST PARAMETERS
         file_size = 40000000;
 
         self.sharding_tools = ShardingTools()
@@ -1249,7 +1250,7 @@ class StorjSDKImplementationsOverrides():
         i = 0
         # Maximum chunk size that can be sent
         CHUNK_SIZE_TABLE = []
-        while i < int(shard_parametrs["shard_count"])+1:
+        while i < int(shard_parametrs["shard_count"]) + 1:
             CHUNK_SIZE_TABLE.append(int(shard_parametrs["shard_size"]))
             i += 1
 
@@ -1273,7 +1274,6 @@ class StorjSDKImplementationsOverrides():
             chunk_file.close()
 
         return 1
-
 
     def create_download_connection(self, url, path_to_save, options_chain, progress_bar):
         local_filename = path_to_save
@@ -1301,39 +1301,36 @@ class StorjSDKImplementationsOverrides():
             for chunk in r.iter_content(32 * 1024):
                 f.write(chunk)
                 print str(i) + " " + str(t1)
-                print round (float(i)/float(t1), 1)
-                print str(int(round((100.0*i) / t1))) + " %"
-                percent_downloaded = int(round((100.0*i) / t1))
-                progress_bar.setValue (percent_downloaded)
+                print round(float(i) / float(t1), 1)
+                print str(int(round((100.0 * i) / t1))) + " %"
+                percent_downloaded = int(round((100.0 * i) / t1))
+                progress_bar.setValue(percent_downloaded)
                 i += 1
             f.close()
             return
 
-    def createNewDownloadThread(self,  url, filelocation, options_chain, progress_bars_list):
-        #self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
-        #self.download_thread.start()
-        #self.download_thread.connect(self.download_thread, SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
-        #self.download_thread.tick.connect(progress_bars_list.setValue)
+    def createNewDownloadThread(self, url, filelocation, options_chain, progress_bars_list):
+        # self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
+        # self.download_thread.start()
+        # self.download_thread.connect(self.download_thread, SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
+        # self.download_thread.tick.connect(progress_bars_list.setValue)
 
         # Refactor to QtTrhead
-         download_thread = threading.Thread(target=self.create_download_connection, args=(url, filelocation, options_chain, progress_bars_list))
-         download_thread.start()
-
+        download_thread = threading.Thread(target=self.create_download_connection,
+                                           args=(url, filelocation, options_chain, progress_bars_list))
+        download_thread.start()
 
     def test1(self, value1, value2):
         print str(value1) + " aaa " + str(value2)
 
-
-
-
-    def upload_file (self):
+    def upload_file(self):
         print 1;
 
     def file_download(self, bucket_id, file_id, file_save_path, options_array, progress_bars_list):
         options_chain = {}
         self.storj_engine.storj_client.logger.info('file_pointers(%s, %s)', bucket_id, file_id)
 
-        #Determine file pointers
+        # Determine file pointers
         if options_array["file_pointers_is_given"] == "1":
             pointers = options_array["file_pointers"]
         else:
@@ -1357,14 +1354,15 @@ class StorjSDKImplementationsOverrides():
         for pointer in pointers:
             print pointer
             options_chain["shard_file_size"] = shard_size_array[part]
-            url = "http://" +  pointer.get('farmer')['address'] + ":" + str(pointer.get('farmer')['port']) + "/shards/" + pointer["hash"] + "?token=" + pointer["token"]
-            self.createNewDownloadThread(url, file_save_path + "part" + str(part), options_chain, progress_bars_list[part])
+            url = "http://" + pointer.get('farmer')['address'] + ":" + str(pointer.get('farmer')['port']) + "/shards/" + \
+                  pointer["hash"] + "?token=" + pointer["token"]
+            print url
+            # self.createNewDownloadThread(url, file_save_path + "part" + str(part), options_chain, progress_bars_list[part])
             part = part + 1
 
         print "pobrano"
 
         return True
-
 
 
 ################################################################# SINGLE FILE UPLOADER UI SECTION ###################################################################
@@ -1373,35 +1371,38 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_upload = Ui_SingleFileUpload()
         self.ui_single_file_upload.setupUi(self)
-        QtCore.QObject.connect(self.ui_single_file_upload.start_upload_bt, QtCore.SIGNAL("clicked()"), self.createNewUploadThread) # open bucket manager
-        QtCore.QObject.connect(self.ui_single_file_upload.file_path_select_bt, QtCore.SIGNAL("clicked()"), self.select_file_path) # open file select dialog
-        QtCore.QObject.connect(self.ui_single_file_upload.tmp_path_select_bt, QtCore.SIGNAL("clicked()"), self.select_tmp_directory) # open tmp directory select dialog
-        self.storj_engine = StorjEngine() #init StorjEngine
+        QtCore.QObject.connect(self.ui_single_file_upload.start_upload_bt, QtCore.SIGNAL("clicked()"),
+                               self.createNewUploadThread)  # open bucket manager
+        QtCore.QObject.connect(self.ui_single_file_upload.file_path_select_bt, QtCore.SIGNAL("clicked()"),
+                               self.select_file_path)  # open file select dialog
+        QtCore.QObject.connect(self.ui_single_file_upload.tmp_path_select_bt, QtCore.SIGNAL("clicked()"),
+                               self.select_tmp_directory)  # open tmp directory select dialog
+        self.storj_engine = StorjEngine()  # init StorjEngine
 
         self.initialize_upload_queue_table()
-        #file_pointers = self.storj_engine.storj_client.file_pointers("6acfcdc62499144929cf9b4a", "dfba26ab34466b1211c60d02")
+        # file_pointers = self.storj_engine.storj_client.file_pointers("6acfcdc62499144929cf9b4a", "dfba26ab34466b1211c60d02")
 
-        #self.initialize_shard_queue_table(file_pointers)
+        # self.initialize_shard_queue_table(file_pointers)
 
-    def select_tmp_directory (self):
-        self.selected_tmp_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:', '', QtGui.QFileDialog.ShowDirsOnly)
+    def select_tmp_directory(self):
+        self.selected_tmp_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:', '',
+                                                                       QtGui.QFileDialog.ShowDirsOnly)
         self.ui_single_file_upload.tmp_path.setText(str(self.selected_tmp_dir))
 
-    def select_file_path (self):
+    def select_file_path(self):
         self.ui_single_file_upload.file_path.setText(QFileDialog.getOpenFileName())
 
     def createNewUploadThread(self):
-        #self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
-        #self.download_thread.start()
-        #self.download_thread.connect(self.download_thread, SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
-        #self.download_thread.tick.connect(progress_bars_list.setValue)
+        # self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
+        # self.download_thread.start()
+        # self.download_thread.connect(self.download_thread, SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
+        # self.download_thread.tick.connect(progress_bars_list.setValue)
 
         # Refactor to QtTrhead
-         upload_thread = threading.Thread(target=self.file_upload_begin, args=())
-         upload_thread.start()
+        upload_thread = threading.Thread(target=self.file_upload_begin, args=())
+        upload_thread.start()
 
-
-    def initialize_upload_queue_table (self):
+    def initialize_upload_queue_table(self):
         model = QStandardItemModel(1, 1)  # initialize model for inserting to table
 
         model.setHorizontalHeaderLabels(['Progress', 'Hash', 'Farmer addres', 'State', 'Token'])
@@ -1410,31 +1411,61 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.shard_queue_table.setModel(model)
         self.ui_single_file_upload.shard_queue_table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
 
-    def file_upload_begin(self):
-        file_path = "/home/lakewik/config.json"
-        bucket_id = "b421441c3744bcc02a6a0ae1"
+    def set_current_status(self, current_status):
+        self.ui_single_file_upload.current_state.setText(html_format_begin + current_status + html_format_end)
 
-        # TODO:
+
+    def file_upload_begin(self):
+
+        file_path = "/home/lakewik/2017-01-26-11-07-32.flv"
+        bucket_id = "dc4778cc186192af49475b49"
+        bname = os.path.split(file_path)[1]
+
+        def read_in_chunks(file_object, blocksize=4096, chunks=-1):
+            """Lazy function (generator) to read a file piece by piece.
+            Default chunk size: 1k."""
+            i = 0
+            while chunks:
+                data = file_object.read(blocksize)
+                if not data:
+                    break
+                yield data
+                i += 1
+                print i
+                chunks -= 1
+
         # encrypt file
+
+        file_crypto_tools = FileCrypto()
+
+        # file_crypto_tools.decrypt_file("AES", "/home/lakewik/config.json.encrypted", "/home/lakewik/PycharmProjects/config.json.decrypted", "kotecze57")
+
+
+        file_path_ready = file_path + ".encrypted"
+
         def get_size(file_like_object):
             return os.stat(file_like_object.name).st_size
 
         # file_size = get_size(file)
         file_size = os.stat(file_path).st_size
-        self.ui_single_file_upload.current_state.setText(html_format_begin + "Resolving PUSH token..." + html_format_end)
+        self.ui_single_file_upload.current_state.setText(
+            html_format_begin + "Resolving PUSH token..." + html_format_end)
 
         push_token = None
 
         try:
-            push_token = self.storj_engine.storj_client.token_create(bucket_id, 'PUSH')  # get the PUSH token from Storj Bridge
+            push_token = self.storj_engine.storj_client.token_create(bucket_id,
+                                                                     'PUSH')  # get the PUSH token from Storj Bridge
         except storj.exception.StorjBridgeApiError, e:
             QMessageBox.about(self, "Unhandled PUSH token create exception", "Exception: " + str(e))
 
-        self.ui_single_file_upload.push_token.setText(html_format_begin + str(push_token.id) + html_format_end) # set the PUSH Token
+        self.ui_single_file_upload.push_token.setText(
+            html_format_begin + str(push_token.id) + html_format_end)  # set the PUSH Token
 
         print push_token.id
 
-        self.ui_single_file_upload.current_state.setText(html_format_begin + "Resolving frame for file..." + html_format_end)
+        self.ui_single_file_upload.current_state.setText(
+            html_format_begin + "Resolving frame for file..." + html_format_end)
         try:
             frame = self.storj_engine.storj_client.frame_create()  # Create file frame
         except storj.exception.StorjBridgeApiError, e:
@@ -1448,7 +1479,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # Now generate shards
         shards_manager = model.ShardManager(file_path, 1)
         self.ui_single_file_upload.current_state.setText(html_format_begin + "Generating shards..." + html_format_end)
-        #shards_manager._make_shards()
+        # shards_manager._make_shards()
         shards_count = shards_manager.index
         # create file hash
         self.storj_engine.storj_client.logger.debug('file_upload() push_token=%s', push_token)
@@ -1457,39 +1488,66 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         print shards_count
         chapters = 0
         for shard in shards_manager.shards:
-            self.ui_single_file_upload.current_state.setText(html_format_begin + "Adding shard " + str(chapters) +" to file frame..." + html_format_end)
-            frame_content = self.storj_engine.storj_client.frame_add_shard(shard, frame.id)
 
-            #self.tabledata = []
-            #self.tabledata.append([1, 1, 1, 1, 1])
-            #self.ui_single_file_upload.shard_queue_table.model().layoutChanged.emit()
+            while True:
 
-            #rowPosition = self.ui_single_file_upload.shard_queue_table.model()
-            #self.ui_single_file_upload.shard_queue_table.insertRow(rowPosition)
-            #self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 0, QtGui.QTableWidgetItem("text1"))
-            #self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 1, QtGui.QTableWidgetItem("text2"))
-            #self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 2, QtGui.QTableWidgetItem(str(frame_content["farmer"]["address"])))
-            #self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 3, QtGui.QTableWidgetItem("text3"))
-            #self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 4, QtGui.QTableWidgetItem("text3"))
+                self.ui_single_file_upload.current_state.setText(
+                    html_format_begin + "Adding shard " + str(
+                        chapters) + " to file frame and getting contract..." + html_format_end)
 
-            #tablemodel = MyTableModel(tabledata, header, self)
-            #rowcount = tablemodel.rowCount(None)
-            #tabledata.append([rowcount + 1, str(self.ui4.lineEdit.text()), str(self.ui4.lineEdit_2.text()), 2])
-            #tv.setModel(tablemodel)
-            print frame_content
-            print shard
-            # frame_content.
-            print frame_content["farmer"]["address"]
+                try:
+                    frame_content = self.storj_engine.storj_client.frame_add_shard(shard, frame.id)
 
-            url = "http://" + frame_content["farmer"]["address"] + ":" + str(
-                frame_content["farmer"]["port"]) + "/shards/" + frame_content["hash"] + "?token=" + frame_content["token"]
-            print url
-            files = {'file': open(file_path + '.part%s' % chapters)}
+                    # self.tabledata = []
+                    # self.tabledata.append([1, 1, 1, 1, 1])
+                    # self.ui_single_file_upload.shard_queue_table.model().layoutChanged.emit()
 
-            response = requests.post(url, files=files, timeout=1)
+                    # rowPosition = self.ui_single_file_upload.shard_queue_table.model()
+                    # self.ui_single_file_upload.shard_queue_table.insertRow(rowPosition)
+                    # self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 0, QtGui.QTableWidgetItem("text1"))
+                    # self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 1, QtGui.QTableWidgetItem("text2"))
+                    # self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 2, QtGui.QTableWidgetItem(str(frame_content["farmer"]["address"])))
+                    # self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 3, QtGui.QTableWidgetItem("text3"))
+                    # self.ui_single_file_upload.shard_queue_table.setItem(rowPosition, 4, QtGui.QTableWidgetItem("text3"))
 
-            chapters = chapters + 1
-            #time.sleep(5)
+                    # tablemodel = MyTableModel(tabledata, header, self)
+                    # rowcount = tablemodel.rowCount(None)
+                    # tabledata.append([rowcount + 1, str(self.ui4.lineEdit.text()), str(self.ui4.lineEdit_2.text()), 2])
+                    # tv.setModel(tablemodel)
+                    print frame_content
+                    print shard
+                    # frame_content.
+                    print frame_content["farmer"]["address"]
+
+                    farmerNodeID = frame_content["farmer"]["nodeID"]
+
+                    url = "http://" + frame_content["farmer"]["address"] + ":" + str(
+                        frame_content["farmer"]["port"]) + "/shards/" + frame_content["hash"] + "?token=" + \
+                          frame_content["token"]
+                    print url
+
+                    # files = {'file': open(file_path + '.part%s' % chapters)}
+                    # headers = {'content-type: application/octet-stream', 'x-storj-node-id: ' + str(farmerNodeID)}
+
+                    self.set_current_status("Uploading shard" + str(chapters+1) + "to farmer...")
+                    with open(file_path + '-' + str(chapters + 1), 'rb') as f:
+                        response = requests.post(url, data=read_in_chunks(f), timeout=1)
+
+                    print response.content
+                    chapters = chapters + 1
+
+                    self.set_current_status("Sending Exchange Report for shard " + str(chapters + 1))
+                    # now send Exchange Report
+
+
+                except storj.exception.StorjBridgeApiError, e:
+                    print "Exception raised while trying to negitiate contract: " + str(e)
+                    continue
+                except:
+                    print "Error occured while trying to upload shard or negotiate contract. Retrying..."
+                    continue
+                else:
+                    break
 
         # delete encrypted file
 
@@ -1497,7 +1555,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         hash_sha512_hmac = "dxjcdj"
 
         self.crypto_tools = CryptoTools()
-        self.ui_single_file_upload.current_state.setText(html_format_begin + "Generating SHA5212 HMAC..." + html_format_end)
+        self.ui_single_file_upload.current_state.setText(
+            html_format_begin + "Generating SHA5212 HMAC..." + html_format_end)
         hash_sha512_hmac_b64 = self.crypto_tools.prepare_bucket_entry_hmac(shards_manager.shards)
         hash_sha512_hmac = hashlib.sha224(str(hash_sha512_hmac_b64["SHA-512"])).hexdigest()
         print hash_sha512_hmac
@@ -1515,15 +1574,17 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             'x-filesize': str(file_size),
             'frame': frame.id,
             'mimetype': 'application/pdf',
-            'filename': "python2",
+            'filename': str(bname),
             'hmac': {
                 'type': "sha512",
-                #'value': hash_sha512_hmac["sha512_checksum"]
+                # 'value': hash_sha512_hmac["sha512_checksum"]
                 'value': hash_sha512_hmac
             },
         }
-        self.ui_single_file_upload.current_state.setText(html_format_begin + "Adding file to bucket..." + html_format_end)
+        self.ui_single_file_upload.current_state.setText(
+            html_format_begin + "Adding file to bucket..." + html_format_end)
 
+        success = False
         try:
             response = self.storj_engine.storj_client._request(
                 method='POST', path='/buckets/%s/files' % bucket_id,
@@ -1536,7 +1597,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             )
             success = True
         except storj.exception.StorjBridgeApiError, e:
-                QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
+            QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
         if success:
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Upload success! Waiting for user..." + html_format_end)
