@@ -13,11 +13,11 @@ GUI Client for Storj Distributed Storage Network written in Python and PyQt4. Th
 - create buckets +
 - register user +
 - list files in buckets +
-- upload file -
-- download file -
-- list file pointers -
+- upload file +/-
+- download file +/-
+- list file pointers +
 - list file mirrors +
-- manage buckets -
+- manage buckets +
 - advanced configuration and bandwidth limiting +/-
 - specified farmer node details +
 
