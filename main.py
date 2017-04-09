@@ -3,14 +3,18 @@ import hashlib
 import hmac
 import json
 import math
+import magic
 import os
 import platform
 import re  # for regex
 import socket
 import sys
 import threading
+import time
 import xml.etree.cElementTree as ET
 from PyQt4 import QtCore, QtGui
+
+
 
 import pycountry
 import requests
@@ -65,6 +69,32 @@ class Tools():
         ping_data_parsed = pingparser.parse(ping_latency)
 
         return ping_data_parsed
+
+    def human_size(self, size_bytes):
+        """
+        format a size in bytes into a 'human' file size, e.g. bytes, KB, MB, GB, TB, PB
+        Note that bytes/KB will be reported in whole numbers but MB and above will have greater precision
+        e.g. 1 byte, 43 bytes, 443 KB, 4.3 MB, 4.43 GB, etc
+        From: <http://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size>
+        """
+        if size_bytes == 1:
+            # because I really hate unnecessary plurals
+            return "1 byte"
+
+        suffixes_table = [('bytes', 0), ('KB', 0), ('MB', 1), ('GB', 2), ('TB', 2), ('PB', 2)]
+
+        num = float(size_bytes)
+        for suffix, precision in suffixes_table:
+            if num < 1024.0:
+                break
+            num /= 1024.0
+
+        if precision == 0:
+            formatted_size = "%d" % num
+        else:
+            formatted_size = str(round(num, ndigits=precision))
+
+        return "%s %s" % (formatted_size, suffix)
 
 
 ############# SHARDING TOOLS ################################################################
@@ -189,6 +219,40 @@ class ShardingException(Exception):
 
 # Configuration backend section
 class Configuration():
+    def __init__(
+            self, sameFileNamePrompt=None, sameFileHashPrompt=None, load_config=False
+    ):
+
+        if load_config:
+
+            et = None
+
+            try:
+                et = etree.parse("storj_client_config.xml")
+            except:
+                print "Unspecified XML parse error"
+
+            for tags in et.iter(str("same_file_name_prompt")):
+                if tags.text == "1":
+                    self.sameFileNamePrompt = True
+                elif tags.text == "0":
+                    self.sameFileNamePrompt = False
+                else:
+                    self.sameFileNamePrompt = True
+            for tags in et.iter(str("same_file_hash_prompt")):
+                if tags.text == "1":
+                    self.sameFileHashPrompt = True
+                elif tags.text == "0":
+                    self.sameFileHashPrompt = False
+                else:
+                    self.sameFileHashPrompt = True
+            for tags in et.iter(str("max_chunk_size_for_download")):
+                if tags.text != None:
+                    self.maxDownloadChunkSize = int(tags.text)
+                else:
+                    self.maxDownloadChunkSize = 1024
+
+
     def get_config_parametr_value(self, parametr):
         output = ""
         try:
@@ -854,6 +918,7 @@ class FileManagerUI(QtGui.QMainWindow):
 
     def delete_selected_file(self):
 
+
         self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()
         self.current_selected_bucket_id = self.bucket_id_list[self.current_bucket_index]
 
@@ -861,12 +926,31 @@ class FileManagerUI(QtGui.QMainWindow):
         rows = sorted(set(index.row() for index in
                           self.file_manager_ui.files_list_tableview.selectedIndexes()))
 
+        selected = False
         for row in rows:
-            index = tablemodel.index(row, 3)  # get file ID
+            selected = True
+            index = tablemodel.index(row, 3)  # get file ID index
+            index_filename = tablemodel.index(row, 0)  # get file name index
+
             # We suppose data are strings
             selected_file_id = str(tablemodel.data(index).toString())
+            selected_file_name = str(tablemodel.data(index_filename).toString())
+            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Question",
+                                       "Are you sure you want to delete this file? File name: " + selected_file_name, QtGui.QMessageBox.Yes)
+            result = msgBox.exec_()
+            print result
+            if result != QtGui.QMessageBox.Rejected:
+                try:
+                    self.storj_engine.storj_client.file_remove(str(self.current_selected_bucket_id), str(selected_file_id))
+                    self.createNewFileListUpdateThread() # update files list
+                    QMessageBox.about(self, "Success", 'File "' + str(selected_file_name) + '" was deleted successfully')
+                except storj.exception.StorjBridgeApiError, e:
+                    QMessageBox.about(self, "Error", "Bridge exception occured while trying to delete file: " + str(e))
+                except Exception, e:
+                    QMessageBox.about(self, "Error", "Unhandled exception occured while trying to delete file: " + str(e))
 
-            self.storj_engine.storj_client.file_remove(str(self.current_selected_bucket_id), str(selected_file_id))
+        if not selected:
+            QMessageBox.about(self, "Information", "Please select file which you want to delete")
 
         return True
 
@@ -898,6 +982,9 @@ class FileManagerUI(QtGui.QMainWindow):
         download_thread.start()
 
     def update_files_list(self):
+
+        self.tools = Tools()
+
         model = QStandardItemModel(1, 1)  # initialize model for inserting to table
 
         model.setHorizontalHeaderLabels(['File name', 'File size', 'Mimetype', 'File ID'])
@@ -911,7 +998,9 @@ class FileManagerUI(QtGui.QMainWindow):
             item = QStandardItem(str(self.file_details["filename"]))
             model.setItem(i, 0, item)  # row, column, item (QStandardItem)
 
-            item = QStandardItem(str(self.file_details["size"]))
+            file_size_str = self.tools.human_size(int(self.file_details["size"])) # get human readable file size
+
+            item = QStandardItem(str(file_size_str))
             model.setItem(i, 1, item)  # row, column, item (QStandardItem)
 
             item = QStandardItem(str(self.file_details["mimetype"]))
@@ -1060,16 +1149,20 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine()  # init StorjEngine
 
-        file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49",
-                                                                     "38009389bb163ab574231a28")
 
-        self.initialize_shard_queue_table(file_pointers)
+
+        #self.initialize_shard_queue_table(file_pointers)
 
         QtCore.QObject.connect(self.ui_single_file_download.file_save_path_bt, QtCore.SIGNAL("clicked()"),
                                self.select_file_save_path)  # open file select dialog
         QtCore.QObject.connect(self.ui_single_file_download.tmp_dir_bt, QtCore.SIGNAL("clicked()"),
                                self.select_tmp_directory)  # open tmp directory select dialog
+        QtCore.QObject.connect(self.ui_single_file_download.start_download_bt, QtCore.SIGNAL("clicked()"),
+                               self.initialize_shard_queue_table)  # begin file downloading process
 
+        file_metadata = self.storj_engine.storj_client.file_metadata("dc4778cc186192af49475b49", "07a2a9ebff6b7785b4bb18fd")
+
+        self.ui_single_file_download.file_name.setText(html_format_begin + str(file_metadata.filename) + html_format_end)
 
     def set_current_status(self, current_status):
         self.ui_single_file_download.current_state.setText(html_format_begin + current_status + html_format_end)
@@ -1082,25 +1175,27 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
     def select_file_save_path(self):
         self.ui_single_file_download.file_save_path.setText(QFileDialog.getOpenFileName())
 
-    def initialize_shard_queue_table(self, file_pointers):
+    def initialize_shard_queue_table(self, file_pointers=None):
 
+
+        file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49", "8ca55894f127a675cb4f11a0")
         options_array = {}
 
         i = 0
         model = QStandardItemModel(1, 1)  # initialize model for inserting to table
 
-        model.setHorizontalHeaderLabels(['Progress', 'Shard hash', 'Farmer addres', 'State'])
+        model.setHorizontalHeaderLabels(['Progress', 'Hash', 'Farmer addres', 'State'])
         for pointer in file_pointers:
             item = QStandardItem(str(""))
             model.setItem(i, 0, item)  # row, column, item (QStandardItem)
 
-            item = QStandardItem(str(pointer))
+            item = QStandardItem(str(pointer["hash"]))
             model.setItem(i, 1, item)  # row, column, item (QStandardItem)
 
-            item = QStandardItem(str(pointer))
+            item = QStandardItem(str(pointer["farmer"]["address"] + ":" + str(pointer["farmer"]["port"])))
             model.setItem(i, 2, item)  # row, column, item (QStandardItem)
 
-            item = QStandardItem(str(pointer))
+            item = QStandardItem(str("Waiting..."))
             model.setItem(i, 3, item)  # row, column, item (QStandardItem)
 
             options_array["file_size_shard_" + str(i)] = pointer["size"]
@@ -1111,25 +1206,139 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.ui_single_file_download.shard_queue_table.setModel(model)
         self.ui_single_file_download.shard_queue_table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
 
-        i = 0
+        i2 = 0
         progressbar_list = []
         for pointer in file_pointers:
             tablemodel = self.ui_single_file_download.shard_queue_table.model()
-            index = tablemodel.index(i, 0)
+            index = tablemodel.index(i2, 0)
             progressbar_list.append(QProgressBar())
-            self.ui_single_file_download.shard_queue_table.setIndexWidget(index, progressbar_list[i])
-            i = i + 1
+            self.ui_single_file_download.shard_queue_table.setIndexWidget(index, progressbar_list[i2])
+            i2 = i2 + 1
 
         options_array["file_pointers"] = file_pointers
         options_array["file_pointers_is_given"] = "1"
         options_array["progressbars_enabled"] = "1"
         options_array["file_size_is_given"] = "1"
-        options_array["shards_count"] = "1"
+        options_array["shards_count"] = i
 
-        storj_sdk_overrides = StorjSDKImplementationsOverrides()
-        storj_sdk_overrides.file_download(None, None, "/home/lakewik/rudasek1", options_array, progressbar_list)
+        self.ui_single_file_download.total_shards.setText(html_format_begin + str(i) + html_format_end)
+
+        #storj_sdk_overrides = StorjSDKImplementationsOverrides()
+
+        self.file_download(None, None, "/home/lakewik/rudasek1", options_array, progressbar_list)
         # progressbar_list[0].setValue(20)
         # progressbar_list[2].setValue(17)
+
+    def calculate_final_hmac(self):
+        return 1
+
+    def create_download_connection(self, url, path_to_save, options_chain, progress_bar):
+        local_filename = path_to_save
+
+        if options_chain["handle_progressbars"] != "1":
+            r = requests.get(url)
+            # requests.
+            with open(local_filename, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=1024):
+                    if chunk:  # filter out keep-alive new chunks
+                        f.write(chunk)
+        else:
+            r = requests.get(url, stream=True)
+            f = open(local_filename, 'wb')
+            if options_chain["file_size_is_given"] == "1":
+                file_size = options_chain["shard_file_size"]
+            else:
+                file_size = int(r.headers['Content-Length'])
+
+            chunk = 1
+            num_bars = file_size / chunk
+            t1 = float(file_size) / float((32 * 1024))
+
+            if t1 <= (32 * 1024):
+                t1 = 1
+
+            i = 0
+            print file_size
+            print str(t1) + "kotek"
+            for chunk in r.iter_content(32 * 1024):
+                i += 1
+                f.write(chunk)
+                print str(i) + " " + str(t1)
+                print round(float(i) / float(t1), 1)
+                print str(int(round((100.0 * i) / t1))) + " %"
+                percent_downloaded = int(round((100.0 * i) / t1))
+                progress_bar.setValue(percent_downloaded)
+
+            f.close()
+            return
+
+    def createNewDownloadThread(self, url, filelocation, options_chain, progress_bars_list):
+        # self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
+        # self.download_thread.start()
+        # self.download_thread.connect(self.download_thread, SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
+        # self.download_thread.tick.connect(progress_bars_list.setValue)
+
+        # Refactor to QtTrhead
+        download_thread = threading.Thread(target=self.create_download_connection,
+                                           args=(url, filelocation, options_chain, progress_bars_list))
+        download_thread.start()
+
+    def test1(self, value1, value2):
+        print str(value1) + " aaa " + str(value2)
+
+    def upload_file(self):
+        print 1;
+
+    def file_download(self, bucket_id, file_id, file_save_path, options_array, progress_bars_list):
+        options_chain = {}
+        self.storj_engine.storj_client.logger.info('file_pointers(%s, %s)', bucket_id, file_id)
+
+        # Determine file pointers
+        if options_array["file_pointers_is_given"] == "1":
+            pointers = options_array["file_pointers"]
+        else:
+            pointers = self.storj_engine.storj_client.file_pointers(bucket_id=bucket_id, file_id=file_id)
+
+        if options_array["progressbars_enabled"] == "1":
+            options_chain["handle_progressbars"] = "1"
+
+        if options_array["file_size_is_given"] == "1":
+            options_chain["file_size_is_given"] = "1"
+
+        shards_count = int(options_array["shards_count"])
+
+        i = 0
+        shard_size_array = []
+        while i < shards_count:
+            shard_size_array.append(int(options_array["file_size_shard_" + str(i)]))
+            i += 1
+        print shard_size_array
+        part = 0
+        self.set_current_status("Starting download threads...")
+        for pointer in pointers:
+            self.set_current_status("Downloading shard at index " + str(part) + "...")
+
+            print pointer
+            options_chain["shard_file_size"] = shard_size_array[part]
+            url = "http://" + pointer.get('farmer')['address'] + ":" + str(pointer.get('farmer')['port']) + "/shards/" + \
+                  pointer["hash"] + "?token=" + pointer["token"]
+            print url
+            self.createNewDownloadThread(url, file_save_path + "part" + str(part), options_chain, progress_bars_list[part])
+            part = part + 1
+
+
+        fileisencrypted = True
+
+        if fileisencrypted:
+            # decrypt file
+            self.set_current_status("Decrypting file...")
+            #self.set_current_status()
+            file_crypto_tools = FileCrypto()
+            #file_crypto_tools.decrypt_file("AES", str(file_path), self.parametrs.tmpPath + bname , "kotecze57") # begin file encryption
+
+        print "pobrano"
+
+        return True
 
 
 class DownloadTaskQtThread(QtCore.QThread):
@@ -1236,133 +1445,7 @@ class StorjSDKImplementationsOverrides():
     def __init__(self, parent=None):
         self.storj_engine = StorjEngine()  # init StorjEngine
 
-    def calculate_final_hmac(self):
-        return 1
 
-    def shard_file(self, file_path, shard_save_path, tmp_dir):
-
-        # TEST PARAMETERS
-        file_size = 40000000;
-
-        self.sharding_tools = ShardingTools()
-        shard_parametrs = self.sharding_tools.get_optimal_shard_parametrs(40000000)
-        last_shard_size = file_size - (int(shard_parametrs["shard_count"]) * int(shard_parametrs["shard_size"]))
-        i = 0
-        # Maximum chunk size that can be sent
-        CHUNK_SIZE_TABLE = []
-        while i < int(shard_parametrs["shard_count"]) + 1:
-            CHUNK_SIZE_TABLE.append(int(shard_parametrs["shard_size"]))
-            i += 1
-
-        # Location of source image
-        file_path = 'images/001.jpg'
-
-        # This file is for dev purposes. Each line is one piece of the message being sent individually
-        chunk_file = open('chunkfile.txt', 'wb+')
-
-        with open(file_path, 'rb') as infile:
-            i = 0
-            while True:
-                # Read chunks with specified sizes
-                chunk = infile.read(CHUNK_SIZE_TABLE[i])
-                if not chunk: break
-
-                # Do what you want with each chunk (in dev, write line to file)
-                chunk_file.write(chunk)
-                i += 1
-
-            chunk_file.close()
-
-        return 1
-
-    def create_download_connection(self, url, path_to_save, options_chain, progress_bar):
-        local_filename = path_to_save
-
-        if options_chain["handle_progressbars"] != "1":
-            r = requests.get(url)
-            # requests.
-            with open(local_filename, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=1024):
-                    if chunk:  # filter out keep-alive new chunks
-                        f.write(chunk)
-        else:
-            r = requests.get(url, stream=True)
-            f = open(local_filename, 'wb')
-            if options_chain["file_size_is_given"] == "1":
-                file_size = options_chain["shard_file_size"]
-            else:
-                file_size = int(r.headers['Content-Length'])
-
-            chunk = 1
-            num_bars = file_size / chunk
-            t1 = file_size / (32 * 1024)
-            i = 0
-            print file_size
-            for chunk in r.iter_content(32 * 1024):
-                f.write(chunk)
-                print str(i) + " " + str(t1)
-                print round(float(i) / float(t1), 1)
-                print str(int(round((100.0 * i) / t1))) + " %"
-                percent_downloaded = int(round((100.0 * i) / t1))
-                progress_bar.setValue(percent_downloaded)
-                i += 1
-            f.close()
-            return
-
-    def createNewDownloadThread(self, url, filelocation, options_chain, progress_bars_list):
-        # self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
-        # self.download_thread.start()
-        # self.download_thread.connect(self.download_thread, SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
-        # self.download_thread.tick.connect(progress_bars_list.setValue)
-
-        # Refactor to QtTrhead
-        download_thread = threading.Thread(target=self.create_download_connection,
-                                           args=(url, filelocation, options_chain, progress_bars_list))
-        download_thread.start()
-
-    def test1(self, value1, value2):
-        print str(value1) + " aaa " + str(value2)
-
-    def upload_file(self):
-        print 1;
-
-    def file_download(self, bucket_id, file_id, file_save_path, options_array, progress_bars_list):
-        options_chain = {}
-        self.storj_engine.storj_client.logger.info('file_pointers(%s, %s)', bucket_id, file_id)
-
-        # Determine file pointers
-        if options_array["file_pointers_is_given"] == "1":
-            pointers = options_array["file_pointers"]
-        else:
-            pointers = self.storj_engine.storj_client.file_pointers(bucket_id=bucket_id, file_id=file_id)
-
-        if options_array["progressbars_enabled"] == "1":
-            options_chain["handle_progressbars"] = "1"
-
-        if options_array["file_size_is_given"] == "1":
-            options_chain["file_size_is_given"] = "1"
-
-        shards_count = int(options_array["shards_count"])
-
-        i = 0
-        shard_size_array = []
-        while i < shards_count:
-            shard_size_array.append(int(options_array["file_size_shard_" + str(i)]))
-            i += 1
-        print shard_size_array
-        part = 0
-        for pointer in pointers:
-            print pointer
-            options_chain["shard_file_size"] = shard_size_array[part]
-            url = "http://" + pointer.get('farmer')['address'] + ":" + str(pointer.get('farmer')['port']) + "/shards/" + \
-                  pointer["hash"] + "?token=" + pointer["token"]
-            print url
-            # self.createNewDownloadThread(url, file_save_path + "part" + str(part), options_chain, progress_bars_list[part])
-            part = part + 1
-
-        print "pobrano"
-
-        return True
 
 
 ################################################################# SINGLE FILE UPLOADER UI SECTION ###################################################################
@@ -1417,9 +1500,34 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
     def file_upload_begin(self):
 
-        file_path = "/home/lakewik/2017-01-26-11-07-32.flv"
+        encryption_enabled = True
+        self.parametrs = storj.model.StorjParametrs()
+
+        # get temporary files path
+        if self.ui_single_file_upload.tmp_path.text() == "":
+            self.parametrs.tmpPath = "/tmp/"
+        else:
+            self.parametrs.tmpPath = self.ui_single_file_upload.tmp_path.text()
+
+        self.configuration = Configuration()
+
+
+
+        file_path = "/home/lakewik/config.json"
         bucket_id = "dc4778cc186192af49475b49"
         bname = os.path.split(file_path)[1]
+
+        mime = magic.Magic(mime=True)
+        file_mime_type = str(mime.from_file(str(file_path)))
+
+        file_existence_in_bucket = False
+
+        #if self.configuration.sameFileNamePrompt or self.configuration.sameFileHashPrompt:
+            #file_existence_in_bucket = self.storj_engine.storj_client.check_file_existence_in_bucket(bucket_id=bucket_id, filepath=file_path) # chech if exist file with same file name
+
+        if file_existence_in_bucket == 1:
+            # QInputDialog.getText(self, 'Warning!', 'File with name ' + str(bname) + " already exist in bucket! Please use different name:", "test" )
+            print "Same file exist!"
 
         def read_in_chunks(file_object, blocksize=4096, chunks=-1):
             """Lazy function (generator) to read a file piece by piece.
@@ -1434,14 +1542,16 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 print i
                 chunks -= 1
 
-        # encrypt file
-
-        file_crypto_tools = FileCrypto()
-
-        # file_crypto_tools.decrypt_file("AES", "/home/lakewik/config.json.encrypted", "/home/lakewik/PycharmProjects/config.json.decrypted", "kotecze57")
-
-
-        file_path_ready = file_path + ".encrypted"
+        if self.ui_single_file_upload.encrypt_files_checkbox.isChecked():
+            # encrypt file
+            self.set_current_status("Encrypting file...")
+            file_crypto_tools = FileCrypto()
+            file_crypto_tools.encrypt_file("AES", str(file_path), self.parametrs.tmpPath + bname + ".encrypted", "kotecze57") # begin file encryption
+            file_path_ready = self.parametrs.tmpPath + bname + ".encrypted"
+            file_name_ready_to_shard_upload = bname + ".encrypted"
+        else:
+            file_path_ready = file_path
+            file_name_ready_to_shard_upload = bname
 
         def get_size(file_like_object):
             return os.stat(file_like_object.name).st_size
@@ -1477,8 +1587,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # Now encrypt file
 
         # Now generate shards
-        shards_manager = model.ShardManager(file_path, 1)
-        self.ui_single_file_upload.current_state.setText(html_format_begin + "Generating shards..." + html_format_end)
+        self.set_current_status("Splitting file to shards...")
+        shards_manager = model.ShardManager(str(file_path_ready), 1)
+
+        #self.ui_single_file_upload.current_state.setText(html_format_begin + "Generating shards..." + html_format_end)
         # shards_manager._make_shards()
         shards_count = shards_manager.index
         # create file hash
@@ -1530,24 +1642,51 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                     # headers = {'content-type: application/octet-stream', 'x-storj-node-id: ' + str(farmerNodeID)}
 
                     self.set_current_status("Uploading shard" + str(chapters+1) + "to farmer...")
-                    with open(file_path + '-' + str(chapters + 1), 'rb') as f:
+
+                    # begin recording exchange report
+                    exchange_report = storj.model.ExchangeReport()
+
+                    current_timestamp = int(time.time())
+
+                    exchange_report.exchangeStart = str(current_timestamp)
+                    exchange_report.farmerId = str(farmerNodeID)
+                    exchange_report.dataHash = str(shard.hash)
+
+                    with open(self.parametrs.tmpPath + file_name_ready_to_shard_upload + '-' + str(chapters + 1), 'rb') as f:
                         response = requests.post(url, data=read_in_chunks(f), timeout=1)
 
                     print response.content
                     chapters = chapters + 1
 
-                    self.set_current_status("Sending Exchange Report for shard " + str(chapters + 1))
+
                     # now send Exchange Report
 
-
                 except storj.exception.StorjBridgeApiError, e:
+                    # upload failed due to Storj Bridge failure
                     print "Exception raised while trying to negitiate contract: " + str(e)
                     continue
-                except:
-                    print "Error occured while trying to upload shard or negotiate contract. Retrying..."
+                except Exception, e:
+                    # upload failed probably while sending data to farmer
+                    print "Error occured while trying to upload shard or negotiate contract. Retrying... " + str(e)
+                    current_timestamp = int(time.time())
+
+                    exchange_report.exchangeEnd = str(current_timestamp)
+                    exchange_report.exchangeResultCode = (exchange_report.FAILURE)
+                    exchange_report.exchangeResultMessage = (exchange_report.STORJ_REPORT_UPLOAD_ERROR)
+                    self.set_current_status("Sending Exchange Report for shard " + str(chapters + 1))
+                    #self.storj_engine.storj_client.send_exchange_report(exchange_report) # send exchange report
                     continue
                 else:
+                    # uploaded with success
+                    current_timestamp = int(time.time())
+                    # prepare second half of exchange heport
+                    exchange_report.exchangeEnd = str(current_timestamp)
+                    exchange_report.exchangeResultCode = (exchange_report.SUCCESS)
+                    exchange_report.exchangeResultMessage = (exchange_report.STORJ_REPORT_SHARD_UPLOADED)
+                    self.set_current_status("Sending Exchange Report for shard " + str(chapters + 1))
+                    #self.storj_engine.storj_client.send_exchange_report(exchange_report) # send exchange report
                     break
+
 
         # delete encrypted file
 
@@ -1573,7 +1712,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             'x-token': push_token.id,
             'x-filesize': str(file_size),
             'frame': frame.id,
-            'mimetype': 'application/pdf',
+            'mimetype': file_mime_type,
             'filename': str(bname),
             'hmac': {
                 'type': "sha512",
@@ -1601,6 +1740,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         if success:
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Upload success! Waiting for user..." + html_format_end)
+
+
 
 
 if __name__ == "__main__":
