@@ -1,0 +1,10 @@
+storj
+python-magic
+libmagic
+pycountry
+requests
+click
+ipwhois
+lxml
+
+# NOTE: PyQt4 must be install separately. On Debian, this is possible via `sudo apt install python-qt4`
