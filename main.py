@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import base64
 import hashlib
 import hmac
@@ -58,6 +59,7 @@ SHARD_MULTIPLES_BACK = 4
 global html_format_begin, html_format_end
 html_format_begin = "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">"
 html_format_end = "</span></p></body></html>"
+
 
 
 class ProgressBar(QProgressBar):
@@ -1235,13 +1237,13 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
     def initialize_shard_queue_table(self, file_pointers=None):
 
 
-        file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49", "8ca55894f127a675cb4f11a0")
+        file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49", "1c2d637b06e2ea56e70b6c6b")
         options_array = {}
 
         i = 0
         model = QStandardItemModel(1, 1)  # initialize model for inserting to table
 
-        model.setHorizontalHeaderLabels(['Progress', 'Hash', 'Farmer addres', 'State'])
+        model.setHorizontalHeaderLabels(['Progress', 'Hash', 'Farmer addres', 'State', 'Shard index'])
         for pointer in file_pointers:
             item = QStandardItem(str(""))
             model.setItem(i, 0, item)  # row, column, item (QStandardItem)
@@ -1255,9 +1257,12 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             item = QStandardItem(str("Waiting..."))
             model.setItem(i, 3, item)  # row, column, item (QStandardItem)
 
+            item = QStandardItem(str(pointer["index"]))
+            model.setItem(i, 4, item)  # row, column, item (QStandardItem)
+
             options_array["file_size_shard_" + str(i)] = pointer["size"]
             i = i + 1
-            print  pointer
+            #print  str(pointer["index"])+"index"
 
         self.ui_single_file_download.shard_queue_table.clearFocus()
         self.ui_single_file_download.shard_queue_table.setModel(model)
@@ -1291,42 +1296,63 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
     def create_download_connection(self, url, path_to_save, options_chain, progress_bar):
         local_filename = path_to_save
+        downloaded = False
 
-        if options_chain["handle_progressbars"] != "1":
-            r = requests.get(url)
-            # requests.
-            with open(local_filename, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=1024):
-                    if chunk:  # filter out keep-alive new chunks
+        while True:
+            try:
+                if options_chain["handle_progressbars"] != "1":
+                    r = requests.get(url)
+                    # requests.
+                    with open(local_filename, 'wb') as f:
+                        for chunk in r.iter_content(chunk_size=1024):
+                            if chunk:  # filter out keep-alive new chunks
+                                f.write(chunk)
+                else:
+                    r = requests.get(url, stream=True)
+                    f = open(local_filename, 'wb')
+                    if options_chain["file_size_is_given"] == "1":
+                        file_size = options_chain["shard_file_size"]
+                    else:
+                        file_size = int(r.headers['Content-Length'])
+
+                    chunk = 1
+                    num_bars = file_size / chunk
+                    t1 = float(file_size) / float((32 * 1024))
+                    print t1
+
+                    if file_size <= (32 * 1024):
+                        t1 = 1
+
+                    i = 0
+                    print file_size
+                    print str(t1) + "kotek"
+                    for chunk in r.iter_content(32 * 1024):
+                        i += 1
                         f.write(chunk)
-        else:
-            r = requests.get(url, stream=True)
-            f = open(local_filename, 'wb')
-            if options_chain["file_size_is_given"] == "1":
-                file_size = options_chain["shard_file_size"]
+                        print str(i) + " " + str(t1)
+                        print round(float(i) / float(t1), 1)
+                        print str(int(round((100.0 * i) / t1))) + " %"
+                        if int(round((100.0 * i) / t1)) > 100:
+                            percent_downloaded = 100
+                        else:
+                            percent_downloaded = int(round((100.0 * i) / t1))
+                        progress_bar.setValue(percent_downloaded)
+
+                    f.close()
+                    downloaded = True
+            except Exception:
+                continue
             else:
-                file_size = int(r.headers['Content-Length'])
+                downloaded = True
+                break
 
-            chunk = 1
-            num_bars = file_size / chunk
-            t1 = float(file_size) / float((32 * 1024))
+        if not downloaded:
+            self.emit(SIGNAL("retryWithNewDownloadPointer"), options_chain["shard_index"])  # retry download with new download pointer
+        else:
+            self.emit(SIGNAL("incrementShardsDownloadProgressCounters"))  # update already uploaded shards count
+            self.emit(SIGNAL("updateDownloadTaskState"), options_chain["rowposition"], "Downloaded!")  # update shard upload state
 
-            if t1 <= (32 * 1024):
-                t1 = 1
 
-            i = 0
-            print file_size
-            print str(t1) + "kotek"
-            for chunk in r.iter_content(32 * 1024):
-                i += 1
-                f.write(chunk)
-                print str(i) + " " + str(t1)
-                print round(float(i) / float(t1), 1)
-                print str(int(round((100.0 * i) / t1))) + " %"
-                percent_downloaded = int(round((100.0 * i) / t1))
-                progress_bar.setValue(percent_downloaded)
-
-            f.close()
             return
 
     def createNewDownloadThread(self, url, filelocation, options_chain, progress_bars_list):
@@ -1625,37 +1651,27 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         def read_in_chunks(file_object, shard_size, rowposition, blocksize=self.uploadblocksize, chunks=-1):
             """Lazy function (generator) to read a file piece by piece.
             Default chunk size: 1k."""
-            while True:
-                try:
-                    i = 0
-                    while chunks:
-                        data = file_object.read(blocksize)
-                        if not data:
-                            break
-                        yield data
-                        i += 1
-                        t1 = float(shard_size) / float((self.uploadblocksize))
-                        if t1 <= (self.uploadblocksize):
-                            t1 = 1
 
-                        percent_uploaded = int(round((100.0 * i) / t1))
-
-                        print i
-                        chunks -= 1
-                        self.emit(SIGNAL("updateShardUploadProgress"), 0, percent_uploaded)  # update progress bar in upload queue table
-                except Exception, e:
-                    print str(e)
-                    continue
-                else:
-                    self.emit(SIGNAL("incrementShardsProgressCounters"))  # update already uploaded shards count
-                    self.emit(SIGNAL("updateUploadTaskState"), rowposition, "Uploaded!")  # update shard upload state
+            i = 0
+            while chunks:
+                data = file_object.read(blocksize)
+                if not data:
                     break
+                yield data
+                i += 1
+                t1 = float(shard_size) / float((self.uploadblocksize))
+                if t1 <= (self.uploadblocksize):
+                    t1 = 1
 
+                percent_uploaded = int(round((100.0 * i) / t1))
 
+                print i
+                chunks -= 1
+                self.emit(SIGNAL("updateShardUploadProgress"), 0,
+                          percent_uploaded)  # update progress bar in upload queue table
 
-
+        it = 0
         while True:
-            it = 0
 
             # emit signal to add row to upload queue table
             # self.emit(SIGNAL("addRowToUploadQueueTable"), "important", "information")
@@ -1712,21 +1728,51 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                 rowposition = it
 
-                with open(self.parametrs.tmpPath + file_name_ready_to_shard_upload + '-' + str(chapters + 1),
-                          'rb') as f:
-                    response = requests.post(url, data=read_in_chunks(f, shard_size, rowposition), timeout=1)
+                while True:
+                    try:
+                        with open(self.parametrs.tmpPath + file_name_ready_to_shard_upload + '-' + str(chapters + 1),
+                                  'rb') as f:
+                            response = requests.post(url, data=read_in_chunks(f, shard_size, rowposition), timeout=1)
+
+                        j = json.loads(str(response.content))
+                        if (j["result"] == "The supplied token is not accepted"):
+                            raise storj.exception.StorjFarmerError(
+                                storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
+
+                    except Exception, e:
+                        self.emit(SIGNAL("updateUploadTaskState"), rowposition,
+                                  "First try failed. Retrying...")  # update shard upload state
+                        print str(e)
+                        continue
+                    else:
+                        self.emit(SIGNAL("incrementShardsProgressCounters"))  # update already uploaded shards count
+                        self.emit(SIGNAL("updateUploadTaskState"), rowposition,
+                                  "Uploaded!")  # update shard upload state
+                        break
 
                 print response.content
 
+                j = json.loads(str(response.content))
+                if (j["result"] == "The supplied token is not accepted"):
+                    raise storj.exception.StorjFarmerError(storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
 
 
-                # now send Exchange Report
+                firstiteration = False
+                it += 1
 
             except storj.exception.StorjBridgeApiError, e:
                 # upload failed due to Storj Bridge failure
                 print "Exception raised while trying to negitiate contract: " + str(e)
                 continue
+            except storj.exception.StorjFarmerError, e:
+                # upload failed due to Farmer Failure
+                print str(e)
+                if str(e) == str(storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED):
+                    print "The supplied token not accepted"
+                #print "Exception raised while trying to negitiate contract: " + str(e)
+                continue
             except Exception, e:
+                # now send Exchange Report
                 # upload failed probably while sending data to farmer
                 print "Error occured while trying to upload shard or negotiate contract. Retrying... " + str(e)
                 current_timestamp = int(time.time())
@@ -1747,8 +1793,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.set_current_status("Sending Exchange Report for shard " + str(chapters + 1))
                 # self.storj_engine.storj_client.send_exchange_report(exchange_report) # send exchange report
                 break
-            firstiteration = False
-            it += 1
+
 
 
     def file_upload_begin(self):
