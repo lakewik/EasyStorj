@@ -1,10 +1,11 @@
-storj
-python-magic
-libmagic
-pycountry
-requests
 click
+configparser
 ipwhois
+libmagic
 lxml
+pycountry
+python-magic
+requests
+storj
 
 # NOTE: PyQt4 must be install separately. On Debian, this is possible via `sudo apt install python-qt4`
