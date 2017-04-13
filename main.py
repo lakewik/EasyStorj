@@ -30,7 +30,7 @@ from create_bucket_ui import Ui_BucketCreate
 from file_crypto_tools import FileCrypto  # file ancryption and decryption lib
 from file_manager_ui import Ui_FileManager
 from file_mirrors_list_ui import Ui_FileMirrorsList
-from initial_window_ui import Ui_InitialWindow
+#from initial_window_ui import Ui_InitialWindow
 #from main_menu_ui import Ui_MainMenu
 from node_details_ui import Ui_NodeDetails
 from single_file_downloader_ui import Ui_SingleFileDownload
@@ -46,6 +46,10 @@ from account_manager import AccountManager
 from UI.loginUI import LoginUI
 from UI.registrationUI import RegisterUI
 from UI.mainUI import MainUI
+from UI.initial_window import InitialWindowUI
+
+# CONSIDER A BETTER PLACE WHERE TO MOVE THIS
+from UI.engine import StorjEngine
 
 # ext libs
 
@@ -140,22 +144,6 @@ class ClientConfigurationUI(QtGui.QMainWindow):
         print 1
 
 
-
-
-
-# StorjEngine section
-class StorjEngine():
-    def __init__(self):
-        account_manager = AccountManager()
-        self.password = None
-        if account_manager.if_logged_in():
-            self.password = account_manager.get_user_password()
-            self.email = account_manager.get_user_email()
-            # initialize Storj
-            self.storj_client = storj.Client(email=str(self.email), password=str(self.password))
-            print "zalogowano"
-        print "testlogin"
-        print str(self.password)
 # Node details section
 class NodeDetailsUI(QtGui.QMainWindow):
     def __init__(self, parent=None, nodeid=None):
@@ -704,32 +692,6 @@ class FileManagerUI(QtGui.QMainWindow):
         self.single_file_download_window.show()
 
 
-# Initial window section
-
-class InitialWindowUI(QtGui.QMainWindow):
-    def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        self.ui_initial_window = Ui_InitialWindow()
-        self.ui_initial_window.setupUi(self)
-        # QtCore.QObject.connect(self.ui.pushButton_3, QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
-        self.storj_engine = StorjEngine()  # init StorjEngine
-
-        QtCore.QObject.connect(self.ui_initial_window.login_bt, QtCore.SIGNAL("clicked()"),
-                               self.open_login_window)  # open login window
-        QtCore.QObject.connect(self.ui_initial_window.register_bt, QtCore.SIGNAL("clicked()"),
-                               self.open_register_window)  # open login window
-        # QtCore.QObject.connect(self.ui_initial_window.about_bt, QtCore.SIGNAL("clicked()"), self.open_about_window) # open login window
-
-
-        # self.storj_engine.storj_client.
-
-    def open_login_window(self):
-        self.login_window = LoginUI(self)
-        self.login_window.show()
-
-    def open_register_window(self):
-        self.register_window = RegisterUI(self)
-        self.register_window.show()
 
 
 
