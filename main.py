@@ -31,16 +31,21 @@ from file_crypto_tools import FileCrypto  # file ancryption and decryption lib
 from file_manager_ui import Ui_FileManager
 from file_mirrors_list_ui import Ui_FileMirrorsList
 from initial_window_ui import Ui_InitialWindow
-from main_menu_ui import Ui_MainMenu
+#from main_menu_ui import Ui_MainMenu
 from node_details_ui import Ui_NodeDetails
 from single_file_downloader_ui import Ui_SingleFileDownload
 from single_file_upload_ui import Ui_SingleFileUpload
-from storj_login_ui import Ui_Login
-from storj_register_ui import Ui_Register
+#from storj_login_ui import Ui_Login
+#from storj_register_ui import Ui_Register
 from sharder import ShardingTools
 from tools import Tools
 from backend_config import Configuration
 from account_manager import AccountManager
+
+# UI
+from UI.loginUI import LoginUI
+from UI.registrationUI import RegisterUI
+from UI.mainUI import MainUI
 
 # ext libs
 
@@ -135,129 +140,7 @@ class ClientConfigurationUI(QtGui.QMainWindow):
         print 1
 
 
-# Register section
-class RegisterUI(QtGui.QMainWindow):
-    def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
 
-        # register UI
-        self.register_ui = Ui_Register()
-        self.register_ui.setupUi(self)
-
-        self.register_ui.password.setEchoMode(QLineEdit.Password)
-        self.register_ui.password_2.setEchoMode(QLineEdit.Password)
-
-        QtCore.QObject.connect(self.register_ui.register_bt, QtCore.SIGNAL("clicked()"),
-                               self.register)  # valudate and register user
-
-    def register(self):
-        # validate fields
-
-
-        self.email = self.register_ui.email.text()
-        self.password = self.register_ui.password.text()
-        self.password_repeat = self.register_ui.password_2.text()
-
-        self.tools = Tools()
-        success = False
-        if self.email != "" and self.password != "" and self.password_repeat != "":
-            if self.password == self.password_repeat:
-                if (self.tools.check_email(self.email)):
-                    # take login action
-                    try:
-                        self.storj_client = storj.Client(str(self.email), str(self.password))
-                        print self.email
-                        success = True
-                        # self.storj_client.user_create("wiktest15@gmail.com", "kotek1")
-                    except storj.exception.StorjBridgeApiError, e:
-                        j = json.loads(str(e))
-                        if (j["error"] == "Email is already registered"):
-                            success = False
-                            QMessageBox.about(self, "Warning",
-                                              "User with this e-mail is already registered! Please login or try different e-mail!")
-                        else:
-                            success = False
-                            QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
-                else:
-                    success = False
-                    QMessageBox.about(self, "Warning",
-                                      "Your e-mail seems to be invalid! Please chech e-mail  and try again")
-            else:
-                success = False
-                QMessageBox.about(self, "Warning",
-                                  "Given passwords are different! Please check and try again!")
-        else:
-            success = False
-            QMessageBox.about(self, "Warning",
-                              "Please fill out all fields!")
-
-        if success:
-            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success",
-                                       "Successfully registered in Storj Distributed Storage Network! "
-                                       "Now, yo must verify your email by clicking link, that been send to you. "
-                                       "Then you can login", QtGui.QMessageBox.Ok)
-            result = msgBox.exec_()
-            if result == QtGui.QMessageBox.Ok:
-                self.login_window = LoginUI(self)
-                self.login_window.show()
-                self.close()
-                initial_window.hide()
-
-        print self.email
-
-
-# Login section
-class LoginUI(QtGui.QMainWindow):
-    def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-
-        # login UI
-        self.login_ui = Ui_Login()
-        self.login_ui.setupUi(self)
-
-        # Account manager
-
-        self.login_ui.password.setEchoMode(QLineEdit.Password)
-
-        QtCore.QObject.connect(self.login_ui.login_bt, QtCore.SIGNAL("clicked()"), self.login)  # take login action
-
-    def login(self):
-        # take login action
-
-        self.email = self.login_ui.email.text()  # get login
-        self.password = self.login_ui.password.text()  # get password
-
-        self.storj_client = storj.Client(email=str(self.email), password=str(self.password))
-        success = False
-        # take login action - check credentials by listing keys :D
-        try:
-            self.storj_client.key_list()
-            success = True
-        except storj.exception.StorjBridgeApiError, e:
-            j = json.loads(str(e))
-            if (j["error"] == "Invalid email or password"):
-                QMessageBox.about(self, "Warning",
-                                  "Invalid email or password - access denied. Please check your credentials and try again!")
-            else:
-                QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
-
-        if success:
-            self.account_manager = AccountManager(str(self.email), str(self.password))  # init account manager
-            self.account_manager.save_account_credentials()  # save login credentials and state
-            # login_msg_box = QMessageBox.about(self, "Success", "Successfully loged in!")
-            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success", "Successfully loged in!",
-                                       QtGui.QMessageBox.Ok)
-            result = msgBox.exec_()
-            if result == QtGui.QMessageBox.Ok:
-                self.main_ui_window = MainUI(self)
-                self.main_ui_window.show()
-                self.close()
-                initial_window.hide()
-
-                # self.account_manager.get_login_state()
-
-        # print self.storj_client.bucket_list()
-        print 1;
 
 
 # StorjEngine section
@@ -848,77 +731,6 @@ class InitialWindowUI(QtGui.QMainWindow):
         self.register_window = RegisterUI(self)
         self.register_window.show()
 
-
-# Main UI section
-class MainUI(QtGui.QMainWindow):
-    def __init__(self, parent=None):
-        EXIT_CODE_REBOOT = -123
-        QtGui.QWidget.__init__(self, parent)
-        self.ui = Ui_MainMenu()
-        self.ui.setupUi(self)
-        # QtCore.QObject.connect(self.ui.pushButton_3, QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
-        self.storj_engine = StorjEngine()  # init StorjEngine
-        # self.storj_engine.storj_client.
-        #self.sharding_tools = ShardingTools()
-
-        #print self.sharding_tools.get_optimal_shard_parametrs(18888888888)
-        # print self.sharding_tools.determine_shard_size(12343446576, 10)
-        self.account_manager = AccountManager()  # init AccountManager
-
-        user_email = self.account_manager.get_user_email()
-        self.ui.account_label.setText(html_format_begin + str(user_email) + html_format_end)
-
-        # QtCore.QObject.connect(self.ui., QtCore.SIGNAL("clicked()"), self.open_login_window) # open login window
-        # QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
-        QtCore.QObject.connect(self.ui.bucket_menager_bt, QtCore.SIGNAL("clicked()"),
-                               self.open_bucket_manager_window)  # open bucket manager window
-        QtCore.QObject.connect(self.ui.file_manager_bt, QtCore.SIGNAL("clicked()"),
-                               self.open_file_manager_window)  # open file manager window
-        QtCore.QObject.connect(self.ui.create_bucket_bt, QtCore.SIGNAL("clicked()"),
-                               self.open_bucket_create_window)  # open bucket create window
-        QtCore.QObject.connect(self.ui.uploader_bt, QtCore.SIGNAL("clicked()"),
-                               self.open_single_file_upload_window)  # open single file upload ui
-        QtCore.QObject.connect(self.ui.settings_bt, QtCore.SIGNAL("clicked()"),
-                               self.open_settings_window)  # open single file upload ui
-        # QtCore.QObject.connect(self.ui.pushButton_7, QtCore.SIGNAL("clicked()"), self.open_file_mirrors_list_window) # open file mirrors list window
-
-    def open_login_window(self):
-        self.login_window = LoginUI(self)
-        self.login_window.show()
-
-        self.login_window = ClientConfigurationUI(self)
-        self.login_window.show()
-
-        # take login action
-        print 1;
-
-    def open_register_window(self):
-        self.register_window = RegisterUI(self)
-        self.register_window.show()
-
-    def open_single_file_upload_window(self):
-        self.single_file_upload_window = SingleFileUploadUI(self)
-        self.single_file_upload_window.show()
-
-    def open_bucket_manager_window(self):
-        self.bucket_manager_window = BucketManagerUI(self)
-        self.bucket_manager_window.show()
-
-    def open_file_manager_window(self):
-        self.file_manager_window = FileManagerUI(self)
-        self.file_manager_window.show()
-
-    def open_bucket_create_window(self):
-        self.bucket_create_window = BucketCreateUI(self)
-        self.bucket_create_window.show()
-
-    def open_file_mirrors_list_window(self):
-        self.file_mirrors_list_window = FileMirrorsListUI(self)
-        self.file_mirrors_list_window.show()
-
-    def open_settings_window(self):
-        self.settings_window = ClientConfigurationUI(self)
-        self.settings_window.show()
 
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
