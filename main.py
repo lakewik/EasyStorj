@@ -3,7 +3,6 @@ import base64
 import hashlib
 import hmac
 import json
-# import math
 from PyQt4 import Qt
 
 import magic
@@ -46,7 +45,6 @@ from single_file_upload_ui import Ui_SingleFileUpload
 from storj_login_ui import Ui_Login
 from storj_register_ui import Ui_Register
 
-# edit
 from sharder import ShardingTools
 
 # ext libs
