@@ -16,7 +16,7 @@ class ShardingTools():
         shard_parameters = {}
         accumulator = 0
         shard_size = None
-        while (shard_size == None):
+        while (shard_size is None):
             shard_size = self.determine_shard_size(file_size, accumulator)
             accumulator += 1
         shard_parameters["shard_size"] = str(shard_size)
@@ -115,16 +115,16 @@ class ShardingTools():
             f.write(data)
             f.close()
         except (OSError, IOError, EOFError), e:
-            raise ShardingException, str(e)
+            raise ShardingException(str(e))
 
         print 'Wrote file', bname
         return 1
 
 
 class ShardingException(Exception):
+
     def __init__(self, value):
         self.value = value
 
     def __str__(self):
         return str(self.value)
-
