@@ -3,19 +3,15 @@ import base64
 import hashlib
 import hmac
 import json
-import configparser
 from PyQt4 import Qt
 
 import magic
 import os
 import operator
-import platform
-import re  # for regex
 import socket
 import sys
 import threading
 import time
-import xml.etree.cElementTree as ET
 from PyQt4 import QtCore, QtGui
 
 import pycountry
@@ -25,14 +21,9 @@ from PyQt4.QtCore import QAbstractTableModel, SIGNAL
 from PyQt4.QtCore import QVariant
 from PyQt4.QtGui import *
 from ipwhois import IPWhois
-from lxml import etree
 from storj import exception
 from storj import model
 
-from sys import platform
-
-
-import pingparser
 from bucket_manage_ui import Ui_BucketManager
 from client_configuration_ui import Ui_ClientConfiguration
 from create_bucket_ui import Ui_BucketCreate
@@ -85,10 +76,6 @@ class ProgressWidgetItem(QTableWidgetItem):
 
     def updateValue(self, value):
         self.setData(Qt.UserRole, value)
-
-
-############# SHARDING TOOLS ################################################################
-# Sharding Tools
 
 
 class MyTableModel(QtCore.QAbstractTableModel):
