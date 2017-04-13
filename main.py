@@ -154,7 +154,6 @@ class MyTableModel(QtCore.QAbstractTableModel):
         return True
 
 
-
 # Configuration backend section
 class Configuration():
     def __init__(
