@@ -1,7 +1,7 @@
 from PyQt4 import QtCore, QtGui
 from qt_interfaces.initial_window_ui import Ui_InitialWindow
-from loginUI import LoginUI
-from registrationUI import RegisterUI
+from login import LoginUI
+from registration import RegisterUI
 from engine import StorjEngine
 
 

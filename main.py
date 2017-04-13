@@ -26,25 +26,25 @@ from storj import model
 
 from bucket_manage_ui import Ui_BucketManager
 #from client_configuration_ui import Ui_ClientConfiguration
-from create_bucket_ui import Ui_BucketCreate
+#from create_bucket_ui import Ui_BucketCreate
 from file_crypto_tools import FileCrypto  # file ancryption and decryption lib
 from file_manager_ui import Ui_FileManager
 from file_mirrors_list_ui import Ui_FileMirrorsList
 #from initial_window_ui import Ui_InitialWindow
 #from main_menu_ui import Ui_MainMenu
 #from node_details_ui import Ui_NodeDetails
-from single_file_downloader_ui import Ui_SingleFileDownload
+#from single_file_downloader_ui import Ui_SingleFileDownload
 from single_file_upload_ui import Ui_SingleFileUpload
 #from storj_login_ui import Ui_Login
 #from storj_register_ui import Ui_Register
 from sharder import ShardingTools
 from tools import Tools
-from backend_config import Configuration
+#from backend_config import Configuration
 from account_manager import AccountManager
 
 # UI
-from UI.loginUI import LoginUI
-from UI.registrationUI import RegisterUI
+#from UI.login import LoginUI
+#from UI.registration import RegisterUI
 from UI.mainUI import MainUI
 from UI.initial_window import InitialWindowUI
 

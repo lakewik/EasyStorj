@@ -1,7 +1,7 @@
 import storj
 from PyQt4 import QtCore, QtGui
 from qt_interfaces.storj_register_ui import Ui_Register
-from loginUI import LoginUI
+from login import LoginUI
 from utilities.tools import Tools
 
 
