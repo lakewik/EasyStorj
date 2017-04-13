@@ -1,0 +1,7 @@
+*.pyc
+
+# virtualenv
+venv
+
+# storj credentials
+storj_account_conf.xml
