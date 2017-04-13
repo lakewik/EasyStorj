@@ -14,25 +14,25 @@ import threading
 import time
 from PyQt4 import QtCore, QtGui
 
-import pycountry
+#import pycountry
 import requests
 import storj
 from PyQt4.QtCore import QAbstractTableModel, SIGNAL
 from PyQt4.QtCore import QVariant
 from PyQt4.QtGui import *
-from ipwhois import IPWhois
+#from ipwhois import IPWhois
 from storj import exception
 from storj import model
 
 from bucket_manage_ui import Ui_BucketManager
-from client_configuration_ui import Ui_ClientConfiguration
+#from client_configuration_ui import Ui_ClientConfiguration
 from create_bucket_ui import Ui_BucketCreate
 from file_crypto_tools import FileCrypto  # file ancryption and decryption lib
 from file_manager_ui import Ui_FileManager
 from file_mirrors_list_ui import Ui_FileMirrorsList
 #from initial_window_ui import Ui_InitialWindow
 #from main_menu_ui import Ui_MainMenu
-from node_details_ui import Ui_NodeDetails
+#from node_details_ui import Ui_NodeDetails
 from single_file_downloader_ui import Ui_SingleFileDownload
 from single_file_upload_ui import Ui_SingleFileUpload
 #from storj_login_ui import Ui_Login
@@ -121,109 +121,7 @@ class MyTableModel(QtCore.QAbstractTableModel):
 
 
 
-# Configuration Ui section
-class ClientConfigurationUI(QtGui.QMainWindow):
-    def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
 
-        # register UI
-        self.client_configuration_ui = Ui_ClientConfiguration()
-        self.client_configuration_ui.setupUi(self)
-
-        self.configuration_manager = Configuration()
-
-        QtCore.QObject.connect(self.client_configuration_ui.apply_bt, QtCore.SIGNAL("clicked()"),
-                               self.save_settings)  # valudate and register user
-
-    def save_settings(self):
-        # validate settings
-
-        self.configuration_manager.save_client_configuration(self.client_configuration_ui)  # save configuration
-
-    def reset_settings_to_default(self):
-        print 1
-
-
-# Node details section
-class NodeDetailsUI(QtGui.QMainWindow):
-    def __init__(self, parent=None, nodeid=None):
-        QtGui.QWidget.__init__(self, parent)
-
-        self.storj_engine = StorjEngine()  # init StorjEngine
-        # login UI
-        self.node_details_ui = Ui_NodeDetails()
-        self.node_details_ui.setupUi(self)
-
-        self.nodeid = nodeid
-        self.tools = Tools()
-
-        QtCore.QObject.connect(self.node_details_ui.ok_bt, QtCore.SIGNAL("clicked()"), self.close)  # close window
-
-        self.createNewNodeDetailsResolveThread()
-
-        ## print nodeid
-
-    def createNewNodeDetailsResolveThread(self):
-        download_thread = threading.Thread(target=self.initialize_node_details, args=())
-        download_thread.start()
-
-    def initialize_node_details(self):
-        self.node_details_content = self.storj_engine.storj_client.contact_lookup(str(self.nodeid))
-
-        self.node_details_ui.address_label.setText(
-            html_format_begin + str(self.node_details_content.address) + html_format_end)  # get given node address
-        self.node_details_ui.last_timeout_label.setText(
-            html_format_begin + str(self.node_details_content.lastTimeout) + html_format_end)  # get last timeout
-        self.node_details_ui.timeout_rate_label.setText(
-            html_format_begin + str(self.node_details_content.timeoutRate) + html_format_end)  # get timeout rate
-        self.node_details_ui.user_agent_label.setText(
-            html_format_begin + str(self.node_details_content.userAgent) + html_format_end)  # get user agent
-        self.node_details_ui.protocol_version_label.setText(
-            html_format_begin + str(self.node_details_content.protocol) + html_format_end)  # get protocol version
-        self.node_details_ui.response_time_label.setText(html_format_begin + str(
-            self.node_details_content.responseTime) + html_format_end)  # get farmer node response time
-        self.node_details_ui.port_label.setText(
-            html_format_begin + str(self.node_details_content.port) + html_format_end)  # get farmer node port
-        self.node_details_ui.node_id_label.setText(
-            html_format_begin + str(self.nodeid) + html_format_end)  # get farmer node response time
-
-        # ping_to_node = self.tools.measure_ping_latency(str(self.node_details_content.address))
-
-        ip_addr = socket.gethostbyname(str(self.node_details_content.address))
-
-        obj = IPWhois(ip_addr)
-        res = obj.lookup_whois()
-        country = res["nets"][0]['country']
-
-        country_parsed = pycountry.countries.get(alpha_2=str(country))
-
-        country_full_name = country_parsed.name
-
-        self.node_details_ui.country_label.setText(
-            html_format_begin + str(country_full_name) + html_format_end)  # set full country name
-
-        ### Display country flag ###
-
-        self.scene = QtGui.QGraphicsScene()
-
-        # scene.setSceneRect(-600,-600, 600,600)
-        # self.scene.setSceneRect(-600, -600, 1200, 1200)
-
-        # pic = QtGui.QPixmap("PL.png")
-        # self.scene.addItem(QtGui.QGraphicsPixmapItem(pic))
-        # self.view = self.node_details_ui.country_graphicsView
-        # self.view.setScene(self.scene)
-        # self.view.setRenderHint(QtGui.QPainter.Antialiasing)
-        # self.view.show()
-
-        grview = self.node_details_ui.country_graphicsView()
-        scene = QGraphicsScene()
-        scene.addPixmap(QPixmap('PL.png'))
-        grview.setScene(scene)
-
-        grview.show()
-
-        print country_full_name
 
 
 # Mirrors section
