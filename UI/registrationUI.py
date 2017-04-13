@@ -1,5 +1,6 @@
+import storj
 from PyQt4 import QtCore, QtGui
-from storj_utils.storj_register_ui import Ui_Register
+from qt_interfaces.storj_register_ui import Ui_Register
 from loginUI import LoginUI
 from utilities.tools import Tools
 
@@ -37,7 +38,7 @@ class RegisterUI(QtGui.QMainWindow):
                         print self.email
                         success = True
                         # self.storj_client.user_create("wiktest15@gmail.com", "kotek1")
-                    except storj.exception.StorjBridgeApiError, e:
+                    except storj.exception.StorjBridgeApiError as e:
                         j = json.loads(str(e))
                         if (j["error"] == "Email is already registered"):
                             success = False

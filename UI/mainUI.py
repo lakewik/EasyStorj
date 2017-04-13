@@ -1,7 +1,8 @@
 from PyQt4 import QtCore, QtGui
 import storj
-from storj_utils.main_menu_ui import Ui_MainMenu
+from qt_interfaces.main_menu_ui import Ui_MainMenu
 from utilities.account_manager import AccountManager
+from engine import StorjEngine
 
 
 global html_format_begin, html_format_end
@@ -20,9 +21,9 @@ class MainUI(QtGui.QMainWindow):
         # QtCore.QObject.connect(self.ui.pushButton_3, QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine()  # init StorjEngine
         # self.storj_engine.storj_client.
-        #self.sharding_tools = ShardingTools()
+        # self.sharding_tools = ShardingTools()
 
-        #print self.sharding_tools.get_optimal_shard_parametrs(18888888888)
+        # print self.sharding_tools.get_optimal_shard_parametrs(18888888888)
         # print self.sharding_tools.determine_shard_size(12343446576, 10)
         self.account_manager = AccountManager()  # init AccountManager
 
@@ -51,7 +52,7 @@ class MainUI(QtGui.QMainWindow):
         self.login_window.show()
 
         # take login action
-        print 1;
+        print 1
 
     def open_register_window(self):
         self.register_window = RegisterUI(self)
@@ -80,22 +81,3 @@ class MainUI(QtGui.QMainWindow):
     def open_settings_window(self):
         self.settings_window = ClientConfigurationUI(self)
         self.settings_window.show()
-
-
-
-
-
-
-# StorjEngine section
-class StorjEngine():
-    def __init__(self):
-        account_manager = AccountManager()
-        self.password = None
-        if account_manager.if_logged_in():
-            self.password = account_manager.get_user_password()
-            self.email = account_manager.get_user_email()
-            # initialize Storj
-            self.storj_client = storj.Client(email=str(self.email), password=str(self.password))
-            print "zalogowano"
-        print "testlogin"
-        print str(self.password)
