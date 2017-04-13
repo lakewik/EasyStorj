@@ -5,3 +5,6 @@ venv
 
 # storj credentials
 storj_account_conf.xml
+
+# config
+storj_client_config.xml
