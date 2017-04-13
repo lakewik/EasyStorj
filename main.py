@@ -45,6 +45,7 @@ from single_file_downloader_ui import Ui_SingleFileDownload
 from single_file_upload_ui import Ui_SingleFileUpload
 from storj_login_ui import Ui_Login
 from storj_register_ui import Ui_Register
+from sharder import ShardingTools
 
 # ext libs
 
