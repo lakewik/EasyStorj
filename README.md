@@ -2,11 +2,13 @@
 GUI Client for Storj Distributed Storage Network written in Python and PyQt4. This app finally will work on most desktop platforms: Linux, Windows, Mac OS X. Very early alpha dev version, we are working on download and uploads, but others functions like buckets, file managing, mirrors listing have been implemented
 
 # How to run (Alpha version)
-- git clone https://github.com/lakewik/storj-gui-client.git
-- cd storj-gui-client
-- install python dependencies, including Storj Python SDK (pip install storj)
-- excute: python main.py
-
+- `git clone https://github.com/lakewik/storj-gui-client.git`
+- `cd storj-gui-client`
+- install PyQt4 (`sudo apt-get install python-qt4` for Debian and Ubuntu). In
+  case you want to use a Virtual Environment, [a few more steps are
+  required](https://gist.github.com/marcorosa/73c72f0315fa7098315c8b0774414ad6)
+- install python requirements: `pip install -r requirements.txt`
+- execute: `python main.py`
 
 # Software features:
 - list buckets +
