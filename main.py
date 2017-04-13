@@ -46,6 +46,7 @@ from single_file_upload_ui import Ui_SingleFileUpload
 from storj_login_ui import Ui_Login
 from storj_register_ui import Ui_Register
 from sharder import ShardingTools
+from tools import Tools
 
 # ext libs
 
@@ -81,51 +82,6 @@ class ProgressWidgetItem(QTableWidgetItem):
 
     def updateValue(self, value):
         self.setData(Qt.UserRole, value)
-
-class Tools():
-    def check_email(self, email):
-        if not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email):
-            return False
-        else:
-            return True
-
-    def measure_ping_latency(self, destination_host):
-        ping_latency = str(os.system(
-            "ping " + ("-n 1 " if platform.system().lower() == "windows" else "-c 1 ") + str(destination_host)))
-
-        ping_data_parsed = pingparser.parse(ping_latency)
-
-        return ping_data_parsed
-
-    def human_size(self, size_bytes):
-        """
-        format a size in bytes into a 'human' file size, e.g. bytes, KB, MB, GB, TB, PB
-        Note that bytes/KB will be reported in whole numbers but MB and above will have greater precision
-        e.g. 1 byte, 43 bytes, 443 KB, 4.3 MB, 4.43 GB, etc
-        From: <http://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size>
-        """
-        if size_bytes == 1:
-            # because I really hate unnecessary plurals
-            return "1 byte"
-
-        suffixes_table = [('bytes', 0), ('KB', 0), ('MB', 1), ('GB', 2), ('TB', 2), ('PB', 2)]
-
-        num = float(size_bytes)
-        for suffix, precision in suffixes_table:
-            if num < 1024.0:
-                break
-            num /= 1024.0
-
-        if precision == 0:
-            formatted_size = "%d" % num
-        else:
-            formatted_size = str(round(num, ndigits=precision))
-
-        return "%s %s" % (formatted_size, suffix)
-
-
-############# SHARDING TOOLS ################################################################
-# Sharding Tools
 
 
 class MyTableModel(QtCore.QAbstractTableModel):
