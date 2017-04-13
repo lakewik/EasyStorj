@@ -4,7 +4,10 @@ from qt_interfaces.main_menu_ui import Ui_MainMenu
 from utilities.account_manager import AccountManager
 from engine import StorjEngine
 
+from bucket_manager import BucketManagerUI
 from client_config import ClientConfigurationUI
+from file_manager import FileManagerUI
+from file_mirror import FileMirrorsListUI
 
 
 global html_format_begin, html_format_end
