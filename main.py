@@ -3,7 +3,7 @@ import base64
 import hashlib
 import hmac
 import json
-import math
+# import math
 from PyQt4 import Qt
 
 import magic
