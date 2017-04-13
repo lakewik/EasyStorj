@@ -31,6 +31,7 @@ from storj import model
 
 from sys import platform
 
+
 import pingparser
 from bucket_manage_ui import Ui_BucketManager
 from client_configuration_ui import Ui_ClientConfiguration
@@ -82,6 +83,10 @@ class ProgressWidgetItem(QTableWidgetItem):
 
     def updateValue(self, value):
         self.setData(Qt.UserRole, value)
+
+
+############# SHARDING TOOLS ################################################################
+# Sharding Tools
 
 
 class MyTableModel(QtCore.QAbstractTableModel):
@@ -759,7 +764,19 @@ class BucketCreateUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.bucket_create_ui.cancel_bt, QtCore.SIGNAL("clicked()"),
                                self.close)  # create bucket action
 
+        self.connect(self, SIGNAL("showBucketCreatingException"), self.show_bucket_creating_exception_dialog)
+        self.connect(self, SIGNAL("showBucketCreatedSuccessfully"), self.show_bucket_crated_successfully)
+        self.connect(self, SIGNAL("showBucketCreationMissingFields"), lambda : QMessageBox.about(self, "Warning", "Please fill out all fields!"))
+
         self.storj_engine = StorjEngine()  # init StorjEngine
+
+    def show_bucket_creating_exception_dialog(self, exception):
+        QMessageBox.about(self, "Unhandled exception while creating bucket", "Exception: " + str(exception))
+
+    def show_bucket_crated_successfully(self, bucket_name):
+        msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success", "Bucket '" + str(bucket_name) + "' was created successfully!",
+                                   QtGui.QMessageBox.Ok)
+        msgBox.exec_()
 
     def createNewBucketCreateThread(self):
         bucket_create_thread = threading.Thread(target=self.create_bucket, args=())
@@ -779,17 +796,14 @@ class BucketCreateUI(QtGui.QMainWindow):
                 bucekt_cerated = True
             except  storj.exception.StorjBridgeApiError, e:
                 bucekt_cerated = False
-                QMessageBox.about(self, "Unhandled exception while creating bucket", "Exception: " + str(e))
+                self.emit(SIGNAL("showBucketCreatingException"), str(e))
 
         else:
-            QMessageBox.about(self, "Warning", "Please fill out all fields!")
+            self.emit(SIGNAL("showBucketCreationMissingFields"))
             bucekt_cerated = False
 
         if bucekt_cerated:
-            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success", "Bucket was created successfully!",
-                                       QtGui.QMessageBox.Ok)
-            msgBox.exec_()
-            # QMessageBox.about(self, "Success", "Bucket was created successfully!", QMessageBox.Ok)
+            self.emit(SIGNAL("showBucketCreatedSuccessfully"), str(self.bucket_name))  # show dialog - bucket created successfully
 
         print 1
 
@@ -1773,6 +1787,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # get temporary files path
         if self.ui_single_file_upload.file_path.text() == "":
             self.validation["file_path"] = False
+            self.emit(SIGNAL("showFileNotSelectedError"))  # show error missing file path
         else:
             self.validation["file_path"] = True
             file_path = str(self.ui_single_file_upload.file_path.text())
