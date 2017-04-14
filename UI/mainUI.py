@@ -4,7 +4,7 @@ from qt_interfaces.main_menu_ui import Ui_MainMenu
 from utilities.account_manager import AccountManager
 from engine import StorjEngine
 
-from bucket_create_window import BucketCreateUI
+from bucket_create import BucketCreateUI
 from bucket_manager import BucketManagerUI
 from client_config import ClientConfigurationUI
 from file_manager import FileManagerUI
