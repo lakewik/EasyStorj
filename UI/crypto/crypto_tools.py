@@ -1,4 +1,5 @@
 # import base64
+import base64
 import hashlib
 import hmac
 import storj
