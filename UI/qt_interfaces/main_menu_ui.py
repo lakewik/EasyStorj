@@ -63,7 +63,7 @@ class Ui_MainMenu(object):
     def retranslateUi(self, MainMenu):
         MainMenu.setWindowTitle(_translate("MainMenu", "Main menu - Storj GUI Client", None))
         self.label.setText(_translate("MainMenu", "<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">Storj GUI Client - Menu</span></p></body></html>", None))
-        self.bucket_menager_bt.setText(_translate("MainMenu", "Bucekts manager", None))
+        self.bucket_menager_bt.setText(_translate("MainMenu", "Buckets manager", None))
         self.settings_bt.setText(_translate("MainMenu", "Settings", None))
         self.uploader_bt.setText(_translate("MainMenu", "File uploader [UNFINISHED]", None))
         self.file_manager_bt.setText(_translate("MainMenu", "File manager", None))
