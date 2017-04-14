@@ -3,6 +3,7 @@ from qt_interfaces.single_file_downloader_ui import Ui_SingleFileDownload
 from crypto.file_crypto_tools import FileCrypto
 from engine import StorjEngine
 import storj
+import threading
 
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
