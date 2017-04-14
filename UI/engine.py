@@ -11,7 +11,7 @@ class StorjEngine:
             self.password = account_manager.get_user_password()
             self.email = account_manager.get_user_email()
             # initialize Storj
-            self.storj_client = storj.Client(email=str(self.email), password=str(self.password))
-            print "zalogowano"
+            self.storj_client = storj.Client(email=self.email, password=self.password)
+            print "Login from credentials xml file"
         print "testlogin"
-        print str(self.password)
+        print self.password
