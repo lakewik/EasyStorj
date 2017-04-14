@@ -1,4 +1,8 @@
+import socket
 from PyQt4 import QtCore, QtGui
+
+from PyQt4.QtGui import QPixmap
+
 from qt_interfaces.node_details_ui import Ui_NodeDetails
 from engine import StorjEngine
 from utilities.tools import Tools
