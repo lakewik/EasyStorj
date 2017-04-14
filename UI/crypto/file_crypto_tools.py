@@ -6,17 +6,17 @@ from Crypto.Cipher import AES
 from Crypto import Random
 
 
-class FileCrypto():
-    def encrypt_file (self, algorithm, file_path, encrypted_file_save_path, password):
+class FileCrypto:
+
+    def encrypt_file(self, algorithm, file_path, encrypted_file_save_path, password):
         if algorithm == "AES":
             with open(file_path, 'rb') as in_file, open(encrypted_file_save_path, 'wb') as out_file:
                 self.encrypt_file_aes(in_file, out_file, password)
 
-    def decrypt_file (self, algorithm, file_path, decrypted_file_save_path, password):
+    def decrypt_file(self, algorithm, file_path, decrypted_file_save_path, password):
         if algorithm == "AES":
             with open(file_path, 'rb') as in_file, open(decrypted_file_save_path, 'wb') as out_file:
                 self.decrypt_file_aes(in_file, out_file, password)
-
 
     def derive_key_and_iv(self, password, salt, key_length, iv_length):
         d = d_i = ''

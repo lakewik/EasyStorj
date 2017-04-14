@@ -1,5 +1,8 @@
+import xml.etree.cElementTree as ET
+
+
 # Configuration backend section
-class Configuration():
+class Configuration:
 
     def __init__(self, sameFileNamePrompt=None, sameFileHashPrompt=None,
                  load_config=False):
@@ -8,7 +11,7 @@ class Configuration():
             et = None
 
             try:
-                et = etree.parse("storj_client_config.xml")
+                et = ET.parse("storj_client_config.xml")
             except:
                 print "Unspecified XML parse error"
 
@@ -35,7 +38,7 @@ class Configuration():
     def get_config_parametr_value(self, parametr):
         output = ""
         try:
-            et = etree.parse("storj_client_config.xml")
+            et = ET.parse("storj_client_config.xml")
             for tags in et.iter(str(parametr)):
                 output = tags.text
         except:
@@ -45,7 +48,7 @@ class Configuration():
 
     def load_config_from_xml(self):
         try:
-            et = etree.parse("storj_client_config.xml")
+            et = ET.parse("storj_client_config.xml")
             for tags in et.iter('password'):
                 output = tags.text
         except:
