@@ -53,7 +53,7 @@ class LoginUI(QtGui.QMainWindow):
                 self.main_ui_window = MainUI(self)
                 self.main_ui_window.show()
                 self.close()
-                initial_window.hide()
+                #initial_window.hide()
 
                 # self.account_manager.get_login_state()
 

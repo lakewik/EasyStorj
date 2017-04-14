@@ -70,6 +70,6 @@ class RegisterUI(QtGui.QMainWindow):
                 self.login_window = LoginUI(self)
                 self.login_window.show()
                 self.close()
-                initial_window.hide()
+                #initial_window.hide()
 
         print self.email

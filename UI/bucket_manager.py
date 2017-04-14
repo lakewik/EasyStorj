@@ -1,6 +1,8 @@
 from PyQt4 import QtCore, QtGui
+from PyQt4.QtGui import QStandardItemModel
 from qt_interfaces.bucket_manager_ui import Ui_BucketManager
 from engine import StorjEngine
+import storj
 import threading
 
 
