@@ -11,17 +11,17 @@ GUI Client for Storj Distributed Storage Network written in Python and PyQt4. Th
 - execute: `python main.py`
 
 # Software features:
-- list buckets +
-- create buckets +
-- register user +
-- list files in buckets +
-- upload file +/-
-- download file +/-
-- list file pointers +
-- list file mirrors +
-- manage buckets +
-- advanced configuration and bandwidth limiting +/-
-- specified farmer node details +
+[x] list buckets
+[x] create buckets
+[ ] register user &nbsp; &nbsp; ![test](http://progressed.io/bar/50)
+[x] list files in buckets
+[ ] upload file
+[ ] download file
+[x] list file pointers
+[x] list file mirrors
+[x] manage buckets
+[ ] advanced configuration and bandwidth limiting
+[x] specified farmer node details
 
 # Planned features:
 - analyzing geodistribution of nodes, mirrors
