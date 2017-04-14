@@ -1,10 +1,32 @@
+import json
+import os
+
+import requests
 from PyQt4 import QtCore, QtGui
+
+import time
+from PyQt4.QtCore import SIGNAL
+from PyQt4.QtGui import QFileDialog
+from PyQt4.QtGui import QMessageBox
+from PyQt4.QtGui import QProgressBar
+
+from UI.crypto.file_crypto_tools import FileCrypto
+from UI.utilities.backend_config import Configuration
+from UI.utilities.tools import Tools
 from qt_interfaces.single_file_upload_ui import Ui_SingleFileUpload
 from engine import StorjEngine
 import storj
 from crypto.crypto_tools import CryptoTools
 import hashlib
+import threading
+import magic
 
+import storj.model
+import  storj.exception
+
+global html_format_begin, html_format_end
+html_format_begin = "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">"
+html_format_end = "</span></p></body></html>"
 
 class SingleFileUploadUI(QtGui.QMainWindow):
     def __init__(self, parent=None, bucketid=None, fileid=None):
@@ -39,6 +61,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, SIGNAL("showFileNotSelectedError"), self.show_error_not_selected_file)
         self.connect(self, SIGNAL("showInvalidPathError"), self.show_error_invalid_file_path)
         self.connect(self, SIGNAL("showInvalidTemporaryPathError"), self.show_error_invalid_temporary_path)
+        self.connect(self, SIGNAL("refreshOverallProgress"), self.refresh_overall_progress)
 
         self.createBucketResolveThread() # resolve buckets and put to buckets combobox
 
@@ -55,6 +78,23 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # print self.config.max_retries_upload_to_same_farmer
 
         # self.initialize_shard_queue_table(file_pointers)
+
+        self.shard_upload_percent_list = []
+
+    def refresh_overall_progress(self, base_percent):
+        total_percent_to_upload = self.all_shards_count * 100
+        total_percent_uploaded = sum(self.shard_upload_percent_list) * 100
+
+        actual_percent_uploaded = total_percent_uploaded / total_percent_to_upload
+
+        total_percent = (base_percent * 100) + (0.90 * actual_percent_uploaded)
+
+        print str(actual_percent_uploaded) + str(base_percent) + "total_percent_uploaded"
+
+        #actual_upload_progressbar_value = self.ui_single_file_upload.overall_progress.value()
+
+        self.ui_single_file_upload.overall_progress.setValue(int(total_percent))
+
     def update_shard_upload_progess (self, row_position_index, value):
         self.upload_queue_progressbar_list[row_position_index].setValue(value)
         print "kotek"
@@ -162,7 +202,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.uploadblocksize = 4096
 
-        def read_in_chunks(file_object, shard_size, rowposition, blocksize=self.uploadblocksize, chunks=-1):
+        def read_in_chunks(file_object, shard_size, rowposition, blocksize=self.uploadblocksize, chunks=-1, shard_index=None):
             """Lazy function (generator) to read a file piece by piece.
             Default chunk size: 1k."""
 
@@ -181,8 +221,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                 print i
                 chunks -= 1
-                self.emit(SIGNAL("updateShardUploadProgress"), int(rowposition),
-                          percent_uploaded)  # update progress bar in upload queue table
+                self.emit(SIGNAL("updateShardUploadProgress"), int(rowposition), percent_uploaded)  # update progress bar in upload queue table
+                self.shard_upload_percent_list[shard_index] = percent_uploaded
+                self.emit(SIGNAL("refreshOverallProgress"), 0.1)  # update progress bar in upload queue table
+
 
         it = 0
         contract_negotiation_tries = 0
@@ -251,7 +293,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                     try:
                         with open(self.parametrs.tmpPath + file_name_ready_to_shard_upload + '-' + str(chapters + 1),
                                   'rb') as f:
-                            response = requests.post(url, data=read_in_chunks(f, shard_size, rowposition), timeout=1)
+                            response = requests.post(url, data=read_in_chunks(f, shard_size, rowposition, shard_index=chapters), timeout=1)
 
                         j = json.loads(str(response.content))
                         if (j["result"] == "The supplied token is not accepted"):
@@ -488,7 +530,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             # Now generate shards
             self.set_current_status("Splitting file to shards...")
-            shards_manager = model.ShardManager(filepath=str(file_path_ready), tmp_path=self.parametrs.tmpPath)
+            shards_manager = storj.model.ShardManager(filepath=str(file_path_ready), tmp_path=self.parametrs.tmpPath)
 
 
 
@@ -509,6 +551,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             firstiteration = True
 
             for shard in shards_manager.shards:
+                self.shard_upload_percent_list.append(0)
                 self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
                 chapters += 1
 
