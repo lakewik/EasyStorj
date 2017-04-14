@@ -1,5 +1,4 @@
 from PyQt4 import QtCore, QtGui
-import storj
 from qt_interfaces.main_menu_ui import Ui_MainMenu
 from utilities.account_manager import AccountManager
 from engine import StorjEngine
@@ -10,8 +9,8 @@ from client_config import ClientConfigurationUI
 from file_manager import FileManagerUI
 from file_mirror import FileMirrorsListUI
 from file_upload import SingleFileUploadUI
-#from login import LoginUI
-#from registration import RegisterUI
+# from login import LoginUI
+# from registration import RegisterUI
 
 
 global html_format_begin, html_format_end
@@ -23,7 +22,7 @@ html_format_end = "</span></p></body></html>"
 class MainUI(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
-        EXIT_CODE_REBOOT = -123
+        # EXIT_CODE_REBOOT = -123
         QtGui.QWidget.__init__(self, parent)
         self.ui = Ui_MainMenu()
         self.ui.setupUi(self)
@@ -39,18 +38,19 @@ class MainUI(QtGui.QMainWindow):
         user_email = self.account_manager.get_user_email()
         self.ui.account_label.setText(html_format_begin + str(user_email) + html_format_end)
 
+        # BUTTONS:
         # QtCore.QObject.connect(self.ui., QtCore.SIGNAL("clicked()"), self.open_login_window) # open login window
         # QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
-        QtCore.QObject.connect(self.ui.bucket_menager_bt, QtCore.SIGNAL("clicked()"),
-                               self.open_bucket_manager_window)  # open bucket manager window
-        QtCore.QObject.connect(self.ui.file_manager_bt, QtCore.SIGNAL("clicked()"),
-                               self.open_file_manager_window)  # open file manager window
         QtCore.QObject.connect(self.ui.create_bucket_bt, QtCore.SIGNAL("clicked()"),
                                self.open_bucket_create_window)  # open bucket create window
+        QtCore.QObject.connect(self.ui.bucket_menager_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_bucket_manager_window)  # open bucket manager window
+        QtCore.QObject.connect(self.ui.settings_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_settings_window)  # open settings ui
+        QtCore.QObject.connect(self.ui.file_manager_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_file_manager_window)  # open file manager window
         QtCore.QObject.connect(self.ui.uploader_bt, QtCore.SIGNAL("clicked()"),
                                self.open_single_file_upload_window)  # open single file upload ui
-        QtCore.QObject.connect(self.ui.settings_bt, QtCore.SIGNAL("clicked()"),
-                               self.open_settings_window)  # open single file upload ui
         # QtCore.QObject.connect(self.ui.pushButton_7, QtCore.SIGNAL("clicked()"), self.open_file_mirrors_list_window) # open file mirrors list window
 
     """
