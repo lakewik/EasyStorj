@@ -10,7 +10,8 @@ from client_config import ClientConfigurationUI
 from file_manager import FileManagerUI
 from file_mirror import FileMirrorsListUI
 from file_upload import SingleFileUploadUI
-from registration import RegisterUI
+#from login import LoginUI
+#from registration import RegisterUI
 
 
 global html_format_begin, html_format_end
@@ -52,6 +53,7 @@ class MainUI(QtGui.QMainWindow):
                                self.open_settings_window)  # open single file upload ui
         # QtCore.QObject.connect(self.ui.pushButton_7, QtCore.SIGNAL("clicked()"), self.open_file_mirrors_list_window) # open file mirrors list window
 
+    """
     def open_login_window(self):
         self.login_window = LoginUI(self)
         self.login_window.show()
@@ -61,10 +63,13 @@ class MainUI(QtGui.QMainWindow):
 
         # take login action
         print 1
+    """
 
+    """
     def open_register_window(self):
         self.register_window = RegisterUI(self)
         self.register_window.show()
+    """
 
     def open_single_file_upload_window(self):
         self.single_file_upload_window = SingleFileUploadUI(self)
