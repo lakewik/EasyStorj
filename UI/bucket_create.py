@@ -2,6 +2,7 @@ from PyQt4 import QtCore, QtGui
 from qt_interfaces.create_bucket_ui import Ui_BucketCreate
 from engine import StorjEngine
 import storj
+import threading
 
 
 class BucketCreateUI(QtGui.QMainWindow):
@@ -18,12 +19,12 @@ class BucketCreateUI(QtGui.QMainWindow):
 
         self.connect(self, QtCore.SIGNAL("showBucketCreatingException"), self.show_bucket_creating_exception_dialog)
         self.connect(self, QtCore.SIGNAL("showBucketCreatedSuccessfully"), self.show_bucket_crated_successfully)
-        self.connect(self, QtCore.SIGNAL("showBucketCreationMissingFields"), lambda: QMessageBox.about(self, "Warning", "Please fill out all fields!"))
+        self.connect(self, QtCore.SIGNAL("showBucketCreationMissingFields"), lambda: QtGui.QMessageBox.about(self, "Warning", "Please fill out all fields!"))
 
         self.storj_engine = StorjEngine()  # init StorjEngine
 
     def show_bucket_creating_exception_dialog(self, exception):
-        QMessageBox.about(self, "Unhandled exception while creating bucket", "Exception: " + str(exception))
+        QtGui.QMessageBox.about(self, "Unhandled exception while creating bucket", "Exception: " + str(exception))
 
     def show_bucket_crated_successfully(self, bucket_name):
         msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success", "Bucket '" + str(bucket_name) + "' was created successfully!",
