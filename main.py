@@ -120,7 +120,6 @@ class MyTableModel(QtCore.QAbstractTableModel):
         return True
 
 
-
 class StorjSDKImplementationsOverrides():
     def __init__(self, parent=None):
         self.storj_engine = StorjEngine()  # init StorjEngine
