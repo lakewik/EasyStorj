@@ -4,6 +4,7 @@ from qt_interfaces.storj_register_ui import Ui_Register
 from login import LoginUI
 from utilities.tools import Tools
 import json
+from  storj import  exception
 
 
 # Register section
@@ -35,10 +36,8 @@ class RegisterUI(QtGui.QMainWindow):
                 if (self.tools.check_email(self.email)):
                     # take login action
                     try:
-                        self.storj_client = storj.Client(str(self.email), str(self.password))
-                        print self.email
+                        self.storj_client = storj.get_client().user_create(str(self.email), str(self.password))
                         success = True
-                        # self.storj_client.user_create("wiktest15@gmail.com", "kotek1")
                     except storj.exception.StorjBridgeApiError as e:
                         j = json.loads(str(e))
                         if (j["error"] == "Email is already registered"):
