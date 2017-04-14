@@ -7,7 +7,6 @@ import hashlib
 
 
 class SingleFileUploadUI(QtGui.QMainWindow):
-
     def __init__(self, parent=None, bucketid=None, fileid=None):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_upload = Ui_SingleFileUpload()
@@ -26,6 +25,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.ui_single_file_upload.tmp_path.setText(str("/tmp/"))
 
+
         # initialize variables
         self.shards_already_uploaded = 0
         self.uploaded_shards_count = 0
@@ -40,13 +40,13 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, SIGNAL("showInvalidPathError"), self.show_error_invalid_file_path)
         self.connect(self, SIGNAL("showInvalidTemporaryPathError"), self.show_error_invalid_temporary_path)
 
-        self.createBucketResolveThread()  # resolve buckets and put to buckets combobox
+        self.createBucketResolveThread() # resolve buckets and put to buckets combobox
 
         # file_pointers = self.storj_engine.storj_client.file_pointers("6acfcdc62499144929cf9b4a", "dfba26ab34466b1211c60d02")
 
-        # self.emit(SIGNAL("addRowToUploadQueueTable"), "important", "information")
-        # self.emit(SIGNAL("addRowToUploadQueueTable"), "important", "information")
-        # self.emit(SIGNAL("incrementShardsProgressCounters"))
+        #self.emit(SIGNAL("addRowToUploadQueueTable"), "important", "information")
+        #self.emit(SIGNAL("addRowToUploadQueueTable"), "important", "information")
+        #self.emit(SIGNAL("incrementShardsProgressCounters"))
 
         self.max_retries_upload_to_same_farmer = 3
         self.max_retries_negotiate_contract = 10
@@ -55,8 +55,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # print self.config.max_retries_upload_to_same_farmer
 
         # self.initialize_shard_queue_table(file_pointers)
-
-    def update_shard_upload_progess(self, row_position_index, value):
+    def update_shard_upload_progess (self, row_position_index, value):
         self.upload_queue_progressbar_list[row_position_index].setValue(value)
         print "kotek"
         return 1
@@ -92,6 +91,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.ui_single_file_upload.save_to_bucket_select.addItems(self.buckets_list)
 
+
     def increment_shards_progress_counters(self):
         self.shards_already_uploaded += 1
         self.ui_single_file_upload.shards_uploaded.setText(html_format_begin + str(self.shards_already_uploaded) + html_format_end)
@@ -101,7 +101,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.upload_queue_table_row_count = self.ui_single_file_upload.shard_queue_table_widget.rowCount()
 
-        self.ui_single_file_upload.shard_queue_table_widget.setRowCount(self.upload_queue_table_row_count + 1)
+        self.ui_single_file_upload.shard_queue_table_widget.setRowCount(self.upload_queue_table_row_count+1)
 
         self.ui_single_file_upload.shard_queue_table_widget.setCellWidget(self.upload_queue_table_row_count, 0, self.upload_queue_progressbar_list[self.upload_queue_table_row_count])
         self.ui_single_file_upload.shard_queue_table_widget.setItem(self.upload_queue_table_row_count, 1, QtGui.QTableWidgetItem(row_data["hash"]))
@@ -133,6 +133,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         upload_thread.start()
 
     def initialize_upload_queue_table(self):
+
         # initialize variables
         self.shards_already_uploaded = 0
         self.uploaded_shards_count = 0
@@ -146,6 +147,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.shard_queue_table_widget.resizeColumnsToContents()
         self.ui_single_file_upload.shard_queue_table_widget.resizeRowsToContents()
 
+
         self.ui_single_file_upload.shard_queue_table_widget.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
 
     def set_current_status(self, current_status):
@@ -157,6 +159,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         upload_thread.start()
 
     def upload_shard(self, shard, chapters, frame, file_name_ready_to_shard_upload):
+
         self.uploadblocksize = 4096
 
         def read_in_chunks(file_object, shard_size, rowposition, blocksize=self.uploadblocksize, chunks=-1):
@@ -189,6 +192,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             # emit signal to add row to upload queue table
             # self.emit(SIGNAL("addRowToUploadQueueTable"), "important", "information")
 
+
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Adding shard " + str(
                     chapters) + " to file frame and getting contract..." + html_format_end)
@@ -219,13 +223,13 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                 url = "http://" + frame_content["farmer"]["address"] + ":" + str(
                     frame_content["farmer"]["port"]) + "/shards/" + frame_content["hash"] + "?token=" + \
-                    frame_content["token"]
+                      frame_content["token"]
                 print url
 
                 # files = {'file': open(file_path + '.part%s' % chapters)}
                 # headers = {'content-type: application/octet-stream', 'x-storj-node-id: ' + str(farmerNodeID)}
 
-                self.set_current_status("Uploading shard" + str(chapters + 1) + "to farmer...")
+                self.set_current_status("Uploading shard " + str(chapters + 1) + " to farmer...")
 
                 # begin recording exchange report
                 exchange_report = storj.model.ExchangeReport()
@@ -266,7 +270,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                         print str(self.all_shards_count) + "wszystkie" + str(
                             self.shards_already_uploaded) + "wyslane"
-                        if int(self.all_shards_count) == int(self.shards_already_uploaded + 1):
+                        if int(self.all_shards_count) <= int(self.shards_already_uploaded+1):
                             self.emit(SIGNAL("finishUpload"))  # send signal to save to bucket after all files are uploaded
                         break
 
@@ -276,21 +280,22 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 if (j["result"] == "The supplied token is not accepted"):
                     raise storj.exception.StorjFarmerError(storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
 
+
                 firstiteration = False
                 it += 1
 
-            except storj.exception.StorjBridgeApiError as e:
+            except storj.exception.StorjBridgeApiError, e:
                 # upload failed due to Storj Bridge failure
                 print "Exception raised while trying to negitiate contract: " + str(e)
                 continue
-            except storj.exception.StorjFarmerError as e:
+            except storj.exception.StorjFarmerError, e:
                 # upload failed due to Farmer Failure
                 print str(e)
                 if str(e) == str(storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED):
                     print "The supplied token not accepted"
-                # print "Exception raised while trying to negitiate contract: " + str(e)
+                #print "Exception raised while trying to negitiate contract: " + str(e)
                 continue
-            except Exception as e:
+            except Exception, e:
                 # now send Exchange Report
                 # upload failed probably while sending data to farmer
                 print "Error occured while trying to upload shard or negotiate contract. Retrying... " + str(e)
@@ -313,7 +318,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 # self.storj_engine.storj_client.send_exchange_report(exchange_report) # send exchange report
                 break
 
+
+
     def file_upload_begin(self):
+
         # upload finish function #
         def finish_upload(self):
             self.crypto_tools = CryptoTools()
@@ -364,19 +372,22 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.ui_single_file_upload.current_state.setText(
                     html_format_begin + "Upload success! Waiting for user..." + html_format_end)
 
+
         self.connect(self, SIGNAL("finishUpload"), lambda: finish_upload(self))
 
         # end upload finishing function #
 
+        file_path = None
         self.validation = {}
 
         self.initialize_upload_queue_table()
 
-        # item = ProgressWidgetItem()
-        # self.ui_single_file_upload.shard_queue_table_widget.setItem(1, 1, item)
-        # item.updateValue(1)
+        #item = ProgressWidgetItem()
+        #self.ui_single_file_upload.shard_queue_table_widget.setItem(1, 1, item)
+        #item.updateValue(1)
 
-        # progress.valueChanged.connect(item.updateValue)
+        #progress.valueChanged.connect(item.updateValue)
+
 
         encryption_enabled = True
         self.parametrs = storj.model.StorjParametrs()
@@ -397,6 +408,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.validation["file_path"] = True
             file_path = str(self.ui_single_file_upload.file_path.text())
 
+
         if self.validation["file_path"]:
             bucket_id = "dc4778cc186192af49475b49"
             bname = os.path.split(file_path)[1]
@@ -405,7 +417,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             mime = magic.Magic(mime=True)
             file_mime_type = str(mime.from_file(str(file_path)))
-            # file_mime_type = str("A")
+
+            print file_mime_type
+            #file_mime_type = str("A")
 
             file_existence_in_bucket = False
 
@@ -422,7 +436,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 file_crypto_tools = FileCrypto()
                 file_crypto_tools.encrypt_file("AES", str(file_path), self.parametrs.tmpPath + "/" + bname + ".encrypted",
                                                "kotecze57")  # begin file encryption
-                file_path_ready = self.parametrs.tmpPath + "/" + bname + ".encrypted"  # get path to encrypted file in temp dir
+                file_path_ready = self.parametrs.tmpPath + "/" + bname + ".encrypted" # get path to encrypted file in temp dir
                 file_name_ready_to_shard_upload = bname + ".encrypted"
             else:
                 file_path_ready = file_path
@@ -435,7 +449,14 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 return os.stat(file_like_object.name).st_size
 
             # file_size = get_size(file)
+
             file_size = os.stat(file_path).st_size
+
+            tools = Tools()
+
+
+            self.ui_single_file_upload.file_size.setText(html_format_begin + str(tools.human_size(int(file_size))) + html_format_end)
+
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Resolving PUSH token..." + html_format_end)
 
@@ -467,8 +488,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             # Now generate shards
             self.set_current_status("Splitting file to shards...")
-            shards_manager = model.ShardManager(filepath=str(file_path_ready),
-                                                tmp_path=self.parametrs.tmpPath)
+            shards_manager = model.ShardManager(filepath=str(file_path_ready), tmp_path=self.parametrs.tmpPath)
+
+
 
             # self.ui_single_file_upload.current_state.setText(html_format_begin + "Generating shards..." + html_format_end)
             # shards_manager._make_shards()
@@ -480,7 +502,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             print shards_count
 
             # set shards count
-            self.ui_single_file_upload.shards_count.setText(str(shards_count))
+            self.ui_single_file_upload.shards_count.setText(html_format_begin + str(shards_count) + html_format_end)
             self.all_shards_count = shards_count
 
             chapters = 0
@@ -490,11 +512,15 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
                 chapters += 1
 
+
+
                 # delete encrypted file
+
+
 
         # hash_sha512_hmac = self.storj_engine.storj_client.get_custom_checksum(file_path)
         hash_sha512_hmac = "dxjcdj"
 
-        # self.emit(SIGNAL("finishUpload")) # send signal to save to bucket after all filea are uploaded
+        #self.emit(SIGNAL("finishUpload")) # send signal to save to bucket after all filea are uploaded
 
-        # finish_upload(self)
+        #finish_upload(self)
