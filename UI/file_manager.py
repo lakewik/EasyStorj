@@ -1,6 +1,9 @@
 from PyQt4 import QtCore, QtGui
 from qt_interfaces.file_manager_ui import Ui_FileManager
+from utilities.tools import Tools
 from engine import StorjEngine
+import storj
+import threading
 
 
 # Files section
@@ -139,7 +142,7 @@ class FileManagerUI(QtGui.QMainWindow):
                 self.buckets_list.append(str(bucket.name))  # append buckets to list
                 self.bucket_id_list.append(str(bucket.id))  # append buckets to list
                 i = i + 1
-        except storj.exception.StorjBridgeApiError, e:
+        except storj.exception.StorjBridgeApiError as e:
             QtGui.QMessageBox.about(self, "Unhandled bucket resolving exception", "Exception: " + str(e))
 
         self.file_manager_ui.bucket_select_combo_box.addItems(self.buckets_list)
