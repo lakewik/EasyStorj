@@ -1,5 +1,18 @@
+import threading
 from PyQt4 import QtCore, QtGui
+
+from PyQt4.QtGui import QAbstractItemView
+from PyQt4.QtGui import QMessageBox
+from PyQt4.QtGui import QStandardItem
+from PyQt4.QtGui import QStandardItemModel
+
+from UI.engine import StorjEngine
+from UI.node_details import NodeDetailsUI
 from qt_interfaces.file_mirrors_list_ui import Ui_FileMirrorsList
+
+global html_format_begin, html_format_end
+html_format_begin = "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">"
+html_format_end = "</span></p></body></html>"
 
 
 # Mirrors section
