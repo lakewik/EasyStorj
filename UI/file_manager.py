@@ -1,4 +1,6 @@
 from PyQt4 import QtCore, QtGui
+
+from PyQt4.QtGui import QStandardItem
 from PyQt4.QtGui import QStandardItemModel
 from qt_interfaces.file_manager_ui import Ui_FileManager
 from utilities.tools import Tools
