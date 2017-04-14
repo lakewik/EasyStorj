@@ -1,7 +1,7 @@
 from utilities.account_manager import AccountManager
+import storj
 
 
-# StorjEngine section
 class StorjEngine:
 
     def __init__(self):
