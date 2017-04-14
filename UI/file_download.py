@@ -1,4 +1,13 @@
+import os
+
+import requests
 from PyQt4 import QtCore, QtGui
+
+from PyQt4.QtGui import QProgressBar
+from PyQt4.QtGui import QTableWidgetItem
+
+from UI.utilities.sharder import ShardingTools
+from UI.utilities.tools import Tools
 from qt_interfaces.single_file_downloader_ui import Ui_SingleFileDownload
 from crypto.file_crypto_tools import FileCrypto
 from engine import StorjEngine
@@ -12,7 +21,6 @@ html_format_end = "</span></p></body></html>"
 
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
-
     def __init__(self, parent=None, bucketid=None, fileid=None):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_download = Ui_SingleFileDownload()
@@ -20,7 +28,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine()  # init StorjEngine
 
-        # self.initialize_shard_queue_table(file_pointers)
+
+
+        #self.initialize_shard_queue_table(file_pointers)
 
         QtCore.QObject.connect(self.ui_single_file_download.file_save_path_bt, QtCore.SIGNAL("clicked()"),
                                self.select_file_save_path)  # open file select dialog
@@ -32,14 +42,33 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("incrementShardsDownloadProgressCounters"), self.increment_shards_download_progress_counters)
         self.connect(self, QtCore.SIGNAL("updateShardDownloadProgress"), self.update_shard_download_progess)
         self.connect(self, QtCore.SIGNAL("beginDownloadProccess"), self.download_begin)
+        self.connect(self, QtCore.SIGNAL("refreshOverallDownloadProgress"), self.refresh_overall_download_progress)
+
 
         self.shards_already_downloaded = 0
 
         self.createNewInitializationThread(bucketid, fileid)
 
+        self.shard_download_percent_list = []
+
+    def refresh_overall_download_progress(self, base_percent):
+        total_percent_to_download = self.all_shards_count * 100
+        total_percent_downloaded = sum(self.shard_download_percent_list) * 100
+
+        actual_percent_downloaded = total_percent_downloaded / total_percent_to_download
+
+        total_percent = (base_percent * 100) + (0.90 * actual_percent_downloaded)
+
+        print str(actual_percent_downloaded) + str(base_percent) + "total_percent_downloaded"
+
+        #actual_upload_progressbar_value = self.ui_single_file_upload.overall_progress.value()
+
+        self.ui_single_file_download.overall_progress.setValue(int(total_percent))
+
     def download_begin(self, file_pointers):
         self.destination_file_path = str(self.ui_single_file_download.file_save_path.text())
         self.tmp_path = str(self.ui_single_file_download.tmp_dir.text())
+
 
         options_array = {}
         options_array["tmp_path"] = self.tmp_path
@@ -100,13 +129,16 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # progressbar_list[0].setValue(20)
         # progressbar_list[2].setValue(17)
 
+
     def createNewDownloadInitThread(self, bucket_id, file_id):
         file_name_resolve_thread = threading.Thread(target=self.init_download_file_pointers, args=(bucket_id, file_id))
         file_name_resolve_thread.start()
 
+
     def createNewInitializationThread(self, bucket_id, file_id):
         file_name_resolve_thread = threading.Thread(target=self.set_file_metadata, args=(bucket_id, file_id))
         file_name_resolve_thread.start()
+
 
     def set_file_metadata(self, bucket_id, file_id):
         file_metadata = self.storj_engine.storj_client.file_metadata("dc4778cc186192af49475b49", "07a2a9ebff6b7785b4bb18fd")
@@ -116,7 +148,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.ui_single_file_download.file_size.setText(html_format_begin + str(tools.human_size(int(file_metadata.size))) + html_format_end)
         self.ui_single_file_download.file_id.setText(html_format_begin + str(file_id) + html_format_end)
 
-    def update_shard_download_progess(self, row_position_index, value):
+
+    def update_shard_download_progess (self, row_position_index, value):
         self.progressbar_list[row_position_index].setValue(value)
         return 1
 
@@ -133,8 +166,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.ui_single_file_download.tmp_dir.setText(str(self.selected_tmp_dir))
 
     def init_download_file_pointers(self, bucket_id, file_id):
-        file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49", "9af4e2f80e7f334ae651464a")
+        file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49", "aa9627aed3f499fcd83907e7")
         self.emit(QtCore.SIGNAL("beginDownloadProccess"), file_pointers)
+
 
     def select_file_save_path(self):
         file_save_path = QtGui.QFileDialog.getSaveFileName(self, 'Save file to...', '')
@@ -143,7 +177,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
     def calculate_final_hmac(self):
         return 1
 
-    def create_download_connection(self, url, path_to_save, options_chain, progress_bar, rowposition):
+    def create_download_connection(self, url, path_to_save, options_chain, progress_bar, rowposition, shard_index):
         local_filename = path_to_save
         downloaded = False
 
@@ -186,9 +220,12 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                         else:
                             percent_downloaded = int(round((100.0 * i) / t1))
                         self.emit(QtCore.SIGNAL("updateShardDownloadProgress"), int(rowposition), percent_downloaded)  # update progress bar in upload queue table
+                        self.shard_download_percent_list[shard_index] = percent_downloaded
+                        self.emit(QtCore.SIGNAL("refreshOverallDownloadProgress"), 0.1)  # update progress bar in upload queue table
                         print str(rowposition) + "pozycja"
 
-                        # progress_bar.setValue(percent_downloaded)
+
+                        #progress_bar.setValue(percent_downloaded)
 
                     f.close()
                     downloaded = True
@@ -203,13 +240,16 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             self.emit(QtCore.SIGNAL("retryWithNewDownloadPointer"), options_chain["shard_index"])  # retry download with new download pointer
         else:
             self.emit(QtCore.SIGNAL("incrementShardsDownloadProgressCounters"))  # update already uploaded shards count
-            self.emit(QtCore.SIGNAL("updateDownloadTaskState"), options_chain["rowposition"], "Downloaded!")  # update shard upload state
+            self.emit(QtCore.SIGNAL("updateDownloadTaskState"), options_chain["rowposition"],
+                      "Downloaded!")  # update shard download state
             if int(self.all_shards_count) <= int(self.shards_already_downloaded + 1):
                 self.emit(QtCore.SIGNAL("finishDownload"))  # send signal to begin file shards joind and decryption after all shards are downloaded
 
+
+
             return
 
-    def createNewDownloadThread(self, url, filelocation, options_chain, progress_bars_list, rowposition):
+    def createNewDownloadThread(self, url, filelocation, options_chain, progress_bars_list, rowposition, shard_index):
         # self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
         # self.download_thread.start()
         # self.download_thread.connect(self.download_thread, SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
@@ -217,7 +257,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         # Refactor to QtTrhead
         download_thread = threading.Thread(target=self.create_download_connection,
-                                           args=(url, filelocation, options_chain, progress_bars_list, rowposition))
+                                           args=(url, filelocation, options_chain, progress_bars_list, rowposition, shard_index))
         download_thread.start()
         print str(options_chain["rowposition"]) + "position"
 
@@ -225,7 +265,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         print str(value1) + " aaa " + str(value2)
 
     def upload_file(self):
-        print 1
+        print 1;
 
     def file_download(self, bucket_id, file_id, file_save_path, options_array, progress_bars_list):
 
@@ -243,15 +283,16 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             else:
                 sharing_tools.join_shards(self.tmp_path + "/" + str(file_name), "-", file_save_path)
 
-            print file_save_path + ".encrypted"
+            print self.tmp_path + "/" + str(file_name) + ".encrypted"
+
 
             if fileisencrypted:
                 # decrypt file
                 self.set_current_status("Decrypting file...")
                 # self.set_current_status()
                 file_crypto_tools = FileCrypto()
-                # file_crypto_tools.decrypt_file("AES", str(self.tmp_path + "/" + str(file_name)) + ".encrypted", file_save_path,
-                #                                "kotecze57")  # begin file decryption
+                #file_crypto_tools.decrypt_file("AES", str(self.tmp_path + "/" + str(file_name)) + ".encrypted", file_save_path,
+                 #                              "kotecze57")  # begin file decryption
 
             print "pobrano"
 
@@ -292,11 +333,13 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         for pointer in pointers:
             self.set_current_status("Downloading shard at index " + str(part) + "...")
             options_chain["rowposition"] = part
+            self.shard_download_percent_list.append(0)
 
             print pointer
             options_chain["shard_file_size"] = shard_size_array[part]
             url = "http://" + pointer.get('farmer')['address'] + ":" + str(pointer.get('farmer')['port']) + "/shards/" + \
                   pointer["hash"] + "?token=" + pointer["token"]
             print url
-            self.createNewDownloadThread(url, self.tmp_path + "/" + str(file_name) + "-" + str(part), options_chain, progress_bars_list[part], part)
+            self.createNewDownloadThread(url, self.tmp_path + "/" + str(file_name) + "-" + str(part), options_chain, progress_bars_list[part], part, part)
+            print self.tmp_path + "/" + str(file_name) + "-" + str(part) + "zapisane"
             part = part + 1
