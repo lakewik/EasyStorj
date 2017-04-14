@@ -21,12 +21,12 @@ class AccountManager:
     def if_logged_in(self):
         logged_in = "0"
         try:
-            et = etree.parse("storj_account_conf.xml")
+            et = ET.parse("storj_account_conf.xml")
             for tags in et.iter('logged_in'):
                 logged_in = tags.text
         except:
             logged_in = "0"
-            print "Unspecified error"
+            print "Error in Account Manager login"
 
         if logged_in == "1":
             return True
@@ -39,20 +39,20 @@ class AccountManager:
     def get_user_password(self):
         password = ""
         try:
-            et = etree.parse("storj_account_conf.xml")
+            et = ET.parse("storj_account_conf.xml")
             for tags in et.iter('password'):
                 password = tags.text
         except:
-            print "Unspecified error"
+            print "Error in Account Manager get password"
         return password
 
     def get_user_email(self):
         email = ""
         try:
-            et = etree.parse("storj_account_conf.xml")
+            et = ET.parse("storj_account_conf.xml")
             for tags in et.iter('login_email'):
                 email = tags.text
         except:
-            print "Unspecified error"
+            print "Error in Account Manager get email"
         return email
         print 1
