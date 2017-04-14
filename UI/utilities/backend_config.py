@@ -2,7 +2,7 @@ import xml.etree.cElementTree as ET
 
 
 # Configuration backend section
-class Configuration():
+class Configuration:
 
     def __init__(self, sameFileNamePrompt=None, sameFileHashPrompt=None,
                  load_config=False):

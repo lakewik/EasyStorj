@@ -3,6 +3,7 @@ from PyQt4.QtGui import QStandardItemModel
 from qt_interfaces.file_manager_ui import Ui_FileManager
 from utilities.tools import Tools
 from engine import StorjEngine
+from file_download import SingleFileDownloadUI
 import storj
 import threading
 

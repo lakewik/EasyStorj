@@ -1,19 +1,18 @@
 from PyQt4 import QtCore, QtGui
-from qt_interfaces.single_file_download_ui import Ui_SingleFileDownload
+from qt_interfaces.single_file_downloader_ui import Ui_SingleFileDownload
 from crypto.file_crypto_tools import FileCrypto
 from engine import StorjEngine
 import storj
 
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
+
     def __init__(self, parent=None, bucketid=None, fileid=None):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_download = Ui_SingleFileDownload()
         self.ui_single_file_download.setupUi(self)
         # QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine()  # init StorjEngine
-
-
 
         #self.initialize_shard_queue_table(file_pointers)
 
@@ -35,7 +34,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
     def download_begin(self, file_pointers):
         self.destination_file_path = str(self.ui_single_file_download.file_save_path.text())
         self.tmp_path = str(self.ui_single_file_download.tmp_dir.text())
-
 
         options_array = {}
         options_array["tmp_path"] = self.tmp_path
@@ -96,16 +94,13 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # progressbar_list[0].setValue(20)
         # progressbar_list[2].setValue(17)
 
-
     def createNewDownloadInitThread(self, bucket_id, file_id):
         file_name_resolve_thread = threading.Thread(target=self.init_download_file_pointers, args=(bucket_id, file_id))
         file_name_resolve_thread.start()
 
-
     def createNewInitializationThread(self, bucket_id, file_id):
         file_name_resolve_thread = threading.Thread(target=self.set_file_metadata, args=(bucket_id, file_id))
         file_name_resolve_thread.start()
-
 
     def set_file_metadata(self, bucket_id, file_id):
         file_metadata = self.storj_engine.storj_client.file_metadata("dc4778cc186192af49475b49", "07a2a9ebff6b7785b4bb18fd")
@@ -115,8 +110,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.ui_single_file_download.file_size.setText(html_format_begin + str(tools.human_size(int(file_metadata.size))) + html_format_end)
         self.ui_single_file_download.file_id.setText(html_format_begin + str(file_id) + html_format_end)
 
-
-    def update_shard_download_progess (self, row_position_index, value):
+    def update_shard_download_progess(self, row_position_index, value):
         self.progressbar_list[row_position_index].setValue(value)
         return 1
 
@@ -135,7 +129,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
     def init_download_file_pointers(self, bucket_id, file_id):
         file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49", "9af4e2f80e7f334ae651464a")
         self.emit(SIGNAL("beginDownloadProccess"), file_pointers)
-
 
     def select_file_save_path(self):
         file_save_path = QtGui.QFileDialog.getSaveFileName(self, 'Save file to...', '')
@@ -189,8 +182,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                         self.emit(SIGNAL("updateShardDownloadProgress"), int(rowposition), percent_downloaded)  # update progress bar in upload queue table
                         print str(rowposition) + "pozycja"
 
-
-                        #progress_bar.setValue(percent_downloaded)
+                        # progress_bar.setValue(percent_downloaded)
 
                     f.close()
                     downloaded = True
@@ -208,8 +200,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             self.emit(SIGNAL("updateDownloadTaskState"), options_chain["rowposition"], "Downloaded!")  # update shard upload state
             if int(self.all_shards_count) <= int(self.shards_already_downloaded + 1):
                 self.emit(SIGNAL("finishDownload"))  # send signal to begin file shards joind and decryption after all shards are downloaded
-
-
 
             return
 
@@ -229,7 +219,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         print str(value1) + " aaa " + str(value2)
 
     def upload_file(self):
-        print 1;
+        print 1
 
     def file_download(self, bucket_id, file_id, file_save_path, options_array, progress_bars_list):
 
@@ -249,14 +239,13 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
             print file_save_path + ".encrypted"
 
-
             if fileisencrypted:
                 # decrypt file
                 self.set_current_status("Decrypting file...")
                 # self.set_current_status()
                 file_crypto_tools = FileCrypto()
                 #file_crypto_tools.decrypt_file("AES", str(self.tmp_path + "/" + str(file_name)) + ".encrypted", file_save_path,
-                 #                              "kotecze57")  # begin file decryption
+                #                               "kotecze57")  # begin file decryption
 
             print "pobrano"
 

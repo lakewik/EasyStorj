@@ -2,7 +2,7 @@ from utilities.account_manager import AccountManager
 
 
 # StorjEngine section
-class StorjEngine():
+class StorjEngine:
 
     def __init__(self):
         account_manager = AccountManager()

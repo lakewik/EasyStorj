@@ -1,7 +1,7 @@
 import xml.etree.cElementTree as ET
 
 
-class AccountManager():
+class AccountManager:
 
     def __init__(self, login_email=None, password=None):
         self.login_email = login_email

@@ -4,7 +4,7 @@ import hmac
 import storj
 
 
-class CryptoTools():
+class CryptoTools:
 
     def calculate_hmac(self, base_string, key):
         """
