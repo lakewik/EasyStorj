@@ -3,6 +3,7 @@ from PyQt4 import QtCore, QtGui
 from qt_interfaces.storj_register_ui import Ui_Register
 from login import LoginUI
 from utilities.tools import Tools
+import json
 
 
 # Register section
@@ -19,7 +20,7 @@ class RegisterUI(QtGui.QMainWindow):
         self.register_ui.password_2.setEchoMode(QtGui.QLineEdit.Password)
 
         QtCore.QObject.connect(self.register_ui.register_bt, QtCore.SIGNAL("clicked()"),
-                               self.register)  # valudate and register user
+                               self.register)  # validate and register user
 
     def register(self):
         # validate fields
@@ -42,23 +43,23 @@ class RegisterUI(QtGui.QMainWindow):
                         j = json.loads(str(e))
                         if (j["error"] == "Email is already registered"):
                             success = False
-                            QMessageBox.about(self, "Warning",
-                                              "User with this e-mail is already registered! Please login or try different e-mail!")
+                            QtGui.QMessageBox.about(self, "Warning",
+                                                    "User with this e-mail is already registered! Please login or try different e-mail!")
                         else:
                             success = False
-                            QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
+                            QtGui.QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
                 else:
                     success = False
-                    QMessageBox.about(self, "Warning",
-                                      "Your e-mail seems to be invalid! Please chech e-mail  and try again")
+                    QtGui.QMessageBox.about(self, "Warning",
+                                            "Your e-mail seems to be invalid! Please chech e-mail  and try again")
             else:
                 success = False
-                QMessageBox.about(self, "Warning",
-                                  "Given passwords are different! Please check and try again!")
+                QtGui.QMessageBox.about(self, "Warning",
+                                        "Given passwords are different! Please check and try again!")
         else:
             success = False
-            QMessageBox.about(self, "Warning",
-                              "Please fill out all fields!")
+            QtGui.QMessageBox.about(self, "Warning",
+                                    "Please fill out all fields!")
 
         if success:
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success",
@@ -70,6 +71,6 @@ class RegisterUI(QtGui.QMainWindow):
                 self.login_window = LoginUI(self)
                 self.login_window.show()
                 self.close()
-                #initial_window.hide()
+                # initial_window.hide()
 
         print self.email
