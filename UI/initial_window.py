@@ -24,7 +24,7 @@ class InitialWindowUI(QtGui.QMainWindow):
     def open_login_window(self):
         self.login_window = LoginUI(self)
         self.login_window.show()
-        #self.ui_initial_window.hide()
+        # initial_window.hide()
 
     def open_register_window(self):
         self.register_window = RegisterUI(self)

@@ -17,18 +17,17 @@ class LoginUI(QtGui.QMainWindow):
         self.login_ui.setupUi(self)
 
         # Account manager
-
         self.login_ui.password.setEchoMode(QtGui.QLineEdit.Password)
 
         QtCore.QObject.connect(self.login_ui.login_bt, QtCore.SIGNAL("clicked()"), self.login)  # take login action
 
     def login(self):
         # take login action
-
         self.email = self.login_ui.email.text()  # get login
         self.password = self.login_ui.password.text()  # get password
 
-        self.storj_client = storj.Client(email=str(self.email), password=str(self.password))
+        self.storj_client = storj.Client(email=str(self.email).strip(),
+                                         password=str(self.password).strip())
         success = False
         # take login action - check credentials by listing keys :D
         try:
@@ -36,7 +35,7 @@ class LoginUI(QtGui.QMainWindow):
             success = True
         except storj.exception.StorjBridgeApiError as e:
             j = json.loads(str(e))
-            if (j["error"] == "Invalid email or password"):
+            if j["error"] == "Invalid email or password":
                 QMessageBox.about(self, "Warning",
                                   "Invalid email or password - access denied. Please check your credentials and try again!")
             else:
@@ -45,7 +44,6 @@ class LoginUI(QtGui.QMainWindow):
         if success:
             self.account_manager = AccountManager(str(self.email), str(self.password))  # init account manager
             self.account_manager.save_account_credentials()  # save login credentials and state
-            # login_msg_box = QMessageBox.about(self, "Success", "Successfully loged in!")
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success", "Successfully loged in!",
                                        QtGui.QMessageBox.Ok)
             result = msgBox.exec_()
