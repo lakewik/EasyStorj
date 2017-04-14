@@ -14,7 +14,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine()  # init StorjEngine
 
-        #self.initialize_shard_queue_table(file_pointers)
+        # self.initialize_shard_queue_table(file_pointers)
 
         QtCore.QObject.connect(self.ui_single_file_download.file_save_path_bt, QtCore.SIGNAL("clicked()"),
                                self.select_file_save_path)  # open file select dialog
@@ -23,9 +23,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui_single_file_download.start_download_bt, QtCore.SIGNAL("clicked()"),
                                lambda: self.createNewDownloadInitThread(bucketid, fileid))  # begin file downloading process
 
-        self.connect(self, SIGNAL("incrementShardsDownloadProgressCounters"), self.increment_shards_download_progress_counters)
-        self.connect(self, SIGNAL("updateShardDownloadProgress"), self.update_shard_download_progess)
-        self.connect(self, SIGNAL("beginDownloadProccess"), self.download_begin)
+        self.connect(self, QtCore.SIGNAL("incrementShardsDownloadProgressCounters"), self.increment_shards_download_progress_counters)
+        self.connect(self, QtCore.SIGNAL("updateShardDownloadProgress"), self.update_shard_download_progess)
+        self.connect(self, QtCore.SIGNAL("beginDownloadProccess"), self.download_begin)
 
         self.shards_already_downloaded = 0
 
@@ -128,7 +128,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
     def init_download_file_pointers(self, bucket_id, file_id):
         file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49", "9af4e2f80e7f334ae651464a")
-        self.emit(SIGNAL("beginDownloadProccess"), file_pointers)
+        self.emit(QtCore.SIGNAL("beginDownloadProccess"), file_pointers)
 
     def select_file_save_path(self):
         file_save_path = QtGui.QFileDialog.getSaveFileName(self, 'Save file to...', '')
@@ -179,7 +179,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                             percent_downloaded = 100
                         else:
                             percent_downloaded = int(round((100.0 * i) / t1))
-                        self.emit(SIGNAL("updateShardDownloadProgress"), int(rowposition), percent_downloaded)  # update progress bar in upload queue table
+                        self.emit(QtCore.SIGNAL("updateShardDownloadProgress"), int(rowposition), percent_downloaded)  # update progress bar in upload queue table
                         print str(rowposition) + "pozycja"
 
                         # progress_bar.setValue(percent_downloaded)
@@ -194,12 +194,12 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 break
 
         if not downloaded:
-            self.emit(SIGNAL("retryWithNewDownloadPointer"), options_chain["shard_index"])  # retry download with new download pointer
+            self.emit(QtCore.SIGNAL("retryWithNewDownloadPointer"), options_chain["shard_index"])  # retry download with new download pointer
         else:
-            self.emit(SIGNAL("incrementShardsDownloadProgressCounters"))  # update already uploaded shards count
-            self.emit(SIGNAL("updateDownloadTaskState"), options_chain["rowposition"], "Downloaded!")  # update shard upload state
+            self.emit(QtCore.SIGNAL("incrementShardsDownloadProgressCounters"))  # update already uploaded shards count
+            self.emit(QtCore.SIGNAL("updateDownloadTaskState"), options_chain["rowposition"], "Downloaded!")  # update shard upload state
             if int(self.all_shards_count) <= int(self.shards_already_downloaded + 1):
-                self.emit(SIGNAL("finishDownload"))  # send signal to begin file shards joind and decryption after all shards are downloaded
+                self.emit(QtCore.SIGNAL("finishDownload"))  # send signal to begin file shards joind and decryption after all shards are downloaded
 
             return
 
@@ -244,14 +244,14 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 self.set_current_status("Decrypting file...")
                 # self.set_current_status()
                 file_crypto_tools = FileCrypto()
-                #file_crypto_tools.decrypt_file("AES", str(self.tmp_path + "/" + str(file_name)) + ".encrypted", file_save_path,
-                #                               "kotecze57")  # begin file decryption
+                # file_crypto_tools.decrypt_file("AES", str(self.tmp_path + "/" + str(file_name)) + ".encrypted", file_save_path,
+                #                                "kotecze57")  # begin file decryption
 
             print "pobrano"
 
             return True
 
-        self.connect(self, SIGNAL("finishDownload"), lambda: finish_download(self))
+        self.connect(self, QtCore.SIGNAL("finishDownload"), lambda: finish_download(self))
 
         ##### End file download finish point #####
 
