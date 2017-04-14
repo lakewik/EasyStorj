@@ -1,78 +1,10 @@
 # -*- coding: utf-8 -*-
-#import base64
-#import hashlib
-#import hmac
-#import json
-from PyQt4 import Qt
 
-import magic
-import os
-import operator
-import socket
 import sys
-import threading
-import time
 from PyQt4 import QtCore, QtGui
-
-#import pycountry
-import requests
-import storj
-from PyQt4.QtCore import QAbstractTableModel, SIGNAL
-from PyQt4.QtCore import QVariant
-from PyQt4.QtGui import *
-#from ipwhois import IPWhois
-from storj import exception
-from storj import model
-
-#from bucket_manage_ui import Ui_BucketManager
-#from client_configuration_ui import Ui_ClientConfiguration
-#from create_bucket_ui import Ui_BucketCreate
-#from file_crypto_tools import FileCrypto  # file ancryption and decryption lib
-#from file_manager_ui import Ui_FileManager
-#from file_mirrors_list_ui import Ui_FileMirrorsList
-#from initial_window_ui import Ui_InitialWindow
-#from main_menu_ui import Ui_MainMenu
-#from node_details_ui import Ui_NodeDetails
-#from single_file_downloader_ui import Ui_SingleFileDownload
-#from single_file_upload_ui import Ui_SingleFileUpload
-#from storj_login_ui import Ui_Login
-#from storj_register_ui import Ui_Register
-from sharder import ShardingTools
-from tools import Tools
-#from backend_config import Configuration
-from account_manager import AccountManager
-
-# UI
-#from UI.login import LoginUI
-#from UI.registration import RegisterUI
+from UI.utilities.account_manager import AccountManager
 from UI.mainUI import MainUI
 from UI.initial_window import InitialWindowUI
-
-# CONSIDER A BETTER PLACE WHERE TO MOVE THIS
-from UI.engine import StorjEngine
-
-# ext libs
-
-# Define CONSTANS
-
-
-global SHARD_MULTIPLES_BACK, MAX_SHARD_SIZE
-
-MAX_SHARD_SIZE = 4294967296  # 4Gb
-SHARD_MULTIPLES_BACK = 4
-
-global html_format_begin, html_format_end
-html_format_begin = "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">"
-html_format_end = "</span></p></body></html>"
-
-
-
-class StorjSDKImplementationsOverrides():
-    def __init__(self, parent=None):
-        self.storj_engine = StorjEngine()  # init StorjEngine
-
-
-
 
 
 if __name__ == "__main__":
