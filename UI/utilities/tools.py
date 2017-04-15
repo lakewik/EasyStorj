@@ -2,6 +2,8 @@ import re
 import os
 import platform
 import pingparser
+from os.path import expanduser
+
 
 
 class Tools:
@@ -45,3 +47,7 @@ class Tools:
             formatted_size = str(round(num, ndigits=precision))
 
         return "%s %s" % (formatted_size, suffix)
+
+    def get_home_user_directory(self):
+        home = expanduser("~")
+        return str(home)
