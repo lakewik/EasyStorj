@@ -13,14 +13,14 @@ GUI Client for Storj Distributed Storage Network written in Python and PyQt4. Th
 # Software features:
 - [x] list buckets
 - [x] create buckets
-- [ ] register user &nbsp; &nbsp; ![test](http://progressed.io/bar/50)
+- [x] register user 
 - [x] list files in buckets
-- [ ] upload file
-- [ ] download file
+- [ ] upload file &nbsp; &nbsp; ![test](http://progressed.io/bar/80)
+- [ ] download file &nbsp; &nbsp; ![test](http://progressed.io/bar/80)
 - [x] list file pointers
 - [x] list file mirrors
 - [x] manage buckets
-- [ ] advanced configuration and bandwidth limiting
+- [ ] advanced configuration and bandwidth limiting &nbsp; &nbsp; ![test](http://progressed.io/bar/10)
 - [x] specified farmer node details
 
 # Planned features:
