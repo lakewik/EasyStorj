@@ -3,10 +3,13 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QStandardItem
 from PyQt4.QtGui import QStandardItemModel
 from qt_interfaces.file_manager_ui import Ui_FileManager
+from qt_interfaces.file_mirrors_list_ui import Ui_FileMirrorsList
+from  file_mirror import FileMirrorsListUI
 from utilities.tools import Tools
 from engine import StorjEngine
 from file_download import SingleFileDownloadUI
 import storj
+from  storj import exception
 import threading
 
 
