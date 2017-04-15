@@ -1,3 +1,4 @@
+import json
 import os
 
 import requests
@@ -13,6 +14,7 @@ from qt_interfaces.single_file_downloader_ui import Ui_SingleFileDownload
 from crypto.file_crypto_tools import FileCrypto
 from engine import StorjEngine
 import storj
+import storj.exception
 import threading
 
 
@@ -48,6 +50,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("showInvalidDestinationPathError"), self.show_error_invalid_file_path)
         self.connect(self, QtCore.SIGNAL("showInvalidTemporaryDownloadPathError"), self.show_error_invalid_temporary_path)
         self.connect(self, QtCore.SIGNAL("updateDownloadTaskState"), self.update_download_task_state)
+        self.connect(self, QtCore.SIGNAL("showStorjBridgeException"), self.show_storj_bridge_exception)
 
 
 
@@ -59,6 +62,18 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         # set default paths
         self.ui_single_file_download.tmp_dir.setText(str("/tmp/"))
+
+    def show_storj_bridge_exception(self, exception_content):
+        try:
+            j = json.loads(str(exception_content))
+            if (j["error"] == "Failed to get retrieval token"):
+                QMessageBox.about(self, "Bridge error", str(j["error"]) + " Please wait and try again.")
+            else:
+                QMessageBox.about(self, "Bridge error", str(j["error"]))
+
+        except:
+            QMessageBox.about(self, "Bridge error", str(exception_content))
+
 
     def update_download_task_state(self, row_position, state):
         self.ui_single_file_download.shard_queue_table.setItem(int(row_position), 3, QtGui.QTableWidgetItem(str(state)))
@@ -190,8 +205,12 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.ui_single_file_download.tmp_dir.setText(str(self.selected_tmp_dir))
 
     def init_download_file_pointers(self, bucket_id, file_id):
-        file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49", "aa9627aed3f499fcd83907e7")
-        self.emit(QtCore.SIGNAL("beginDownloadProccess"), file_pointers)
+        try:
+            file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49", "aa9627aed3f499fcd83907e7")
+            self.emit(QtCore.SIGNAL("beginDownloadProccess"), file_pointers)
+        except storj.exception.StorjBridgeApiError as e:
+            self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e)) # emit Storj Bridge Exception
+
 
 
     def select_file_save_path(self):
