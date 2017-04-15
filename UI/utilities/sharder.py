@@ -75,44 +75,50 @@ class ShardingTools():
             i2 = int(f2[index2:len(f2)])
             return i2 - i1
 
-    def join_shards(self, shards_filenames, pattern, destination_file_path):
+    def join_shards(self, shards_filepath, pattern, destination_file_path):
         # Based on <http://code.activestate.com/recipes/224800-simple-file-splittercombiner-module/>
         import re
 
         print 'Creating file', destination_file_path
 
         bname = (os.path.split(destination_file_path))[1]
-        bname2 = bname
+        bname_input = (os.path.split(shards_filepath))[1]
+        bname2_input = bname_input
+
+        input_directory = (os.path.split(shards_filepath))[0]
+        output_directory = (os.path.split(destination_file_path))[0]
 
         # bugfix: if file contains characters like +,.,[]
         # properly escape them, otherwise re will fail to match.
         for a, b in zip(['+', '.', '[', ']', '$', '(', ')'],
                         ['\+', '\.', '\[', '\]', '\$', '\(', '\)']):
-            bname2 = bname2.replace(a, b)
+            bname2 = bname2_input.replace(a, b)
 
-        chunkre = re.compile(bname2 + '-' + '[0-9]+')
+        chunkre = re.compile(bname2_input + '-' + '[0-9]+')
 
         chunkfiles = []
-        for f in os.listdir("."):
+        for f in os.listdir(str(input_directory)):
             print f
             if chunkre.match(f):
                 chunkfiles.append(f)
 
         print 'Number of chunks', len(chunkfiles), '\n'
         chunkfiles.sort(self.sort_index)
-
+        print chunkfiles
         data = ''
         for f in chunkfiles:
 
             try:
-                print 'Appending chunk', os.path.join(".", f)
-                data += open(f, 'rb').read()
+                print 'Appending chunk', os.path.join(str(input_directory), f)
+                data += open(str(input_directory) + "/" + str(f), 'rb').read()
+                print str(input_directory) + "/" + str(f) + "katalog wejsciowy"
             except (OSError, IOError, EOFError), e:
                 print e
                 continue
 
         try:
-            f = open(bname, 'wb')
+            print str(output_directory) + "katalog wyjsciowy"
+            f = open(str(output_directory) + "/" + str(bname), 'wb')
             f.write(data)
             f.close()
         except (OSError, IOError, EOFError), e:
