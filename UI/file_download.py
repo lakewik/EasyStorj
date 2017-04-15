@@ -3,6 +3,7 @@ import os
 import requests
 from PyQt4 import QtCore, QtGui
 
+from PyQt4.QtGui import QMessageBox
 from PyQt4.QtGui import QProgressBar
 from PyQt4.QtGui import QTableWidgetItem
 
@@ -28,7 +29,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine()  # init StorjEngine
 
-
+        self.tools = Tools()
 
         #self.initialize_shard_queue_table(file_pointers)
 
@@ -43,6 +44,11 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("updateShardDownloadProgress"), self.update_shard_download_progess)
         self.connect(self, QtCore.SIGNAL("beginDownloadProccess"), self.download_begin)
         self.connect(self, QtCore.SIGNAL("refreshOverallDownloadProgress"), self.refresh_overall_download_progress)
+        self.connect(self, QtCore.SIGNAL("showDestinationFileNotSelectedError"), self.show_error_not_selected_file)
+        self.connect(self, QtCore.SIGNAL("showInvalidDestinationPathError"), self.show_error_invalid_file_path)
+        self.connect(self, QtCore.SIGNAL("showInvalidTemporaryDownloadPathError"), self.show_error_invalid_temporary_path)
+        self.connect(self, QtCore.SIGNAL("updateDownloadTaskState"), self.update_download_task_state)
+
 
 
         self.shards_already_downloaded = 0
@@ -50,6 +56,21 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.createNewInitializationThread(bucketid, fileid)
 
         self.shard_download_percent_list = []
+
+        # set default paths
+        self.ui_single_file_download.tmp_dir.setText(str("/tmp/"))
+
+    def update_download_task_state(self, row_position, state):
+        self.ui_single_file_download.shard_queue_table.setItem(int(row_position), 3, QtGui.QTableWidgetItem(str(state)))
+
+    def show_error_not_selected_file(self):
+        QMessageBox.about(self, "Error", "Please select destination file save path!")
+
+    def show_error_invalid_file_path(self):
+        QMessageBox.about(self, "Error", "Destination file save path seems to be invalid!")
+
+    def show_error_invalid_temporary_path(self):
+        QMessageBox.about(self, "Error", "Temporary path seems to be invalid!")
 
     def refresh_overall_download_progress(self, base_percent):
         total_percent_to_download = self.all_shards_count * 100
@@ -125,7 +146,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         # storj_sdk_overrides = StorjSDKImplementationsOverrides()
 
-        self.file_download(None, None, "/home/lakewik/rudasek2", options_array, self.progressbar_list)
+        #self.file_download(None, None, "/home/lakewik/kotek2", options_array, self.progressbar_list)
+        self.file_download(None, None, self.destination_file_path, options_array, self.progressbar_list)
         # progressbar_list[0].setValue(20)
         # progressbar_list[2].setValue(17)
 
@@ -147,6 +169,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         tools = Tools()
         self.ui_single_file_download.file_size.setText(html_format_begin + str(tools.human_size(int(file_metadata.size))) + html_format_end)
         self.ui_single_file_download.file_id.setText(html_format_begin + str(file_id) + html_format_end)
+
+        self.ui_single_file_download.file_save_path.setText(str(tools.get_home_user_directory() + "/" + str(file_metadata.filename)))
 
 
     def update_shard_download_progess (self, row_position_index, value):
@@ -269,6 +293,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
     def file_download(self, bucket_id, file_id, file_save_path, options_array, progress_bars_list):
 
+        options_chain = {}
+        self.storj_engine.storj_client.logger.info('file_pointers(%s, %s)', bucket_id, file_id)
+        file_name = os.path.split(file_save_path)[1]
+
         #### Begin file download finish function ####
         # Wait for signal to do shards joining and encryption
         def finish_download(self):
@@ -302,9 +330,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         ##### End file download finish point #####
 
-        options_chain = {}
-        self.storj_engine.storj_client.logger.info('file_pointers(%s, %s)', bucket_id, file_id)
-        file_name = os.path.split(file_save_path)[1]
         # Determine file pointers
         if options_array["file_pointers_is_given"] == "1":
             pointers = options_array["file_pointers"]
