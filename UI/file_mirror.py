@@ -1,3 +1,4 @@
+import json
 import threading
 from PyQt4 import QtCore, QtGui
 
@@ -14,6 +15,7 @@ global html_format_begin, html_format_end
 html_format_begin = "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">"
 html_format_end = "</span></p></body></html>"
 
+import  storj.exception
 
 # Mirrors section
 class FileMirrorsListUI(QtGui.QMainWindow):
@@ -29,6 +31,10 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         self.file_mirrors_list_ui.mirror_details_bt_2.clicked.connect(
             lambda: self.open_mirror_details_window("available"))
         self.file_mirrors_list_ui.quit_bt.clicked.connect(self.close)
+
+        self.connect(self, QtCore.SIGNAL("showStorjBridgeException"), self.show_storj_bridge_exception)
+        self.connect(self, QtCore.SIGNAL("showUnhandledException"), self.show_unhandled_exception)
+
 
         # self.connect(self.file_mirrors_list_ui.established_mirrors_tree, QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.open_mirror_details_window)
 
@@ -47,6 +53,17 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         print self.fileid
         self.storj_engine = StorjEngine()  # init StorjEngine
         self.createNewMirrorListInitializationThread()
+
+    def show_unhandled_exception(self, exception_content):
+        QMessageBox.critical(self, "Unhandled error", str(exception_content))
+
+    def show_storj_bridge_exception(self, exception_content):
+        try:
+            j = json.loads(str(exception_content))
+            QMessageBox.critical(self, "Bridge error", str(j["error"]))
+
+        except:
+            QMessageBox.critical(self, "Bridge error", str(exception_content))
 
     def open_mirror_details_window(self, mirror_state):
         # self.established_mirrors_tree_view = self.file_mirrors_list_ui.established_mirrors_tree
@@ -110,68 +127,74 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         self.established_mirrors_count_for_file = 0
         recent_shard_hash = ""
         parent1 = QStandardItem('')
-        for file_mirror in self.storj_engine.storj_client.file_mirrors(str(self.bucketid), str(self.fileid)):
-            for mirror in file_mirror.established:
-                self.established_mirrors_count_for_file += 1
-                print file_mirror.established
-                if mirror["shardHash"] != recent_shard_hash:
-                    parent1 = QStandardItem('Shard with hash {}'.format(mirror["shardHash"]))
-                    divider = divider + 1
-                    self.established_mirrors_model.appendRow(parent1)
+        try:
+            for file_mirror in self.storj_engine.storj_client.file_mirrors(str(self.bucketid), str(self.fileid)):
+                for mirror in file_mirror.established:
+                    self.established_mirrors_count_for_file += 1
+                    print file_mirror.established
+                    if mirror["shardHash"] != recent_shard_hash:
+                        parent1 = QStandardItem('Shard with hash {}'.format(mirror["shardHash"]))
+                        divider = divider + 1
+                        self.established_mirrors_model.appendRow(parent1)
 
-                child1 = QStandardItem(str(mirror["contact"]["address"] + ":" + str(mirror["contact"]["port"])))
-                child2 = QStandardItem(str(mirror["contact"]["userAgent"]))
-                child3 = QStandardItem(str(mirror["contact"]["lastSeen"]))
-                child4 = QStandardItem(str(mirror["contact"]["nodeID"]))
-                parent1.appendRow([child1, child2, child3, child4])
+                    child1 = QStandardItem(str(mirror["contact"]["address"] + ":" + str(mirror["contact"]["port"])))
+                    child2 = QStandardItem(str(mirror["contact"]["userAgent"]))
+                    child3 = QStandardItem(str(mirror["contact"]["lastSeen"]))
+                    child4 = QStandardItem(str(mirror["contact"]["nodeID"]))
+                    parent1.appendRow([child1, child2, child3, child4])
 
-                # span container columns
-                # self.established_mirrors_tree_view.setFirstColumnSpanned(1, self.established_mirrors_tree_view.rootIndex(), True)
+                    # span container columns
+                    # self.established_mirrors_tree_view.setFirstColumnSpanned(1, self.established_mirrors_tree_view.rootIndex(), True)
 
-                recent_shard_hash = mirror["shardHash"]
+                    recent_shard_hash = mirror["shardHash"]
 
-        self.file_mirrors_list_ui.loading_label_mirrors_established.setText("")
+            self.file_mirrors_list_ui.loading_label_mirrors_established.setText("")
 
-        # dbQueryModel.itemData(treeView.selectedIndexes()[0])
+            # dbQueryModel.itemData(treeView.selectedIndexes()[0])
 
-        ################################### set the model for available mirrors #########################################
-        self.available_mirrors_model = QStandardItemModel()
-        self.available_mirrors_model.setHorizontalHeaderLabels(self.mirror_tree_view_header)
+            ################################### set the model for available mirrors #########################################
+            self.available_mirrors_model = QStandardItemModel()
+            self.available_mirrors_model.setHorizontalHeaderLabels(self.mirror_tree_view_header)
 
-        self.available_mirrors_tree_view = self.file_mirrors_list_ui.available_mirrors_tree
-        self.available_mirrors_tree_view.setSelectionBehavior(QAbstractItemView.SelectRows)
+            self.available_mirrors_tree_view = self.file_mirrors_list_ui.available_mirrors_tree
+            self.available_mirrors_tree_view.setSelectionBehavior(QAbstractItemView.SelectRows)
 
-        self.available_mirrors_tree_view.setModel(self.available_mirrors_model)
-        self.available_mirrors_tree_view.setUniformRowHeights(True)
+            self.available_mirrors_tree_view.setModel(self.available_mirrors_model)
+            self.available_mirrors_tree_view.setUniformRowHeights(True)
 
-        self.file_mirrors_list_ui.available_mirrors_tree.setModel(self.available_mirrors_model)
+            self.file_mirrors_list_ui.available_mirrors_tree.setModel(self.available_mirrors_model)
 
-        divider = 0
-        self.available_mirrors_count_for_file = 0
-        recent_shard_hash_2 = ""
-        parent2 = QStandardItem('')
-        for file_mirror in self.storj_engine.storj_client.file_mirrors(str(self.bucketid), str(self.fileid)):
-            for mirror_2 in file_mirror.available:
-                self.available_mirrors_count_for_file += 1
-                if mirror_2["shardHash"] != recent_shard_hash_2:
-                    parent2 = QStandardItem('Shard with hash {}'.format(mirror_2["shardHash"]))
-                    divider = divider + 1
-                    self.available_mirrors_model.appendRow(parent2)
+            divider = 0
+            self.available_mirrors_count_for_file = 0
+            recent_shard_hash_2 = ""
+            parent2 = QStandardItem('')
+            for file_mirror in self.storj_engine.storj_client.file_mirrors(str(self.bucketid), str(self.fileid)):
+                for mirror_2 in file_mirror.available:
+                    self.available_mirrors_count_for_file += 1
+                    if mirror_2["shardHash"] != recent_shard_hash_2:
+                        parent2 = QStandardItem('Shard with hash {}'.format(mirror_2["shardHash"]))
+                        divider = divider + 1
+                        self.available_mirrors_model.appendRow(parent2)
 
-                child1 = QStandardItem(str(mirror_2["contact"]["address"] + ":" + str(mirror_2["contact"]["port"])))
-                child2 = QStandardItem(str(mirror_2["contact"]["userAgent"]))
-                child3 = QStandardItem(str(mirror_2["contact"]["lastSeen"]))
-                child4 = QStandardItem(str(mirror_2["contact"]["nodeID"]))
-                parent2.appendRow([child1, child2, child3, child4])
+                    child1 = QStandardItem(str(mirror_2["contact"]["address"] + ":" + str(mirror_2["contact"]["port"])))
+                    child2 = QStandardItem(str(mirror_2["contact"]["userAgent"]))
+                    child3 = QStandardItem(str(mirror_2["contact"]["lastSeen"]))
+                    child4 = QStandardItem(str(mirror_2["contact"]["nodeID"]))
+                    parent2.appendRow([child1, child2, child3, child4])
 
-                # span container columns
-                # self.established_mirrors_tree_view.setFirstColumnSpanned(1, self.established_mirrors_tree_view.rootIndex(), True)
+                    # span container columns
+                    # self.established_mirrors_tree_view.setFirstColumnSpanned(1, self.established_mirrors_tree_view.rootIndex(), True)
 
-                recent_shard_hash_2 = mirror_2["shardHash"]
-        self.file_mirrors_list_ui.loading_label_mirrors_available.setText("")
+                    recent_shard_hash_2 = mirror_2["shardHash"]
+            self.file_mirrors_list_ui.loading_label_mirrors_available.setText("")
 
-        self.file_mirrors_list_ui.established_mirrors_count.setText(
-            html_format_begin + str(self.established_mirrors_count_for_file) + html_format_end)
-        self.file_mirrors_list_ui.available_mirrors_count.setText(
-            html_format_begin + str(self.available_mirrors_count_for_file) + html_format_end)
-        print QtCore.QDir.currentPath()
+            self.file_mirrors_list_ui.established_mirrors_count.setText(
+                html_format_begin + str(self.established_mirrors_count_for_file) + html_format_end)
+            self.file_mirrors_list_ui.available_mirrors_count.setText(
+                html_format_begin + str(self.available_mirrors_count_for_file) + html_format_end)
+        except storj.exception.StorjBridgeApiError as e:
+            self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))  # emit Storj Bridge Exception
+        except Exception as e:
+            self.emit(QtCore.SIGNAL("showUnhandledException"), str(e))  # emit unhandled Exception
+            print str(e)
+
