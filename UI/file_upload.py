@@ -21,6 +21,8 @@ import hashlib
 import threading
 import magic
 
+from sys import platform
+
 import storj.model
 import  storj.exception
 
@@ -45,7 +47,16 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         # set default paths
 
-        self.ui_single_file_upload.tmp_path.setText(str("/tmp/"))
+        if platform == "linux" or platform == "linux2":
+            # linux
+            self.ui_single_file_upload.tmp_path.setText(str("/tmp/"))
+        elif platform == "darwin":
+            # OS X
+            self.ui_single_file_upload.tmp_path.setText(str("/tmp/"))
+        elif platform == "win32":
+            # Windows
+            self.ui_single_file_upload.tmp_path.setText(str("C://Windows/temp/"))
+
 
 
         # initialize variables
@@ -62,6 +73,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, SIGNAL("showInvalidPathError"), self.show_error_invalid_file_path)
         self.connect(self, SIGNAL("showInvalidTemporaryPathError"), self.show_error_invalid_temporary_path)
         self.connect(self, SIGNAL("refreshOverallProgress"), self.refresh_overall_progress)
+        self.connect(self, SIGNAL("showFileUploadedSuccessfully"), lambda: QMessageBox.finished(self, "Success!", "File uploaded successfully!"))
 
         self.createBucketResolveThread() # resolve buckets and put to buckets combobox
 
@@ -80,6 +92,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # self.initialize_shard_queue_table(file_pointers)
 
         self.shard_upload_percent_list = []
+
+        self.ui_single_file_upload.overall_progress.setValue(0)
 
     def refresh_overall_progress(self, base_percent):
         total_percent_to_upload = self.all_shards_count * 100
@@ -223,7 +237,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 chunks -= 1
                 self.emit(SIGNAL("updateShardUploadProgress"), int(rowposition), percent_uploaded)  # update progress bar in upload queue table
                 self.shard_upload_percent_list[shard_index] = percent_uploaded
-                self.emit(SIGNAL("refreshOverallProgress"), 0.1)  # update progress bar in upload queue table
+                self.emit(SIGNAL("refreshOverallProgress"), 0.1)  # update overall progress bar
 
 
         it = 0
@@ -302,7 +316,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                     except Exception, e:
                         self.emit(SIGNAL("updateUploadTaskState"), rowposition,
-                                  "First try failed. Retrying...")  # update shard upload state
+                                  "First try failed. Retrying... (" + str(farmer_tries) + ")")  # update shard upload state
                         print str(e)
                         continue
                     else:
@@ -363,7 +377,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
 
     def file_upload_begin(self):
-
+        self.ui_single_file_upload.overall_progress.setValue(0)
         # upload finish function #
         def finish_upload(self):
             self.crypto_tools = CryptoTools()
@@ -409,10 +423,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 )
                 success = True
             except storj.exception.StorjBridgeApiError, e:
-                QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
+                QMessageBox.about(self, "Unhandled bridge exception", "Exception: " + str(e))
             if success:
                 self.ui_single_file_upload.current_state.setText(
                     html_format_begin + "Upload success! Waiting for user..." + html_format_end)
+                self.emit(SIGNAL("showFileUploadedSuccessfully"))
 
 
         self.connect(self, SIGNAL("finishUpload"), lambda: finish_upload(self))
@@ -517,6 +532,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Resolving frame for file..." + html_format_end)
+
+            frame = None # initialize variable
             try:
                 frame = self.storj_engine.storj_client.frame_create()  # Create file frame
             except storj.exception.StorjBridgeApiError, e:
