@@ -11,6 +11,12 @@ if __name__ == "__main__":
     QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads)
     app = QtGui.QApplication(sys.argv)
 
+    locale = QtCore.QLocale.system().name()
+    qtTranslator = QtCore.QTranslator()
+    # try to load translation
+    if qtTranslator.load("" + locale, ":tra/"):
+        app.installTranslator(qtTranslator)
+
     account_manager = AccountManager()
     if account_manager.if_logged_in():
         myapp = MainUI()
