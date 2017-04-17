@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 import requests
@@ -26,9 +27,21 @@ from sys import platform
 import storj.model
 import  storj.exception
 
+from logs_backend import LogHandler, logger
+
 global html_format_begin, html_format_end
 html_format_begin = "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">"
 html_format_end = "</span></p></body></html>"
+
+######################### Logging ####################
+def get_global_logger(handler):
+    class GlobalLogger(logging.getLoggerClass()):
+        def __init__(self, name):
+            logging.getLoggerClass().__init__(self, name)
+            self.addHandler(handler)
+    return GlobalLogger
+
+######################################################
 
 class SingleFileUploadUI(QtGui.QMainWindow):
     def __init__(self, parent=None, bucketid=None, fileid=None):
@@ -44,6 +57,13 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.storj_engine = StorjEngine()  # init StorjEngine
 
         self.initialize_upload_queue_table()
+
+        # init loggers
+        self.log_handler = LogHandler()
+        logging.setLoggerClass(get_global_logger(self.log_handler))
+        logger.addHandler(self.log_handler)
+        #logging.info("Begin")
+
 
         # set default paths
 
@@ -73,15 +93,15 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, SIGNAL("showInvalidPathError"), self.show_error_invalid_file_path)
         self.connect(self, SIGNAL("showInvalidTemporaryPathError"), self.show_error_invalid_temporary_path)
         self.connect(self, SIGNAL("refreshOverallProgress"), self.refresh_overall_progress)
-        self.connect(self, SIGNAL("showFileUploadedSuccessfully"), lambda: QMessageBox.finished(self, "Success!", "File uploaded successfully!"))
+        self.connect(self, SIGNAL("showFileUploadedSuccessfully"), self.show_upload_finished_message)
 
-        self.createBucketResolveThread() # resolve buckets and put to buckets combobox
+        self.createBucketResolveThread()  # resolve buckets and put to buckets combobox
 
         # file_pointers = self.storj_engine.storj_client.file_pointers("6acfcdc62499144929cf9b4a", "dfba26ab34466b1211c60d02")
 
-        #self.emit(SIGNAL("addRowToUploadQueueTable"), "important", "information")
-        #self.emit(SIGNAL("addRowToUploadQueueTable"), "important", "information")
-        #self.emit(SIGNAL("incrementShardsProgressCounters"))
+        # self.emit(SIGNAL("addRowToUploadQueueTable"), "important", "information")
+        # self.emit(SIGNAL("addRowToUploadQueueTable"), "important", "information")
+        # self.emit(SIGNAL("incrementShardsProgressCounters"))
 
         self.max_retries_upload_to_same_farmer = 3
         self.max_retries_negotiate_contract = 10
@@ -94,6 +114,12 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.shard_upload_percent_list = []
 
         self.ui_single_file_upload.overall_progress.setValue(0)
+
+    def show_upload_finished_message(self):
+        logger.warning(str({"log_event_type": "info", "title": "File uploaded",
+                            "description": "File uploaded successfully!"}))
+
+        QMessageBox.information(self, "Success!", "File uploaded successfully!")
 
     def refresh_overall_progress(self, base_percent):
         total_percent_to_upload = self.all_shards_count * 100
@@ -131,6 +157,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         bucket_resolve_thread.start()
 
     def initialize_buckets_select_list(self):
+        logger.warning(str({"log_event_type": "info", "title": "Buckets", "description": "Resolving buckets from Bridge to buckets combobox..."}))
+
         self.buckets_list = []
         self.bucket_id_list = []
         self.storj_engine = StorjEngine()  # init StorjEngine
@@ -266,6 +294,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 tablerowdata["token"] = frame_content["token"]
                 tablerowdata["shard_index"] = str(chapters)
 
+                logger.warning(str({"log_event_type": "debug", "title": "Contract negotiated",
+                                    "description": "Storage contract negotiated with: " + str(frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"]["port"]))}))
+
                 self.emit(SIGNAL("addRowToUploadQueueTable"), tablerowdata)  # add row to table
 
                 rowcount = self.ui_single_file_upload.shard_queue_table_widget.rowCount()
@@ -299,12 +330,16 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 shard_size = int(shard.size)
 
                 rowposition = rowcount
-
                 farmer_tries = 0
                 response = None
                 while self.max_retries_upload_to_same_farmer > farmer_tries:
                     farmer_tries += 1
                     try:
+                        logger.warning(str({"log_event_type": "debug", "title": "Uploading shard",
+                                            "description": "Uploading shard at index " + str(shard.index) + " to " + str(
+                                                frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"][
+                                                    "port"]))}))
+
                         with open(self.parametrs.tmpPath + file_name_ready_to_shard_upload + '-' + str(chapters + 1),
                                   'rb') as f:
                             response = requests.post(url, data=read_in_chunks(f, shard_size, rowposition, shard_index=chapters), timeout=1)
@@ -317,10 +352,19 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                     except Exception, e:
                         self.emit(SIGNAL("updateUploadTaskState"), rowposition,
                                   "First try failed. Retrying... (" + str(farmer_tries) + ")")  # update shard upload state
+
+                        logger.warning(str({"log_event_type": "warning", "title": "File uploaded",
+                                           "description": "Error while uploading shard to: " + str(
+                                                frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"][
+                                                    "port"])) + " Retrying... (" + str(farmer_tries) + ")"}))
                         print str(e)
                         continue
                     else:
                         self.emit(SIGNAL("incrementShardsProgressCounters"))  # update already uploaded shards count
+                        logger.warning(str({"log_event_type": "success", "title": "Uploading shard",
+                                            "description": "Shard uploaded successfully to " + str(
+                                                frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"][
+                                                    "port"]))}))
                         self.emit(SIGNAL("updateUploadTaskState"), rowposition,
                                   "Uploaded!")  # update shard upload state
 
@@ -517,6 +561,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Resolving PUSH token..." + html_format_end)
 
+            logger.warning(str({"log_event_type": "debug", "title": "PUSH token",
+                                "description": "Resolving PUSH Token for upload..."}))
+
             push_token = None
 
             try:
@@ -533,11 +580,16 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Resolving frame for file..." + html_format_end)
 
+            logger.warning(str({"log_event_type": "debug", "title": "Frame",
+                                "description": "Resolving frame for file upload..."}))
+
             frame = None # initialize variable
             try:
                 frame = self.storj_engine.storj_client.frame_create()  # Create file frame
             except storj.exception.StorjBridgeApiError, e:
                 QMessageBox.about(self, "Unhandled exception while creating file staging frame", "Exception: " + str(e))
+                logger.warning(str({"log_event_type": "error", "title": "Frame",
+                                    "description": "Error while resolving frame for file upload..."}))
 
             self.ui_single_file_upload.file_frame_id.setText(html_format_begin + str(frame.id) + html_format_end)
 
@@ -547,6 +599,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             # Now generate shards
             self.set_current_status("Splitting file to shards...")
+            logger.warning(str({"log_event_type": "debug", "title": "Sharding",
+                                "description": "Splitting file to shards..."}))
             shards_manager = storj.model.ShardManager(filepath=str(file_path_ready), tmp_path=self.parametrs.tmpPath)
 
 
@@ -574,12 +628,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
 
 
-                # delete encrypted file
+                # delete encrypted file TODO
 
 
-
-        # hash_sha512_hmac = self.storj_engine.storj_client.get_custom_checksum(file_path)
-        hash_sha512_hmac = "dxjcdj"
 
         #self.emit(SIGNAL("finishUpload")) # send signal to save to bucket after all filea are uploaded
 
