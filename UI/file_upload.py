@@ -415,6 +415,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 exchange_report.exchangeResultCode = (exchange_report.SUCCESS)
                 exchange_report.exchangeResultMessage = (exchange_report.STORJ_REPORT_SHARD_UPLOADED)
                 self.set_current_status("Sending Exchange Report for shard " + str(chapters + 1))
+                logger.warning(str({"log_event_type": "debug", "title": "Shard added",
+                                    "description": "Shard successfully " + str(chapters + 1) + " added and exchange report sent."}))
                 # self.storj_engine.storj_client.send_exchange_report(exchange_report) # send exchange report
                 break
 
@@ -427,6 +429,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.crypto_tools = CryptoTools()
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Generating SHA5212 HMAC..." + html_format_end)
+            logger.warning(str({"log_event_type": "debug", "title": "HMAC",
+                                "description": "Generating HMAC..."}))
             hash_sha512_hmac_b64 = self.crypto_tools.prepare_bucket_entry_hmac(shards_manager.shards)
             hash_sha512_hmac = hashlib.sha224(str(hash_sha512_hmac_b64["SHA-512"])).hexdigest()
             print hash_sha512_hmac
@@ -453,6 +457,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             }
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Adding file to bucket..." + html_format_end)
+
+            logger.warning(str({"log_event_type": "debug", "title": "Finishing upload",
+                                "description": "Adding file " + str(bname) + " to bucket..."}))
 
             success = False
             try:
