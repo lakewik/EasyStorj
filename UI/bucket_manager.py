@@ -2,7 +2,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QStandardItem, QStandardItemModel
 from qt_interfaces.bucket_manager_ui import Ui_BucketManager
 from engine import StorjEngine
-import storj
+import storj.exception as sjexc
 import threading
 
 
@@ -57,7 +57,7 @@ class BucketManagerUI(QtGui.QMainWindow):
                 try:
                     self.storj_engine.storj_client.bucket_delete(str(bucket_id))
                     success = True
-                except storj.exception.StorjBridgeApiError as e:
+                except sjexc.StorjBridgeApiError as e:
                     QtGui.QMessageBox.about(self, "Unhandled exception deleting bucket", "Exception: " + str(e))
                     success = False
 
@@ -92,7 +92,7 @@ class BucketManagerUI(QtGui.QMainWindow):
                 model.setItem(i, 3, item)  # row, column, item (QStandardItem)
 
                 i = i + 1
-        except storj.exception.StorjBridgeApiError as e:
+        except sjexc.StorjBridgeApiError as e:
             QtGui.QMessageBox.about(self, "Unhandled bucket resolving exception", "Exception: " + str(e))
 
         self.bucket_manager_ui.total_buckets_label.setText(str(i))  # set label of user buckets number

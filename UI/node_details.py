@@ -2,9 +2,6 @@ import json
 import socket
 from PyQt4 import QtCore, QtGui
 
-from PyQt4.QtGui import QMessageBox
-from PyQt4.QtGui import QPixmap
-
 from qt_interfaces.node_details_ui import Ui_NodeDetails
 from engine import StorjEngine
 from utilities.tools import Tools
@@ -12,7 +9,7 @@ from utilities.tools import Tools
 from ipwhois import IPWhois
 import pycountry
 import threading
-import storj.exception
+import storj.exception as sjexc
 
 from resources.html_strings import html_format_begin, html_format_end
 
@@ -39,11 +36,10 @@ class NodeDetailsUI(QtGui.QMainWindow):
     def show_storj_bridge_exception(self, exception_content):
         try:
             j = json.loads(str(exception_content))
-            QMessageBox.critical(self, "Bridge error", str(j["error"]))
+            QtGui.QMessageBox.critical(self, "Bridge error", str(j["error"]))
 
         except:
-            QMessageBox.critical(self, "Bridge error", str(exception_content))
-
+            QtGui.QMessageBox.critical(self, "Bridge error", str(exception_content))
 
     def createNewNodeDetailsResolveThread(self):
         download_thread = threading.Thread(target=self.initialize_node_details, args=())
@@ -102,18 +98,13 @@ class NodeDetailsUI(QtGui.QMainWindow):
 
             grview = self.node_details_ui.country_graphicsView()
             scene = QtGui.QGraphicsScene()
-            scene.addPixmap(QPixmap('PL.png'))
+            scene.addPixmap(QtGui.QPixmap('PL.png'))
             grview.setScene(scene)
 
             grview.show()
 
             print country_full_name
-        except storj.exception.StorjBridgeApiError as e:
+        except sjexc.StorjBridgeApiError as e:
             self.emit(QtCore.SIGNAL("showBridgeExceptionMessageBox"), str(e))  # emit signal to show message box with bridge exception
         except Exception as e:
             self.emit(QtCore.SIGNAL("showUnhandledExceptionMessageBox"), str(e))  # emit signal to show message box with unhandled exception
-
-
-
-
-

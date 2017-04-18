@@ -1,15 +1,12 @@
 from PyQt4 import QtCore, QtGui
 
-from PyQt4.QtGui import QStandardItem
-from PyQt4.QtGui import QStandardItemModel
 from qt_interfaces.file_manager_ui import Ui_FileManager
 from qt_interfaces.file_mirrors_list_ui import Ui_FileMirrorsList
-from  file_mirror import FileMirrorsListUI
+from file_mirror import FileMirrorsListUI
 from utilities.tools import Tools
 from engine import StorjEngine
 from file_download import SingleFileDownloadUI
-import storj
-from  storj import exception
+import storj.exception as sjexc
 import threading
 
 
@@ -62,7 +59,7 @@ class FileManagerUI(QtGui.QMainWindow):
                     self.storj_engine.storj_client.file_remove(str(self.current_selected_bucket_id), str(selected_file_id))
                     self.createNewFileListUpdateThread()  # update files list
                     QtGui.QMessageBox.about(self, "Success", 'File "' + str(selected_file_name) + '" was deleted successfully')
-                except storj.exception.StorjBridgeApiError as e:
+                except sjexc.StorjBridgeApiError as e:
                     QtGui.QMessageBox.about(self, "Error", "Bridge exception occured while trying to delete file: " + str(e))
                 except Exception as e:
                     QtGui.QMessageBox.about(self, "Error", "Unhandled exception occured while trying to delete file: " + str(e))
@@ -103,7 +100,7 @@ class FileManagerUI(QtGui.QMainWindow):
 
         self.tools = Tools()
 
-        model = QStandardItemModel(1, 1)  # initialize model for inserting to table
+        model = QtGui.QStandardItemModel(1, 1)  # initialize model for inserting to table
 
         model.setHorizontalHeaderLabels(['File name', 'File size', 'Mimetype', 'File ID'])
 
@@ -113,18 +110,18 @@ class FileManagerUI(QtGui.QMainWindow):
         i = 0
 
         for self.file_details in self.storj_engine.storj_client.bucket_files(str(self.current_selected_bucket_id)):
-            item = QStandardItem(str(self.file_details["filename"]))
-            model.setItem(i, 0, item)  # row, column, item (QStandardItem)
+            item = QtGui.QStandardItem(str(self.file_details["filename"]))
+            model.setItem(i, 0, item)  # row, column, item (StandardItem)
 
             file_size_str = self.tools.human_size(int(self.file_details["size"]))  # get human readable file size
 
-            item = QStandardItem(str(file_size_str))
-            model.setItem(i, 1, item)  # row, column, item (QStandardItem)
+            item = QtGui.QStandardItem(str(file_size_str))
+            model.setItem(i, 1, item)  # row, column, item (QQtGui.StandardItem)
 
-            item = QStandardItem(str(self.file_details["mimetype"]))
+            item = QtGui.QStandardItem(str(self.file_details["mimetype"]))
             model.setItem(i, 2, item)  # row, column, item (QStandardItem)
 
-            item = QStandardItem(str(self.file_details["id"]))
+            item = QtGui.QStandardItem(str(self.file_details["id"]))
             model.setItem(i, 3, item)  # row, column, item (QStandardItem)
 
             i = i + 1
@@ -149,7 +146,7 @@ class FileManagerUI(QtGui.QMainWindow):
                 self.buckets_list.append(str(bucket.name))  # append buckets to list
                 self.bucket_id_list.append(str(bucket.id))  # append buckets to list
                 i = i + 1
-        except storj.exception.StorjBridgeApiError as e:
+        except sjexc.StorjBridgeApiError as e:
             QtGui.QMessageBox.about(self, "Unhandled bucket resolving exception", "Exception: " + str(e))
 
         self.file_manager_ui.bucket_select_combo_box.addItems(self.buckets_list)

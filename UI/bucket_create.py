@@ -1,7 +1,7 @@
 from PyQt4 import QtCore, QtGui
 from qt_interfaces.create_bucket_ui import Ui_BucketCreate
 from engine import StorjEngine
-import storj
+import storj.exception as sjexc
 import threading
 
 
@@ -47,7 +47,7 @@ class BucketCreateUI(QtGui.QMainWindow):
                 self.storj_engine.storj_client.bucket_create(str(self.bucket_name), int(self.bucket_storage),
                                                              int(self.bucket_transfer))
                 bucket_created = True
-            except storj.exception.StorjBridgeApiError as e:
+            except sjexc.StorjBridgeApiError as e:
                 bucket_created = False
                 self.emit(QtCore.SIGNAL("showBucketCreatingException"), str(e))
 
