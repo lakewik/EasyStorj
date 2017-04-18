@@ -550,6 +550,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             if self.ui_single_file_upload.encrypt_files_checkbox.isChecked():
                 # encrypt file
                 self.set_current_status("Encrypting file...")
+                logger.warning(
+                    str({"log_event_type": "debug", "title": "Encryption", "description": "Encrypting file..."}))
+
                 file_crypto_tools = FileCrypto()
                 file_crypto_tools.encrypt_file("AES", str(file_path), self.parametrs.tmpPath + "/" + bname + ".encrypted",
                                                "kotecze57")  # begin file encryption
