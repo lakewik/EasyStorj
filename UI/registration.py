@@ -4,7 +4,7 @@ from qt_interfaces.storj_register_ui import Ui_Register
 from login import LoginUI
 from utilities.tools import Tools
 import json
-from  storj import  exception
+import storj
 
 
 # Register section
