@@ -30,6 +30,7 @@ import  storj.exception
 from logs_backend import LogHandler, logger
 
 from resources.html_strings import html_format_begin, html_format_end
+from utilities.account_manager import AccountManager
 
 
 ######################### Logging ####################
@@ -62,6 +63,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         logging.setLoggerClass(get_global_logger(self.log_handler))
         logger.addHandler(self.log_handler)
         #logging.info("Begin")
+
+        self.account_manager = AccountManager()  # init AccountManager
+
+        self.user_password = self.account_manager.get_user_password()
 
 
         # set default paths
@@ -526,7 +531,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
 
         if self.validation["file_path"]:
-            
+
             self.current_bucket_index = self.ui_single_file_upload.save_to_bucket_select.currentIndex()
             self.current_selected_bucket_id = self.bucket_id_list[self.current_bucket_index]
             bucket_id = str(self.current_selected_bucket_id)
@@ -558,7 +563,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                 file_crypto_tools = FileCrypto()
                 file_crypto_tools.encrypt_file("AES", str(file_path), self.parametrs.tmpPath + "/" + bname + ".encrypted",
-                                               "kotecze57")  # begin file encryption
+                                               str(self.user_password))  # begin file encryption
                 file_path_ready = self.parametrs.tmpPath + "/" + bname + ".encrypted" # get path to encrypted file in temp dir
                 file_name_ready_to_shard_upload = bname + ".encrypted"
             else:
