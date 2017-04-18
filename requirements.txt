@@ -6,6 +6,6 @@ lxml
 pycountry
 python-magic
 requests
-storj
+#storj
 
 # NOTE: PyQt4 must be install separately. On Debian, this is possible via `sudo apt install python-qt4`
