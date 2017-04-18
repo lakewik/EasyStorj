@@ -108,25 +108,28 @@ class FileManagerUI(QtGui.QMainWindow):
 
         i = 0
 
-        for self.file_details in self.storj_engine.storj_client.bucket_files(str(self.current_selected_bucket_id)):
-            item = QtGui.QStandardItem(str(self.file_details["filename"]))
-            model.setItem(i, 0, item)  # row, column, item (StandardItem)
+        try:
+            for self.file_details in self.storj_engine.storj_client.bucket_files(str(self.current_selected_bucket_id)):
+                item = QtGui.QStandardItem(str(self.file_details["filename"]))
+                model.setItem(i, 0, item)  # row, column, item (StandardItem)
 
-            file_size_str = self.tools.human_size(int(self.file_details["size"]))  # get human readable file size
+                file_size_str = self.tools.human_size(int(self.file_details["size"]))  # get human readable file size
 
-            item = QtGui.QStandardItem(str(file_size_str))
-            model.setItem(i, 1, item)  # row, column, item (QQtGui.StandardItem)
+                item = QtGui.QStandardItem(str(file_size_str))
+                model.setItem(i, 1, item)  # row, column, item (QQtGui.StandardItem)
 
-            item = QtGui.QStandardItem(str(self.file_details["mimetype"]))
-            model.setItem(i, 2, item)  # row, column, item (QStandardItem)
+                item = QtGui.QStandardItem(str(self.file_details["mimetype"]))
+                model.setItem(i, 2, item)  # row, column, item (QStandardItem)
 
-            item = QtGui.QStandardItem(str(self.file_details["id"]))
-            model.setItem(i, 3, item)  # row, column, item (QStandardItem)
+                item = QtGui.QStandardItem(str(self.file_details["id"]))
+                model.setItem(i, 3, item)  # row, column, item (QStandardItem)
 
-            i = i + 1
+                i = i + 1
 
-            print self.file_details
-
+                print self.file_details
+        except sjexc.StorjBridgeApiError as e:
+            print str(e)
+            
         self.file_manager_ui.files_list_tableview.clearFocus()
         self.file_manager_ui.files_list_tableview.setModel(model)
         self.file_manager_ui.files_list_tableview.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
