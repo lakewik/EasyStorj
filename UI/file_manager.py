@@ -50,10 +50,10 @@ class FileManagerUI(QtGui.QMainWindow):
             selected_file_id = str(tablemodel.data(index).toString())
             selected_file_name = str(tablemodel.data(index_filename).toString())
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Question",
-                                       "Are you sure you want to delete this file? File name: " + selected_file_name, QtGui.QMessageBox.Yes)
+                                       "Are you sure you want to delete this file? File name: " + selected_file_name, (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
             result = msgBox.exec_()
             print result
-            if result != QtGui.QMessageBox.Rejected:
+            if result == QtGui.QMessageBox.Yes:
                 try:
                     self.storj_engine.storj_client.file_remove(str(self.current_selected_bucket_id), str(selected_file_id))
                     self.createNewFileListUpdateThread()  # update files list
@@ -129,7 +129,7 @@ class FileManagerUI(QtGui.QMainWindow):
                 print self.file_details
         except sjexc.StorjBridgeApiError as e:
             print str(e)
-            
+
         self.file_manager_ui.files_list_tableview.clearFocus()
         self.file_manager_ui.files_list_tableview.setModel(model)
         self.file_manager_ui.files_list_tableview.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
