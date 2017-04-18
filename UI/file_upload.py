@@ -29,9 +29,8 @@ import  storj.exception
 
 from logs_backend import LogHandler, logger
 
-global html_format_begin, html_format_end
-html_format_begin = "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">"
-html_format_end = "</span></p></body></html>"
+from resources.html_strings import html_format_begin, html_format_end
+
 
 ######################### Logging ####################
 def get_global_logger(handler):

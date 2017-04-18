@@ -11,11 +11,9 @@ from UI.engine import StorjEngine
 from UI.node_details import NodeDetailsUI
 from qt_interfaces.file_mirrors_list_ui import Ui_FileMirrorsList
 
-global html_format_begin, html_format_end
-html_format_begin = "<html><head/><body><p><span style=\" font-size:12pt; font-weight:600;\">"
-html_format_end = "</span></p></body></html>"
+from resources.html_strings import html_format_begin, html_format_end
 
-import  storj.exception
+import  storj.exception as sjexc
 
 # Mirrors section
 class FileMirrorsListUI(QtGui.QMainWindow):
@@ -192,7 +190,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                 html_format_begin + str(self.established_mirrors_count_for_file) + html_format_end)
             self.file_mirrors_list_ui.available_mirrors_count.setText(
                 html_format_begin + str(self.available_mirrors_count_for_file) + html_format_end)
-        except storj.exception.StorjBridgeApiError as e:
+        except sjexc.StorjBridgeApiError as e:
             self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))  # emit Storj Bridge Exception
         except Exception as e:
             self.emit(QtCore.SIGNAL("showUnhandledException"), str(e))  # emit unhandled Exception
