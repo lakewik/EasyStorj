@@ -116,9 +116,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.overall_progress.setValue(0)
 
     def show_upload_finished_message(self):
-        logger.warning(str({"log_event_type": "info", "title": "File uploaded",
-                            "description": "File uploaded successfully!"}))
-
         QMessageBox.information(self, "Success!", "File uploaded successfully!")
 
     def refresh_overall_progress(self, base_percent):
@@ -281,6 +278,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 html_format_begin + "Adding shard " + str(
                     chapters) + " to file frame and getting contract..." + html_format_end)
 
+            logger.warning(str({"log_event_type": "debug", "title": "Negotiating contract",
+                                "description": "Trying to negotiate storage contract for shard at inxed " + str(chapters) + "..."}))
+
             try:
                 frame_content = self.storj_engine.storj_client.frame_add_shard(shard, frame.id)
 
@@ -349,11 +349,19 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                             raise storj.exception.StorjFarmerError(
                                 storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
 
+                    except storj.exception.StorjFarmerError, e:
+                        # upload failed due to Farmer Failure
+                        print str(e)
+                        if str(e) == str(storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED):
+                            print "The supplied token not accepted"
+                        # print "Exception raised while trying to negitiate contract: " + str(e)
+                        continue
+
                     except Exception, e:
                         self.emit(SIGNAL("updateUploadTaskState"), rowposition,
                                   "First try failed. Retrying... (" + str(farmer_tries) + ")")  # update shard upload state
 
-                        logger.warning(str({"log_event_type": "warning", "title": "File uploaded",
+                        logger.warning(str({"log_event_type": "warning", "title": "Shard upload error",
                                            "description": "Error while uploading shard to: " + str(
                                                 frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"][
                                                     "port"])) + " Retrying... (" + str(farmer_tries) + ")"}))
@@ -365,6 +373,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                                             "description": "Shard uploaded successfully to " + str(
                                                 frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"][
                                                     "port"]))}))
+
                         self.emit(SIGNAL("updateUploadTaskState"), rowposition,
                                   "Uploaded!")  # update shard upload state
 
@@ -387,18 +396,16 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             except storj.exception.StorjBridgeApiError, e:
                 # upload failed due to Storj Bridge failure
                 print "Exception raised while trying to negitiate contract: " + str(e)
-                continue
-            except storj.exception.StorjFarmerError, e:
-                # upload failed due to Farmer Failure
-                print str(e)
-                if str(e) == str(storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED):
-                    print "The supplied token not accepted"
-                #print "Exception raised while trying to negitiate contract: " + str(e)
+                logger.warning(str({"log_event_type": "error", "title": "Bridge exception",
+                                    "description": "Exception raised while trying to negitiate storage contract for shard at index " + str(
+                                        chapters)}))
                 continue
             except Exception, e:
                 # now send Exchange Report
                 # upload failed probably while sending data to farmer
                 print "Error occured while trying to upload shard or negotiate contract. Retrying... " + str(e)
+                logger.warning(str({"log_event_type": "error", "title": "Unhandled exception",
+                                    "description": "Unhandled exception occured while trying to upload shard or negotiate contract for shard at index " + str(chapters) + " . Retrying..."}))
                 current_timestamp = int(time.time())
 
                 exchange_report.exchangeEnd = str(current_timestamp)
@@ -416,7 +423,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 exchange_report.exchangeResultMessage = (exchange_report.STORJ_REPORT_SHARD_UPLOADED)
                 self.set_current_status("Sending Exchange Report for shard " + str(chapters + 1))
                 logger.warning(str({"log_event_type": "debug", "title": "Shard added",
-                                    "description": "Shard successfully " + str(chapters + 1) + " added and exchange report sent."}))
+                                    "description": "Shard " + str(chapters + 1) + " successfully added and exchange report sent."}))
                 # self.storj_engine.storj_client.send_exchange_report(exchange_report) # send exchange report
                 break
 
@@ -478,6 +485,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             if success:
                 self.ui_single_file_upload.current_state.setText(
                     html_format_begin + "Upload success! Waiting for user..." + html_format_end)
+                logger.warning(str({"log_event_type": "success", "title": "File uploaded",
+                                    "description": "File uploaded successfully!"}))
                 self.emit(SIGNAL("showFileUploadedSuccessfully"))
 
 
