@@ -89,9 +89,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # set default paths
         self.ui_single_file_download.tmp_dir.setText(str("/tmp/"))
 
-        # set confog variables
+        # set config variables
 
-        self.combine_tmpdir_name_with_bucketid_fileid = False
+        self.combine_tmpdir_name_with_token = False
 
         # set overall progress to 0
         self.ui_single_file_download.overall_progress.setValue(0)
@@ -225,7 +225,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
     def set_file_metadata(self, bucket_id, file_id):
 
         try:
-            file_metadata = self.storj_engine.storj_client.file_metadata("dc4778cc186192af49475b49",
+            file_metadata = self.storj_engine.storj_client.file_metadata(str(bucket_id),
                                                                          str(file_id))
             self.ui_single_file_download.file_name.setText(
                 html_format_begin + str(file_metadata.filename) + html_format_end)
@@ -267,7 +267,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                                 "description": "Resolving file pointers to download file with ID: " + str(
                                     file_id) + "..."}))
 
-            file_pointers = self.storj_engine.storj_client.file_pointers("dc4778cc186192af49475b49", file_id)
+            file_pointers = self.storj_engine.storj_client.file_pointers(str(bucket_id), file_id)
             self.emit(QtCore.SIGNAL("beginDownloadProccess"), file_pointers)
         except storj.exception.StorjBridgeApiError as e:
             logger.warning(str({"log_event_type": "error", "title": "Bridge error",
@@ -292,10 +292,14 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         local_filename = path_to_save
         downloaded = False
         farmer_tries = 0
+
         logger.warning(str({"log_event_type": "debug", "title": "Downloading",
                            "description": "Downloading shard at index " + str(shard_index) + " from farmer: " + str(
                                url)}))
-        while True:
+
+        tries_download_from_same_farmer = 0
+        while self.max_retries_download_from_same_farmer > tries_download_from_same_farmer:
+            tries_download_from_same_farmer += 1
             farmer_tries += 1
             try:
                 self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition, "Downloading...")  # update shard downloading state
@@ -339,8 +343,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                         self.shard_download_percent_list[shard_index] = percent_downloaded
                         self.emit(QtCore.SIGNAL("refreshOverallDownloadProgress"), 0.1)  # update progress bar in upload queue table
                         print str(rowposition) + "pozycja"
-
-
                         #progress_bar.setValue(percent_downloaded)
 
                     f.close()
@@ -434,7 +436,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         ##### End file download finish point #####
 
-        while True:
+        get_file_pointers_tries = 0
+        while self.max_retries_get_file_pointers > get_file_pointers_tries:
+            get_file_pointers_tries += 1
             try:
                 # Determine file pointers
                 if options_array["file_pointers_is_given"] == "1":
@@ -472,9 +476,17 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                         pointer.get('farmer')['port']) + "/shards/" + \
                           pointer["hash"] + "?token=" + pointer["token"]
                     print url
-                    self.createNewDownloadThread(url, self.tmp_path + "/" + str(file_name) + "-" + str(part),
-                                                 options_chain,
-                                                 progress_bars_list[part], part, part)
+
+                    if self.combine_tmpdir_name_with_token:
+                        self.createNewDownloadThread(url, self.tmp_path + "/" + str(pointer["token"]) + "/" + str(
+                            file_name) + "-" + str(part),
+                                                     options_chain,
+                                                     progress_bars_list[part], part, part)
+                    else:
+                        self.createNewDownloadThread(url, self.tmp_path + "/" + str(file_name) + "-" + str(part),
+                                                     options_chain,
+                                                     progress_bars_list[part], part, part)
+
                     print self.tmp_path + "/" + str(file_name) + "-" + str(part) + "zapisane"
                     part = part + 1
 
