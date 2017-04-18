@@ -9,7 +9,6 @@ from file_download import SingleFileDownloadUI
 import storj.exception as sjexc
 import threading
 
-
 # Files section
 class FileManagerUI(QtGui.QMainWindow):
 
@@ -152,5 +151,25 @@ class FileManagerUI(QtGui.QMainWindow):
         self.file_manager_ui.bucket_select_combo_box.addItems(self.buckets_list)
 
     def open_single_file_download_window(self):
-        self.single_file_download_window = SingleFileDownloadUI(self)
-        self.single_file_download_window.show()
+        self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()
+        self.current_selected_bucket_id = self.bucket_id_list[self.current_bucket_index]
+
+        tablemodel = self.file_manager_ui.files_list_tableview.model()
+        rows = sorted(set(index.row() for index in
+                          self.file_manager_ui.files_list_tableview.selectedIndexes()))
+        i = 0
+        for row in rows:
+            print('Row %d is selected' % row)
+            index = tablemodel.index(row, 3)  # get file ID
+            # We suppose data are strings
+            selected_file_id = str(tablemodel.data(index).toString())
+            self.file_mirrors_list_window =  SingleFileDownloadUI(self, str(self.current_selected_bucket_id),
+                                                              selected_file_id)
+            self.file_mirrors_list_window.show()
+            i += 1
+
+        if i == 0:
+            QtGui.QMessageBox.about(self, "Warning!", "Please select file from file list!")
+
+        print 1
+
