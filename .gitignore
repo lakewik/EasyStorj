@@ -8,3 +8,6 @@ storj_account_conf.xml
 
 # config
 storj_client_config.xml
+
+# logs
+upload_log.json
