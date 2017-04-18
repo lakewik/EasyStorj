@@ -52,7 +52,7 @@ class BucketManagerUI(QtGui.QMainWindow):
                                        "Are you sure to delete this bucket? Bucket name: '" + bucket_name + "'",
                                        (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
             result = msgBox.exec_()
-            if result == QtGui.QMessageBox.Ok:
+            if result == QtGui.QMessageBox.Yes:
                 success = False
                 try:
                     self.storj_engine.storj_client.bucket_delete(str(bucket_id))
