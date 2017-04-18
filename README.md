@@ -19,8 +19,8 @@ GUI Client for Storj Distributed Storage Network written in Python and PyQt4. Th
 - [x] create buckets
 - [x] register user 
 - [x] list files in buckets
-- [ ] upload file &nbsp; &nbsp; ![test](http://progressed.io/bar/80)
-- [ ] download file &nbsp; &nbsp; ![test](http://progressed.io/bar/80)
+- [ ] upload file &nbsp; &nbsp; ![test](http://progressed.io/bar/95)
+- [ ] download file &nbsp; &nbsp; ![test](http://progressed.io/bar/95)
 - [x] list file pointers
 - [x] list file mirrors
 - [x] manage buckets
