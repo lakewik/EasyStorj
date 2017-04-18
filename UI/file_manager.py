@@ -100,7 +100,7 @@ class FileManagerUI(QtGui.QMainWindow):
 
         self.tools = Tools()
 
-        model = QStandardItemModel(1, 1)  # initialize model for inserting to table
+        model = QtGui.QStandardItemModel(1, 1)  # initialize model for inserting to table
 
         model.setHorizontalHeaderLabels(['File name', 'File size', 'Mimetype', 'File ID'])
 
@@ -110,18 +110,18 @@ class FileManagerUI(QtGui.QMainWindow):
         i = 0
         try:
             for self.file_details in self.storj_engine.storj_client.bucket_files(str(self.current_selected_bucket_id)):
-                item = QStandardItem(str(self.file_details["filename"]))
+                item = QtGui.QStandardItem(str(self.file_details["filename"]))
                 model.setItem(i, 0, item)  # row, column, item (QStandardItem)
 
                 file_size_str = self.tools.human_size(int(self.file_details["size"]))  # get human readable file size
 
-                item = QStandardItem(str(file_size_str))
+                item = QtGui.QStandardItem(str(file_size_str))
                 model.setItem(i, 1, item)  # row, column, item (QStandardItem)
 
-                item = QStandardItem(str(self.file_details["mimetype"]))
+                item = QtGui.QStandardItem(str(self.file_details["mimetype"]))
                 model.setItem(i, 2, item)  # row, column, item (QStandardItem)
 
-                item = QStandardItem(str(self.file_details["id"]))
+                item = QtGui.QStandardItem(str(self.file_details["id"]))
                 model.setItem(i, 3, item)  # row, column, item (QStandardItem)
 
                 i = i + 1
