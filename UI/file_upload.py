@@ -526,14 +526,18 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
 
         if self.validation["file_path"]:
-            bucket_id = "dc4778cc186192af49475b49"
+            
+            self.current_bucket_index = self.ui_single_file_upload.save_to_bucket_select.currentIndex()
+            self.current_selected_bucket_id = self.bucket_id_list[self.current_bucket_index]
+            bucket_id = str(self.current_selected_bucket_id)
+
             bname = os.path.split(file_path)[1]
 
             print bname + "npliku"
 
             mime = magic.Magic(mime=True)
             file_mime_type = str(mime.from_file(str(file_path)))
-
+            file_mime_type = "text/plain"
             print file_mime_type
             #file_mime_type = str("A")
 
