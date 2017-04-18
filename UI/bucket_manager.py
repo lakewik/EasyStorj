@@ -50,7 +50,7 @@ class BucketManagerUI(QtGui.QMainWindow):
         if i != 0:
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Are you sure?",
                                        "Are you sure to delete this bucket? Bucket name: '" + bucket_name + "'",
-                                       QtGui.QMessageBox.Ok)
+                                       (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
                 success = False
