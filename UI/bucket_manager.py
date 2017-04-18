@@ -5,6 +5,8 @@ from engine import StorjEngine
 import storj.exception as sjexc
 import threading
 
+from bucket_create import BucketCreateUI
+
 
 # Buckets section
 class BucketManagerUI(QtGui.QMainWindow):
@@ -19,6 +21,9 @@ class BucketManagerUI(QtGui.QMainWindow):
                                self.quit)  # open login window
         QtCore.QObject.connect(self.bucket_manager_ui.delete_bucket_bt, QtCore.SIGNAL("clicked()"),
                                self.delete_bucket)  # delete bucket
+
+        QtCore.QObject.connect(self.bucket_manager_ui.create_new_bucket_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_bucket_create_window)  # open bucket create window
         QtCore.QObject.connect(self.bucket_manager_ui.edit_bucket_bt, QtCore.SIGNAL("clicked()"),
                                self.open_bucket_edit_window)  # open bucket edit window
         # QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
@@ -68,6 +73,10 @@ class BucketManagerUI(QtGui.QMainWindow):
 
     def open_bucket_edit_window(self):
         print 1
+
+    def open_bucket_create_window(self):
+        self.bucket_create_window = BucketCreateUI(self)
+        self.bucket_create_window.show()
 
     def initialize_buckets_table(self):
         self.storj_engine = StorjEngine()  # init StorjEngine
