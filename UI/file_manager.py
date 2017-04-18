@@ -8,6 +8,7 @@ from engine import StorjEngine
 from file_download import SingleFileDownloadUI
 import storj.exception as sjexc
 import threading
+from file_upload import SingleFileUploadUI
 
 # Files section
 class FileManagerUI(QtGui.QMainWindow):
@@ -29,8 +30,15 @@ class FileManagerUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.file_manager_ui.file_delete_bt, QtCore.SIGNAL("clicked()"),
                                self.delete_selected_file)  # delete selected file
 
+        QtCore.QObject.connect(self.file_manager_ui.new_file_upload_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_single_file_upload_window)  # delete selected file
+
         self.storj_engine = StorjEngine()  # init StorjEngine
         self.createNewBucketResolveThread()
+
+    def open_single_file_upload_window(self):
+        self.single_file_upload_window = SingleFileUploadUI(self)
+        self.single_file_upload_window.show()
 
     def delete_selected_file(self):
         self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()
