@@ -39,7 +39,7 @@ class MainUI(QtGui.QMainWindow):
         # QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
         QtCore.QObject.connect(self.ui.create_bucket_bt, QtCore.SIGNAL("clicked()"),
                                self.open_bucket_create_window)  # open bucket create window
-        QtCore.QObject.connect(self.ui.bucket_menager_bt, QtCore.SIGNAL("clicked()"),
+        QtCore.QObject.connect(self.ui.bucket_manager_bt, QtCore.SIGNAL("clicked()"),
                                self.open_bucket_manager_window)  # open bucket manager window
         QtCore.QObject.connect(self.ui.settings_bt, QtCore.SIGNAL("clicked()"),
                                self.open_settings_window)  # open settings ui
@@ -47,6 +47,8 @@ class MainUI(QtGui.QMainWindow):
                                self.open_file_manager_window)  # open file manager window
         QtCore.QObject.connect(self.ui.uploader_bt, QtCore.SIGNAL("clicked()"),
                                self.open_single_file_upload_window)  # open single file upload ui
+        QtCore.QObject.connect(self.ui.downloader_bt, QtCore.SIGNAL("clicked()"),
+                               self.open_file_mirrors_list_window)  # open single file download ui
         # QtCore.QObject.connect(self.ui.pushButton_7, QtCore.SIGNAL("clicked()"), self.open_file_mirrors_list_window) # open file mirrors list window
 
     """
@@ -67,26 +69,32 @@ class MainUI(QtGui.QMainWindow):
         self.register_window.show()
     """
 
-    def open_single_file_upload_window(self):
-        self.single_file_upload_window = SingleFileUploadUI(self)
-        self.single_file_upload_window.show()
+    def open_bucket_create_window(self):
+        """Create a new bucket"""
+        self.bucket_create_window = BucketCreateUI(self)
+        self.bucket_create_window.show()
 
     def open_bucket_manager_window(self):
+        """Bucket manager"""
         self.bucket_manager_window = BucketManagerUI(self)
         self.bucket_manager_window.show()
 
     def open_file_manager_window(self):
+        """File manager"""
         self.file_manager_window = FileManagerUI(self)
         self.file_manager_window.show()
 
-    def open_bucket_create_window(self):
-        self.bucket_create_window = BucketCreateUI(self)
-        self.bucket_create_window.show()
-
     def open_file_mirrors_list_window(self):
+        """File download"""
         self.file_mirrors_list_window = FileMirrorsListUI(self)
         self.file_mirrors_list_window.show()
 
+    def open_single_file_upload_window(self):
+        """File upload"""
+        self.single_file_upload_window = SingleFileUploadUI(self)
+        self.single_file_upload_window.show()
+
     def open_settings_window(self):
+        """Settings"""
         self.settings_window = ClientConfigurationUI(self)
         self.settings_window.show()
