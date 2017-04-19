@@ -1,5 +1,6 @@
 from utilities.account_manager import AccountManager
 import storj
+from utilities.log_manager import logger
 
 
 class StorjEngine:
@@ -12,6 +13,5 @@ class StorjEngine:
             self.email = account_manager.get_user_email()
             # initialize Storj
             self.storj_client = storj.Client(email=self.email, password=self.password)
-            print "Login from credentials xml file"
-        print "testlogin"
-        print self.password
+            logger.debug("Login from credentials xml file")
+        logger.debug("testlogin, StorjEngine")
