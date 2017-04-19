@@ -5,6 +5,8 @@ from mainUI import MainUI
 from qt_interfaces.storj_login_ui import Ui_Login
 from utilities.account_manager import AccountManager
 
+from utilities.log_manager import logger
+
 
 # Login section
 class LoginUI(QtGui.QMainWindow):
@@ -49,11 +51,11 @@ class LoginUI(QtGui.QMainWindow):
                                        QtGui.QMessageBox.Ok)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
+                logger.info("User {} succesfully logged in".format(self.email))
                 self.main_ui_window = MainUI(self)
                 self.main_ui_window.show()
                 self.close()
                 #initial_window.hide()
-
                 # self.account_manager.get_login_state()
 
         # print self.storj_client.bucket_list()
