@@ -64,9 +64,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.initialize_upload_queue_table()
 
         # init loggers
-        self.log_handler = LogHandler()
-        logging.setLoggerClass(get_global_logger(self.log_handler))
-        logger.addHandler(self.log_handler)
+        # self.log_handler = LogHandler()
+        # logging.setLoggerClass(get_global_logger(self.log_handler))
+        # logger.addHandler(self.log_handler)
 
         self.account_manager = AccountManager()  # init AccountManager
 
@@ -428,8 +428,15 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 # upload failed probably while sending data to farmer
                 logger.error("Error occured while trying to upload shard or\
                              negotiate contract. Retrying... " + str(e))
-                logger.warning(str({"log_event_type": "error", "title": "Unhandled exception",
-                                    "description": "Unhandled exception occured while trying to upload shard or negotiate contract for shard at index " + str(chapters) + " . Retrying..."}))
+                # logger.warning('"log_event_type": "error"')
+                logger.warning('"title": "Unhandled exception"')
+                logger.warning('"description": "Unhandled exception occured\
+                               while trying to upload shard or negotiate \
+                               contract for shard at index "' +
+                               str(chapters) +
+                               " . Retrying...")
+                # logger.warning(str({"log_event_type": "error", "title": "Unhandled exception",
+                #                     "description": "Unhandled exception occured while trying to upload shard or negotiate contract for shard at index " + str(chapters) + " . Retrying..."}))
                 current_timestamp = int(time.time())
 
                 exchange_report.exchangeEnd = str(current_timestamp)
@@ -446,14 +453,19 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 exchange_report.exchangeResultCode = (exchange_report.SUCCESS)
                 exchange_report.exchangeResultMessage = (exchange_report.STORJ_REPORT_SHARD_UPLOADED)
                 self.set_current_status("Sending Exchange Report for shard " + str(chapters + 1))
-                logger.warning(str({"log_event_type": "debug", "title": "Shard added",
-                                    "description": "Shard " + str(chapters + 1) + " successfully added and exchange report sent."}))
+                # logger.warning('"log_event_type": "debug"')
+                logger.debug('"title":"Shard added"')
+                logger.info('"description": "Shard "' + str(chapters + 1) +
+                            " successfully added and exchange report sent.")
+                # logger.warning(str({"log_event_type": "debug", "title": "Shard added",
+                #                     "description": "Shard " + str(chapters + 1) + " successfully added and exchange report sent."}))
                 # self.storj_engine.storj_client.send_exchange_report(exchange_report) # send exchange report
                 break
 
     def file_upload_begin(self):
         self.ui_single_file_upload.overall_progress.setValue(0)
         # upload finish function #
+
         def finish_upload(self):
             self.crypto_tools = CryptoTools()
             self.ui_single_file_upload.current_state.setText(
@@ -462,15 +474,15 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                                 "description": "Generating HMAC..."}))
             hash_sha512_hmac_b64 = self.crypto_tools.prepare_bucket_entry_hmac(shards_manager.shards)
             hash_sha512_hmac = hashlib.sha224(str(hash_sha512_hmac_b64["SHA-512"])).hexdigest()
-            print hash_sha512_hmac
+            logger.debug(hash_sha512_hmac)
             # save
 
             # import magic
             # mime = magic.Magic(mime=True)
             # mime.from_file(file_path)
 
-            print frame.id
-            print "Now upload file"
+            logger.debug(frame.id)
+            logger.debug("Now upload file")
 
             data = {
                 'x-token': push_token.id,
@@ -487,8 +499,12 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Adding file to bucket..." + html_format_end)
 
-            logger.warning(str({"log_event_type": "debug", "title": "Finishing upload",
-                                "description": "Adding file " + str(bname) + " to bucket..."}))
+            # logger.warning('"log_event_type": "debug"')
+            logger.debug('"title": "Finishing upload"')
+            logger.debug('"description": "Adding file "' +
+                         str(bname) + " to bucket...")
+            # logger.warning(str({"log_event_type": "debug", "title": "Finishing upload",
+            #                     "description": "Adding file " + str(bname) + " to bucket..."}))
 
             success = False
             try:
@@ -502,7 +518,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                     json=data,
                 )
                 success = True
-            except storj.exception.StorjBridgeApiError, e:
+            except storj.exception.StorjBridgeApiError as e:
                 QMessageBox.about(self, "Unhandled bridge exception", "Exception: " + str(e))
             if success:
                 self.ui_single_file_upload.current_state.setText(
@@ -510,7 +526,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 logger.warning(str({"log_event_type": "success", "title": "File uploaded",
                                     "description": "File uploaded successfully!"}))
                 self.emit(SIGNAL("showFileUploadedSuccessfully"))
-
 
         self.connect(self, SIGNAL("finishUpload"), lambda: finish_upload(self))
 
@@ -521,12 +536,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.initialize_upload_queue_table()
 
-        #item = ProgressWidgetItem()
-        #self.ui_single_file_upload.shard_queue_table_widget.setItem(1, 1, item)
-        #item.updateValue(1)
+        # item = ProgressWidgetItem()
+        # self.ui_single_file_upload.shard_queue_table_widget.setItem(1, 1, item)
+        # item.updateValue(1)
 
-        #progress.valueChanged.connect(item.updateValue)
-
+        # progress.valueChanged.connect(item.updateValue)
 
         encryption_enabled = True
         self.parametrs = storj.model.StorjParametrs()
@@ -547,7 +561,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.validation["file_path"] = True
             file_path = str(self.ui_single_file_upload.file_path.text())
 
-
         if self.validation["file_path"]:
 
             self.current_bucket_index = self.ui_single_file_upload.save_to_bucket_select.currentIndex()
@@ -556,13 +569,13 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             bname = os.path.split(file_path)[1]
 
-            print bname + "npliku"
+            logger.debug(bname + "npliku")
 
             mime = magic.Magic(mime=True)
             file_mime_type = str(mime.from_file(str(file_path)))
             file_mime_type = "text/plain"
-            print file_mime_type
-            #file_mime_type = str("A")
+            logger.debug(file_mime_type)
+            # file_mime_type = str("A")
 
             file_existence_in_bucket = False
 
@@ -571,25 +584,27 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             if file_existence_in_bucket == 1:
                 # QInputDialog.getText(self, 'Warning!', 'File with name ' + str(bname) + " already exist in bucket! Please use different name:", "test" )
-                print "Same file exist!"
+                logger.warning("Same file exist!")
 
             if self.ui_single_file_upload.encrypt_files_checkbox.isChecked():
                 # encrypt file
                 self.set_current_status("Encrypting file...")
-                logger.warning(
-                    str({"log_event_type": "debug", "title": "Encryption", "description": "Encrypting file..."}))
+                # logger.warning('"log_event_type": "debug"')
+                logger.debug('"title": "Encryption"')
+                logger.debug('"description": "Encrypting file..."')
 
                 file_crypto_tools = FileCrypto()
                 file_crypto_tools.encrypt_file("AES", str(file_path), self.parametrs.tmpPath + "/" + bname + ".encrypted",
                                                str(self.user_password))  # begin file encryption
-                file_path_ready = self.parametrs.tmpPath + "/" + bname + ".encrypted" # get path to encrypted file in temp dir
+                file_path_ready = self.parametrs.tmpPath + "/" + bname +\
+                    ".encrypted"  # get path to encrypted file in temp dir
                 file_name_ready_to_shard_upload = bname + ".encrypted"
             else:
                 file_path_ready = file_path
                 file_name_ready_to_shard_upload = bname
 
-            print self.parametrs.tmpPath
-            print file_path_ready + "sciezka2"
+            logger.debug(self.parametrs.tmpPath)
+            logger.debug(file_path_ready + "sciezka2")
 
             def get_size(file_like_object):
                 return os.stat(file_like_object.name).st_size
@@ -600,55 +615,62 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             tools = Tools()
 
-
             self.ui_single_file_upload.file_size.setText(html_format_begin + str(tools.human_size(int(file_size))) + html_format_end)
 
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Resolving PUSH token..." + html_format_end)
 
-            logger.warning(str({"log_event_type": "debug", "title": "PUSH token",
-                                "description": "Resolving PUSH Token for upload..."}))
+            # logger.warning('"log_event_type": "debug"')
+            logger.debug('"title": "PUSH token"')
+            logger.debug('"description": "Resolving PUSH Token for upload..."')
+            # logger.warning(str({"log_event_type": "debug", "title": "PUSH token",
+            #                     "description": "Resolving PUSH Token for upload..."}))
 
             push_token = None
 
             try:
                 push_token = self.storj_engine.storj_client.token_create(bucket_id,
                                                                          'PUSH')  # get the PUSH token from Storj Bridge
-            except storj.exception.StorjBridgeApiError, e:
+            except storj.exception.StorjBridgeApiError as e:
                 QMessageBox.about(self, "Unhandled PUSH token create exception", "Exception: " + str(e))
 
             self.ui_single_file_upload.push_token.setText(
                 html_format_begin + str(push_token.id) + html_format_end)  # set the PUSH Token
 
-            print push_token.id
+            logger.debug(push_token.id)
 
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Resolving frame for file..." + html_format_end)
 
-            logger.warning(str({"log_event_type": "debug", "title": "Frame",
-                                "description": "Resolving frame for file upload..."}))
+            # logger.warning('"log_event_type": "debug"')
+            logger.debug('"title": "Frame"')
+            logger.debug('"description": "Resolving frame for file upload..."')
+            # logger.warning(str({"log_event_type": "debug", "title": "Frame",
+            #                     "description": "Resolving frame for file upload..."}))
 
-            frame = None # initialize variable
+            frame = None  # initialize variable
             try:
                 frame = self.storj_engine.storj_client.frame_create()  # Create file frame
-            except storj.exception.StorjBridgeApiError, e:
+            except storj.exception.StorjBridgeApiError as e:
                 QMessageBox.about(self, "Unhandled exception while creating file staging frame", "Exception: " + str(e))
-                logger.warning(str({"log_event_type": "error", "title": "Frame",
-                                    "description": "Error while resolving frame for file upload..."}))
+                # logger.warning('"log_event_type": "error"')
+                logger.debug('"title": "Frame"')
+                logger.debug('"description": "Error while resolving frame for\
+                    file upload..."')
+                # logger.warning(str({"log_event_type": "error", "title": "Frame",
+                #                     "description": "Error while resolving frame for file upload..."}))
 
             self.ui_single_file_upload.file_frame_id.setText(html_format_begin + str(frame.id) + html_format_end)
 
-            print frame.id
+            logger.debug(frame.id)
             # Now encrypt file
-            print file_path_ready + "sciezka"
+            logger.debug(file_path_ready + "sciezka")
 
             # Now generate shards
             self.set_current_status("Splitting file to shards...")
             logger.warning(str({"log_event_type": "debug", "title": "Sharding",
                                 "description": "Splitting file to shards..."}))
             shards_manager = storj.model.ShardManager(filepath=str(file_path_ready), tmp_path=self.parametrs.tmpPath)
-
-
 
             # self.ui_single_file_upload.current_state.setText(html_format_begin + "Generating shards..." + html_format_end)
             # shards_manager._make_shards()
@@ -657,7 +679,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.storj_engine.storj_client.logger.debug('file_upload() push_token=%s', push_token)
 
             # upload shards to frame
-            print shards_count
+            logger.debug(shards_count)
 
             # set shards count
             self.ui_single_file_upload.shards_count.setText(html_format_begin + str(shards_count) + html_format_end)
@@ -671,12 +693,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
                 chapters += 1
 
-
-
                 # delete encrypted file TODO
 
+        # self.emit(SIGNAL("finishUpload")) # send signal to save to bucket after all filea are uploaded
 
-
-        #self.emit(SIGNAL("finishUpload")) # send signal to save to bucket after all filea are uploaded
-
-        #finish_upload(self)
+        # finish_upload(self)
