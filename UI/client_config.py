@@ -1,6 +1,7 @@
 from PyQt4 import QtCore, QtGui
 from utilities.backend_config import Configuration
 from qt_interfaces.client_configuration_ui import Ui_ClientConfiguration
+from utilities.log_manager import logger
 
 
 # Configuration Ui section
@@ -24,4 +25,4 @@ class ClientConfigurationUI(QtGui.QMainWindow):
         self.configuration_manager.save_client_configuration(self.client_configuration_ui)  # save configuration
 
     def reset_settings_to_default(self):
-        print 1
+        logger.debug(1)
