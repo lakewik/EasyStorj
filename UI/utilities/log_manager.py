@@ -20,8 +20,8 @@ fileHandler = handlers.RotatingFileHandler(PATH,
                                            maxBytes=(1048576 * 3),
                                            backupCount=5)
 fileHandler.setFormatter(formatter)
-# fileHandler.setLevel(logging.WARNING)
-fileHandler.setLevel(logging.DEBUG)  # TODO: change to WARNING
+fileHandler.setLevel(logging.WARNING)
+# fileHandler.setLevel(logging.DEBUG)  # TODO: change to WARNING
 logger.addHandler(fileHandler)
 
 # Logs to stdout
