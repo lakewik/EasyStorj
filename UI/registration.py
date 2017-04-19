@@ -1,10 +1,10 @@
-import storj
 from PyQt4 import QtCore, QtGui
 from qt_interfaces.storj_register_ui import Ui_Register
 from login import LoginUI
 from utilities.tools import Tools
 import json
 import storj
+from utilities.log_manager import logger
 
 
 # Register section
@@ -64,11 +64,12 @@ class RegisterUI(QtGui.QMainWindow):
                                        "Now, you must verify your email by"
                                        "clicking the link that has been sent to you. "
                                        "Then you can login", QtGui.QMessageBox.Ok)
+            logger.debug("New user registrated")
+            logger.debug("Email: " + self.email)
+            logger.debug("Password: " + self.password)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
                 self.login_window = LoginUI(self)
                 self.login_window.show()
                 self.close()
                 # initial_window.hide()
-
-        print self.email
