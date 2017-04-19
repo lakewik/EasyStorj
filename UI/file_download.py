@@ -23,7 +23,7 @@ import threading
 from utilities.log_manager import logger
 
 from resources.html_strings import html_format_begin, html_format_end
-
+from utilities.account_manager import AccountManager
 
 """
 ######################### Logging ####################
@@ -55,6 +55,12 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # logger.addHandler(self.log_handler)
 
         # self.initialize_shard_queue_table(file_pointers)
+
+        self.account_manager = AccountManager()  # init AccountManager
+
+        self.user_password = self.account_manager.get_user_password()
+
+        ########3
 
         QtCore.QObject.connect(self.ui_single_file_download.file_save_path_bt, QtCore.SIGNAL("clicked()"),
                                self.select_file_save_path)  # open file select dialog
@@ -456,7 +462,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 logger.debug('"description": "Decrypting file..."')
                 # self.set_current_status()
                 file_crypto_tools = FileCrypto()
-                file_crypto_tools.decrypt_file("AES", str(file_save_path) + ".encrypted", file_save_path, "kotecze57")  # begin file decryption
+                file_crypto_tools.decrypt_file("AES", str(file_save_path) + ".encrypted", file_save_path, str(self.user_password))  # begin file decryption
 
             logger.debug("pobrano")
             # logger.warning(str({"log_event_type": "success", "title": "Finished", "description": "Downloading completed successfully!"}))
