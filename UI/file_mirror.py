@@ -8,6 +8,7 @@ from UI.engine import StorjEngine
 from UI.node_details import NodeDetailsUI
 
 from resources.html_strings import html_format_begin, html_format_end
+from utilities.log_manager import logger
 
 
 # Mirrors section
@@ -42,7 +43,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
 
         self.file_mirrors_list_ui.file_id_label.setText(html_format_begin + str(self.fileid) + html_format_end)
 
-        print self.fileid
+        logger.info(self.fileid)
         self.storj_engine = StorjEngine()  # init StorjEngine
         self.createNewMirrorListInitializationThread()
 
@@ -82,11 +83,11 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                 self.node_details_window.show()
             else:
                 QtGui.QMessageBox.about(self, "Warning", "Please select farmer node from list")
-                print "Unhandled error"
+                logger.warning("Unhandled error")
 
         except:
             QtGui.QMessageBox.about(self, "Warning", "Please select farmer node from list")
-            print "Unhandled error"
+            logger.error("Unhandled error")
 
     def createNewMirrorListInitializationThread(self):
         mirror_list_initialization_thread = threading.Thread(target=self.initialize_mirrors_tree, args=())
@@ -123,7 +124,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
             for file_mirror in self.storj_engine.storj_client.file_mirrors(str(self.bucketid), str(self.fileid)):
                 for mirror in file_mirror.established:
                     self.established_mirrors_count_for_file += 1
-                    print file_mirror.established
+                    logger.info(file_mirror.established)
                     if mirror["shardHash"] != recent_shard_hash:
                         parent1 = QtGui.QStandardItem('Shard with hash {}'.format(mirror["shardHash"]))
                         divider = divider + 1
@@ -188,4 +189,4 @@ class FileMirrorsListUI(QtGui.QMainWindow):
             self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))  # emit Storj Bridge Exception
         except Exception as e:
             self.emit(QtCore.SIGNAL("showUnhandledException"), str(e))  # emit unhandled Exception
-            print str(e)
+            logger.error(e)

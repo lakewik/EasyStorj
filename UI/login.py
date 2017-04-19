@@ -5,6 +5,8 @@ from mainUI import MainUI
 from qt_interfaces.storj_login_ui import Ui_Login
 from utilities.account_manager import AccountManager
 
+from utilities.log_manager import logger
+
 
 # Login section
 class LoginUI(QtGui.QMainWindow):
@@ -23,11 +25,11 @@ class LoginUI(QtGui.QMainWindow):
 
     def login(self):
         # take login action
-        self.email = self.login_ui.email.text()  # get login
-        self.password = self.login_ui.password.text()  # get password
+        self.email = str(self.login_ui.email.text()).strip()  # get mail
+        self.password = str(self.login_ui.password.text()).strip()  # get password
 
-        self.storj_client = storj.Client(email=str(self.email).strip(),
-                                         password=str(self.password).strip())
+        self.storj_client = storj.Client(email=self.email,
+                                         password=self.password)
         success = False
         # take login action - check credentials by listing keys :D
         try:
@@ -35,25 +37,22 @@ class LoginUI(QtGui.QMainWindow):
             success = True
         except storj.exception.StorjBridgeApiError as e:
             j = json.loads(str(e))
-            if j["error"] == "Invalid email or password":
-                QMessageBox.about(self, "Warning",
-                                  "Invalid email or password - access denied. Please check your credentials and try again!")
+            if j.get("error") == "Invalid email or password":
+                QtGui.QMessageBox.about(self, "Warning",
+                                        "Invalid email or password - access denied. "
+                                        "Please check your credentials and try again!")
             else:
-                QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
+                QtGui.QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
 
         if success:
-            self.account_manager = AccountManager(str(self.email), str(self.password))  # init account manager
+            self.account_manager = AccountManager(self.email, self.password)  # init account manager
             self.account_manager.save_account_credentials()  # save login credentials and state
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success", "Successfully loged in!",
                                        QtGui.QMessageBox.Ok)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
+                logger.info("User {} succesfully logged in".format(self.email))
                 self.main_ui_window = MainUI(self)
                 self.main_ui_window.show()
                 self.close()
                 #initial_window.hide()
-
-                # self.account_manager.get_login_state()
-
-        # print self.storj_client.bucket_list()
-        print 1

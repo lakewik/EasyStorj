@@ -1,10 +1,10 @@
-import storj
 from PyQt4 import QtCore, QtGui
 from qt_interfaces.storj_register_ui import Ui_Register
 from login import LoginUI
 from utilities.tools import Tools
 import json
 import storj
+from utilities.log_manager import logger
 
 
 # Register section
@@ -36,40 +36,40 @@ class RegisterUI(QtGui.QMainWindow):
                 if (self.tools.check_email(self.email)):
                     # take login action
                     try:
-                        self.storj_client = storj.get_client().user_create(str(self.email), str(self.password))
+                        self.storj_client = storj.Client(None, "").user_create(str(self.email).strip(), str(self.password).strip())
                         success = True
                     except storj.exception.StorjBridgeApiError as e:
                         j = json.loads(str(e))
-                        if (j["error"] == "Email is already registered"):
-                            success = False
+                        if j.get("error", None) == "Email is already registered":
                             QtGui.QMessageBox.about(self, "Warning",
-                                                    "User with this e-mail is already registered! Please login or try different e-mail!")
+                                                    "User with this e-mail is \
+                                                    already registered! Please \
+                                                    login or try a different \
+                                                    e-mail!")
                         else:
-                            success = False
                             QtGui.QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
                 else:
-                    success = False
                     QtGui.QMessageBox.about(self, "Warning",
                                             "Your e-mail seems to be invalid! Please chech e-mail  and try again")
             else:
-                success = False
                 QtGui.QMessageBox.about(self, "Warning",
                                         "Given passwords are different! Please check and try again!")
         else:
-            success = False
             QtGui.QMessageBox.about(self, "Warning",
                                     "Please fill out all fields!")
 
         if success:
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success",
                                        "Successfully registered in Storj Distributed Storage Network! "
-                                       "Now, yo must verify your email by clicking link, that been send to you. "
+                                       "Now, you must verify your email by"
+                                       "clicking the link that has been sent to you. "
                                        "Then you can login", QtGui.QMessageBox.Ok)
+            logger.debug("New user registrated")
+            logger.debug("Email: " + self.email)
+            logger.debug("Password: " + self.password)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
                 self.login_window = LoginUI(self)
                 self.login_window.show()
                 self.close()
                 # initial_window.hide()
-
-        print self.email

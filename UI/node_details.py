@@ -10,6 +10,7 @@ from ipwhois import IPWhois
 import pycountry
 import threading
 import storj.exception as sjexc
+from utilities.log_manager import logger
 
 from resources.html_strings import html_format_begin, html_format_end
 
@@ -31,15 +32,14 @@ class NodeDetailsUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("showBridgeExceptionMessageBox"), self.show_storj_bridge_exception)
 
         self.createNewNodeDetailsResolveThread()
-        # print nodeid
 
     def show_storj_bridge_exception(self, exception_content):
         try:
             j = json.loads(str(exception_content))
             QtGui.QMessageBox.critical(self, "Bridge error", str(j["error"]))
-
-        except:
+        except Exception as e:
             QtGui.QMessageBox.critical(self, "Bridge error", str(exception_content))
+            logger.error(e)
 
     def createNewNodeDetailsResolveThread(self):
         download_thread = threading.Thread(target=self.initialize_node_details, args=())
@@ -103,7 +103,7 @@ class NodeDetailsUI(QtGui.QMainWindow):
 
             grview.show()
 
-            print country_full_name
+            logger.info(country_full_name)
         except sjexc.StorjBridgeApiError as e:
             self.emit(QtCore.SIGNAL("showBridgeExceptionMessageBox"), str(e))  # emit signal to show message box with bridge exception
         except Exception as e:

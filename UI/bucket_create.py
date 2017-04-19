@@ -3,6 +3,7 @@ from qt_interfaces.create_bucket_ui import Ui_BucketCreate
 from engine import StorjEngine
 import storj.exception as sjexc
 import threading
+from utilities.log_manager import logger
 
 
 class BucketCreateUI(QtGui.QMainWindow):
@@ -58,4 +59,4 @@ class BucketCreateUI(QtGui.QMainWindow):
         if bucket_created:
             self.emit(QtCore.SIGNAL("showBucketCreatedSuccessfully"), str(self.bucket_name))  # show dialog - bucket created successfully
 
-        print 1
+        logger.debug(1)

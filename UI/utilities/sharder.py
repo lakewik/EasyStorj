@@ -1,5 +1,6 @@
 import math
 import os
+from log_manager import logger
 
 # global SHARD_MULTIPLES_BACK, MAX_SHARD_SIZE
 
@@ -35,7 +36,7 @@ class ShardingTools():
             return 0
             # if accumulator != True:
             # accumulator  = 0
-        print accumulator
+        logger.debug(accumulator)
 
         # Determine hops back by accumulator
         if ((accumulator - self.SHARD_MULTIPLES_BACK) < 0):
@@ -79,7 +80,7 @@ class ShardingTools():
         # Based on <http://code.activestate.com/recipes/224800-simple-file-splittercombiner-module/>
         import re
 
-        print 'Creating file', destination_file_path
+        logger.info('Creating file', destination_file_path)
 
         bname = (os.path.split(destination_file_path))[1]
         bname_input = (os.path.split(shards_filepath))[1]
@@ -98,33 +99,35 @@ class ShardingTools():
 
         chunkfiles = []
         for f in os.listdir(str(input_directory)):
-            print f
+            logger.debug(f)
             if chunkre.match(f):
                 chunkfiles.append(f)
 
-        print 'Number of chunks', len(chunkfiles), '\n'
+        logger.info('Number of chunks', len(chunkfiles))
         chunkfiles.sort(self.sort_index)
-        print chunkfiles
+        logger.info(chunkfiles)
         data = ''
         for f in chunkfiles:
 
             try:
-                print 'Appending chunk', os.path.join(str(input_directory), f)
+                logger.info('Appending chunk',
+                            os.path.join(str(input_directory), f))
                 data += open(str(input_directory) + "/" + str(f), 'rb').read()
-                print str(input_directory) + "/" + str(f) + "katalog wejsciowy"
-            except (OSError, IOError, EOFError), e:
-                print e
+                logger.info(str(input_directory) + "/" + str(f) +
+                            "katalog wejsciowy")
+            except (OSError, IOError, EOFError) as e:
+                logger.error(e)
                 continue
 
         try:
-            print str(output_directory) + "katalog wyjsciowy"
+            logger.info(str(output_directory) + "katalog wyjsciowy")
             f = open(str(output_directory) + "/" + str(bname), 'wb')
             f.write(data)
             f.close()
-        except (OSError, IOError, EOFError), e:
+        except (OSError, IOError, EOFError) as e:
             raise ShardingException(str(e))
 
-        print 'Wrote file', bname
+        logger.info('Wrote file', bname)
         return 1
 
 

@@ -1,4 +1,6 @@
 from PyQt4 import QtCore
+from log_manager import logger
+import requests
 
 
 class DownloadTaskQtThread(QtCore.QThread):
@@ -17,7 +19,7 @@ class DownloadTaskQtThread(QtCore.QThread):
 
     # def create_download_connection(self, url, path_to_save, options_chain, progress_bar):
     def run(self):
-        print "test"
+        logger.debug("test run downloader")
         local_filename = self.path_to_save
         if self.options_chain["handle_progressbars"] != "1":
             r = requests.get(self.url)
@@ -35,15 +37,15 @@ class DownloadTaskQtThread(QtCore.QThread):
                 file_size = int(r.headers['Content-Length'])
 
             chunk = 1
-            num_bars = file_size / chunk
+            num_bars = float(file_size) / chunk
             t1 = file_size / (32 * 1024)
             i = 0
-            print file_size
+            logger.debug(file_size)
             for chunk in r.iter_content(32 * 1024):
                 f.write(chunk)
-                print str(i) + " " + str(t1)
-                print round(float(i) / float(t1), 1)
-                print str(int(round((100.0 * i) / t1))) + " %"
+                logger.debug(str(i) + " " + str(t1))
+                logger.debug(round(float(i) / float(t1), 1))
+                logger.debug(str(int(round((100.0 * i) / t1))) + " %")
                 percent_downloaded = int(round((100.0 * i) / t1))
                 # Refactor for fix SIGSEGV
                 # self.tick.emit(percent_downloaded)

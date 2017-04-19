@@ -4,8 +4,8 @@ from qt_interfaces.bucket_manager_ui import Ui_BucketManager
 from engine import StorjEngine
 import storj.exception as sjexc
 import threading
-
 from bucket_create import BucketCreateUI
+from utilities.log_manager import logger
 
 
 # Buckets section
@@ -72,7 +72,7 @@ class BucketManagerUI(QtGui.QMainWindow):
             QtGui.QMessageBox.about(self, "Warning", "Please select bucket which you want to delete.")
 
     def open_bucket_edit_window(self):
-        print 1
+        logger.debug(1)
 
     def open_bucket_create_window(self):
         self.bucket_create_window = BucketCreateUI(self)
@@ -80,7 +80,7 @@ class BucketManagerUI(QtGui.QMainWindow):
 
     def initialize_buckets_table(self):
         self.storj_engine = StorjEngine()  # init StorjEngine
-        print "resolving buckets"
+        logger.info("resolving buckets")
         model = QStandardItemModel(1, 1)  # initialize model for inserting to table
 
         model.setHorizontalHeaderLabels(['Name', 'Storage', 'Transfer', 'ID'])

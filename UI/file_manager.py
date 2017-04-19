@@ -1,7 +1,7 @@
 from PyQt4 import QtCore, QtGui
 
 from qt_interfaces.file_manager_ui import Ui_FileManager
-from qt_interfaces.file_mirrors_list_ui import Ui_FileMirrorsList
+# from qt_interfaces.file_mirrors_list_ui import Ui_FileMirrorsList
 from file_mirror import FileMirrorsListUI
 from utilities.tools import Tools
 from engine import StorjEngine
@@ -9,6 +9,8 @@ from file_download import SingleFileDownloadUI
 import storj.exception as sjexc
 import threading
 from file_upload import SingleFileUploadUI
+from utilities.log_manager import logger
+
 
 # Files section
 class FileManagerUI(QtGui.QMainWindow):
@@ -60,7 +62,7 @@ class FileManagerUI(QtGui.QMainWindow):
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Question",
                                        "Are you sure you want to delete this file? File name: " + selected_file_name, (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
             result = msgBox.exec_()
-            print result
+            logger.debug(result)
             if result == QtGui.QMessageBox.Yes:
                 try:
                     self.storj_engine.storj_client.file_remove(str(self.current_selected_bucket_id), str(selected_file_id))
@@ -85,7 +87,7 @@ class FileManagerUI(QtGui.QMainWindow):
                           self.file_manager_ui.files_list_tableview.selectedIndexes()))
         i = 0
         for row in rows:
-            print('Row %d is selected' % row)
+            logger.info('Row %d is selected' % row)
             index = tablemodel.index(row, 3)  # get file ID
             # We suppose data are strings
             selected_file_id = str(tablemodel.data(index).toString())
@@ -97,7 +99,7 @@ class FileManagerUI(QtGui.QMainWindow):
         if i == 0:
             QtGui.QMessageBox.about(self, "Warning!", "Please select file from file list!")
 
-        print 1
+        logger.debug(1)
 
     def createNewFileListUpdateThread(self):
         download_thread = threading.Thread(target=self.update_files_list, args=())
@@ -134,9 +136,9 @@ class FileManagerUI(QtGui.QMainWindow):
 
                 i = i + 1
 
-                print self.file_details
+                logger.info(self.file_details)
         except sjexc.StorjBridgeApiError as e:
-            print str(e)
+            logger.error(e)
 
         self.file_manager_ui.files_list_tableview.clearFocus()
         self.file_manager_ui.files_list_tableview.setModel(model)
@@ -170,17 +172,16 @@ class FileManagerUI(QtGui.QMainWindow):
                           self.file_manager_ui.files_list_tableview.selectedIndexes()))
         i = 0
         for row in rows:
-            print('Row %d is selected' % row)
+            logger.info('Row %d is selected' % row)
             index = tablemodel.index(row, 3)  # get file ID
             # We suppose data are strings
             selected_file_id = str(tablemodel.data(index).toString())
-            self.file_mirrors_list_window =  SingleFileDownloadUI(self, str(self.current_selected_bucket_id),
-                                                              selected_file_id)
+            self.file_mirrors_list_window = SingleFileDownloadUI(self, str(self.current_selected_bucket_id),
+                                                                 selected_file_id)
             self.file_mirrors_list_window.show()
             i += 1
 
         if i == 0:
             QtGui.QMessageBox.about(self, "Warning!", "Please select file from file list!")
 
-        print 1
-
+        logger.debug(1)
