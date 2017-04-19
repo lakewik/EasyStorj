@@ -63,8 +63,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui_single_file_download.start_download_bt, QtCore.SIGNAL("clicked()"),
                                lambda: self.createNewDownloadInitThread(bucketid, fileid))  # begin file downloading process
 
-        QtCore.QObject.connect(self.ui_single_file_download.open_log_bt, QtCore.SIGNAL("clicked()"),
-                               self.open_logs_window)  # open logs window
+        # QtCore.QObject.connect(self.ui_single_file_download.open_log_bt, QtCore.SIGNAL("clicked()"),
+        #                        self.open_logs_window)  # open logs window
 
         self.connect(self, QtCore.SIGNAL("incrementShardsDownloadProgressCounters"), self.increment_shards_download_progress_counters)
         self.connect(self, QtCore.SIGNAL("updateShardDownloadProgress"), self.update_shard_download_progess)
