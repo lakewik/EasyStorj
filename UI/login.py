@@ -56,7 +56,3 @@ class LoginUI(QtGui.QMainWindow):
                 self.main_ui_window.show()
                 self.close()
                 #initial_window.hide()
-                # self.account_manager.get_login_state()
-
-        # print self.storj_client.bucket_list()
-        print 1
