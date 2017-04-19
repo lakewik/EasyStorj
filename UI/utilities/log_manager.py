@@ -1,6 +1,8 @@
 import logging
 import os
 import sys
+# Submodule. Necessary explicit import
+from logging import handlers
 
 
 LOGGER_NAME = 'storj-python-gui-log'
@@ -13,11 +15,10 @@ logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
 # Logs written to file
-# fileHandler = logging.FileHandler(PATH)
 # Rotating file logger. Max size 3 MB per 5 log files
-fileHandler = logging.handlers.RotatingFileHandler(PATH,
-                                                   maxBytes=(1048576 * 3),
-                                                   backupCount=5)
+fileHandler = handlers.RotatingFileHandler(PATH,
+                                           maxBytes=(1048576 * 3),
+                                           backupCount=5)
 fileHandler.setFormatter(formatter)
 # fileHandler.setLevel(logging.WARNING)
 fileHandler.setLevel(logging.DEBUG)  # TODO: change to WARNING
