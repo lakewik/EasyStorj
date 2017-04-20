@@ -6,10 +6,7 @@ import requests
 from PyQt4 import QtCore, QtGui
 
 import time
-# from PyQt4.QtCore import SIGNAL
-from PyQt4.QtGui import QFileDialog
 from PyQt4.QtGui import QMessageBox
-from PyQt4.QtGui import QProgressBar
 
 from UI.crypto.file_crypto_tools import FileCrypto
 from UI.utilities.backend_config import Configuration
@@ -22,11 +19,9 @@ import hashlib
 import threading
 import magic
 
-import sys, linecache
 from sys import platform
 
 import storj.model
-# import storj.exception
 
 from utilities.log_manager import logger
 # from logs_backend import LogHandler, logger
@@ -187,7 +182,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.shards_uploaded.setText(html_format_begin + str(self.shards_already_uploaded) + html_format_end)
 
     def add_row_upload_queue_table(self, row_data):
-        self.upload_queue_progressbar_list.append(QProgressBar())
+        self.upload_queue_progressbar_list.append(QtGui.QProgressBar())
 
         self.upload_queue_table_row_count = self.ui_single_file_upload.shard_queue_table_widget.rowCount()
 
@@ -214,7 +209,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.tmp_path.setText(self.selected_tmp_dir)
 
     def select_file_path(self):
-        self.ui_single_file_upload.file_path.setText(QFileDialog.getOpenFileName())
+        self.ui_single_file_upload.file_path.setText(QtGui.QFileDialog.getOpenFileName())
 
     def createNewUploadThread(self):
         # self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
@@ -464,19 +459,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 logger.error("Error occured while trying to upload shard or\
                              negotiate contract. Retrying... ")
                 logger.error(e)
-
-                def PrintException():
-                    exc_type, exc_obj, tb = sys.exc_info()
-                    f = tb.tb_frame
-                    lineno = tb.tb_lineno
-                    filename = f.f_code.co_filename
-                    linecache.checkcache(filename)
-                    line = linecache.getline(filename, lineno, f.f_globals)
-                    print 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(
-                        filename,
-                        lineno, line.strip(), exc_obj)
-
-                PrintException()
 
                 # logger.warning('"log_event_type": "error"')
                 logger.warning('"title": "Unhandled exception"')
