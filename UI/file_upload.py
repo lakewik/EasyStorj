@@ -17,7 +17,8 @@ import storj
 from crypto.crypto_tools import CryptoTools
 import hashlib
 import threading
-import magic
+#import magic
+import mimetypes
 
 from sys import platform
 
@@ -580,21 +581,18 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # get temporary files path
         self.parametrs.tmpPath = str(self.ui_single_file_upload.tmp_path.text())
         logger.debug("Temporary path chosen: " + self.parametrs.tmpPath)
-        '''
-        if self.ui_single_file_upload.tmp_path.text() == "":
-            self.parametrs.tmpPath = "/tmp/"
-        else:
-            self.parametrs.tmpPath = str(self.ui_single_file_upload.tmp_path.text())
-        '''
+
         self.configuration = Configuration()
 
         # TODO: redundant lines?
         # get temporary files path
         if self.ui_single_file_upload.file_path.text() == "":
+            self.parametrs.tmpPath = "/tmp/"
             self.validation["file_path"] = False
             self.emit(QtCore.SIGNAL("showFileNotSelectedError"))  # show error missing file path
             logger.error("temporary path missing")
         else:
+            self.parametrs.tmpPath = str(self.ui_single_file_upload.tmp_path.text())
             self.validation["file_path"] = True
             file_path = str(self.ui_single_file_upload.file_path.text())
 
@@ -608,9 +606,15 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             logger.debug(bname + "npliku")
 
-            mime = magic.Magic(mime=True)
-            file_mime_type = str(mime.from_file(file_path))
-            file_mime_type = "text/plain"
+            # Temporary replace magic with mimetypes python library
+            if mimetypes.guess_type(file_path)[0] != None:
+                file_mime_type =  mimetypes.guess_type(file_path)[0]
+            else:
+                file_mime_type = "text/plain"
+
+            #mime = magic.Magic(mime=True)
+            #file_mime_type = str(mime.from_file(file_path))
+
             logger.debug(file_mime_type)
             # file_mime_type = str("A")
 
