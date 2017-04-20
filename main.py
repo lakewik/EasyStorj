@@ -5,6 +5,7 @@ from PyQt4 import QtCore, QtGui
 from UI.utilities.account_manager import AccountManager
 from UI.mainUI import MainUI
 from UI.initial_window import InitialWindowUI
+import configparser # needed for Windows package builder
 
 
 if __name__ == "__main__":
