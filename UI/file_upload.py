@@ -290,7 +290,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             # logger.warning('"log_event_type": "debug"')
             logger.warning('"title": "Negotiating contract"')
             logger.warning('"description": "Trying to negotiate storage \
-                    contract for shard at inxed " + str(chapters) + "..."')
+                    contract for shard at inxed "' + str(chapters) + "...")
             # logger.warning(str({"log_event_type": "debug", "title": "Negotiating contract",
             #                     "description": "Trying to negotiate storage contract for shard at inxed " + str(chapters) + "..."}))
 
@@ -677,8 +677,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             # Now generate shards
             self.set_current_status("Splitting file to shards...")
-            logger.warning(str({"log_event_type": "debug", "title": "Sharding",
-                                "description": "Splitting file to shards..."}))
+            # logger.warning('"log_event_type": "debug"')
+            logger.debug('"title": "Sharding"')
+            logger.debug('"description": "Splitting file to shards..."')
+            # logger.warning(str({"log_event_type": "debug", "title": "Sharding",
+            #                     "description": "Splitting file to shards..."}))
             shards_manager = storj.model.ShardManager(filepath=str(file_path_ready), tmp_path=self.parametrs.tmpPath)
 
             # self.ui_single_file_upload.current_state.setText(html_format_begin + "Generating shards..." + html_format_end)
