@@ -28,7 +28,6 @@ from utilities.log_manager import logger
 # from logs_backend import LogHandler, logger
 
 from resources.html_strings import html_format_begin, html_format_end
-from utilities.account_manager import AccountManager
 
 
 """
@@ -64,10 +63,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # self.log_handler = LogHandler()
         # logging.setLoggerClass(get_global_logger(self.log_handler))
         # logger.addHandler(self.log_handler)
-
-        self.account_manager = AccountManager()  # init AccountManager
-
-        self.user_password = self.account_manager.get_user_password()
 
         if platform == "linux" or platform == "linux2":
             # linux
@@ -639,11 +634,12 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 file_path_ready = os.path.join(self.parametrs.tmpPath,
                                                bname + ".encrypted")
                 logger.debug("Call encryption method")
+                # begin file encryption")
                 file_crypto_tools.encrypt_file(
                     "AES",
                     file_path,
                     file_path_ready,
-                    self.user_password)  # begin file encryption
+                    self.storj_engine.account_manager.get_user_password())
                 # file_path_ready = self.parametrs.tmpPath + "/" + bname +\
                 #     ".encrypted"  # get path to encrypted file in temp dir
                 file_name_ready_to_shard_upload = bname + ".encrypted"
