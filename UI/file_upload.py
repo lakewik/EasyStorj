@@ -242,6 +242,33 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         upload_thread = threading.Thread(target=self.upload_shard(shard=shard, chapters=chapters, frame=frame, file_name_ready_to_shard_upload=file_name), args=())
         upload_thread.start()
 
+    def _add_shard_to_table(self, frame_content, shard, chapters):
+        """
+        Add a row to the shard table and return the row number
+        """
+        # Add items to shard queue table view
+        tablerowdata = {}
+        tablerowdata["farmer_address"] = frame_content["farmer"]["address"]
+        tablerowdata["farmer_port"] = frame_content["farmer"]["port"]
+        tablerowdata["hash"] = str(shard.hash)
+        tablerowdata["state"] = "Uploading..."
+        tablerowdata["token"] = frame_content["token"]
+        tablerowdata["shard_index"] = str(chapters)
+
+        # logger.warning('"log_event_type": "debug"')
+        logger.debug('"title": "Contract negotiated"')
+        logger.debug('"description": "Storage contract negotiated \
+                     with: "' +
+                     str(frame_content["farmer"]["address"]) + ":" +
+                     str(frame_content["farmer"]["port"]))
+        # logger.warning(str({"log_event_type": "debug", "title": "Contract negotiated",
+        #                     "description": "Storage contract negotiated with: " + str(frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"]["port"]))}))
+
+        self.emit(QtCore.SIGNAL("addRowToUploadQueueTable"), tablerowdata)  # add row to table
+
+        rowcount = self.ui_single_file_upload.shard_queue_table_widget.rowCount()
+        return rowcount
+
     def upload_shard(self, shard, chapters, frame, file_name_ready_to_shard_upload):
 
         self.uploadblocksize = 4096
@@ -269,7 +296,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.shard_upload_percent_list[shard_index] = percent_uploaded
                 self.emit(QtCore.SIGNAL("refreshOverallProgress"), 0.1)  # update overall progress bar
 
-        it = 0
         contract_negotiation_tries = 0
         while self.max_retries_negotiate_contract > contract_negotiation_tries:
             contract_negotiation_tries += 1
@@ -290,29 +316,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             try:
                 frame_content = self.storj_engine.storj_client.frame_add_shard(shard, frame.id)
-
-                # Add items to shard queue table view
-
-                tablerowdata = {}
-                tablerowdata["farmer_address"] = frame_content["farmer"]["address"]
-                tablerowdata["farmer_port"] = frame_content["farmer"]["port"]
-                tablerowdata["hash"] = str(shard.hash)
-                tablerowdata["state"] = "Uploading..."
-                tablerowdata["token"] = frame_content["token"]
-                tablerowdata["shard_index"] = str(chapters)
-
-                # logger.warning('"log_event_type": "debug"')
-                logger.debug('"title": "Contract negotiated"')
-                logger.debug('"description": "Storage contract negotiated \
-                             with: "' +
-                             str(frame_content["farmer"]["address"]) + ":" +
-                             str(frame_content["farmer"]["port"]))
-                # logger.warning(str({"log_event_type": "debug", "title": "Contract negotiated",
-                #                     "description": "Storage contract negotiated with: " + str(frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"]["port"]))}))
-
-                self.emit(QtCore.SIGNAL("addRowToUploadQueueTable"), tablerowdata)  # add row to table
-
-                rowcount = self.ui_single_file_upload.shard_queue_table_widget.rowCount()
+                rowposition = self._add_shard_to_table(frame_content,
+                                                       shard,
+                                                       chapters)   # Add a row to the table
 
                 logger.debug('-' * 30)
                 logger.debug("FRAME CONTENT: " + str(frame_content))
@@ -345,7 +351,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                 shard_size = int(shard.size)
 
-                rowposition = rowcount
                 farmer_tries = 0
                 response = None
                 while self.max_retries_upload_to_same_farmer > farmer_tries:
@@ -373,7 +378,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                             response = requests.post(url, data=read_in_chunks(f, shard_size, rowposition, shard_index=chapters), timeout=1)
 
                         j = json.loads(str(response.content))
-                        if (j["result"] == "The supplied token is not accepted"):
+                        if (j.get("result") == "The supplied token is not accepted"):
                             raise storj.exception.StorjFarmerError(
                                 storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
 
@@ -420,8 +425,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         self.emit(QtCore.SIGNAL("updateUploadTaskState"), rowposition,
                                   "Uploaded!")  # update shard upload state
 
-                        logger.debug(str(self.all_shards_count) + "wszystkie" +
-                                     str(self.shards_already_uploaded) + "wyslane")
+                        logger.debug(str(self.all_shards_count) + " shards, " +
+                                     str(self.shards_already_uploaded) + "sent")
                         if int(self.all_shards_count) <= int(self.shards_already_uploaded + 1):
                             self.emit(QtCore.SIGNAL("finishUpload"))  # send signal to save to bucket after all files are uploaded
                         break
@@ -431,9 +436,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 j = json.loads(str(response.content))
                 if j.get("result") == "The supplied token is not accepted":
                     raise storj.exception.StorjFarmerError(storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
-
-                firstiteration = False
-                it += 1
 
             except storj.exception.StorjBridgeApiError as e:
                 # upload failed due to Storj Bridge failure
@@ -733,7 +735,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.all_shards_count = shards_count
 
             chapters = 0
-            firstiteration = True
 
             for shard in shards_manager.shards:
                 self.shard_upload_percent_list.append(0)
