@@ -443,8 +443,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                              contract: ")
                 logger.error(e)
                 # logger.warning('"log_event_type": "error"')
-                logger.warning('"title": "Bridge exception"')
-                logger.warning('"description": "Exception raised while trying \
+                logger.error('"title": "Bridge exception"')
+                logger.error('"description": "Exception raised while trying \
                                to negotiate storage contract for shard at index\
                                "' + str(chapters))
                 # logger.warning(str({"log_event_type": "error", "title": "Bridge exception",
@@ -459,8 +459,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 logger.error(e)
 
                 # logger.warning('"log_event_type": "error"')
-                logger.warning('"title": "Unhandled exception"')
-                logger.warning('"description": "Unhandled exception occured\
+                logger.error('"title": "Unhandled exception"')
+                logger.error('"description": "Unhandled exception occured\
                                while trying to upload shard or negotiate \
                                contract for shard at index "' +
                                str(chapters) +
@@ -500,8 +500,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.crypto_tools = CryptoTools()
             self.ui_single_file_upload.current_state.setText(
                 html_format_begin + "Generating SHA5212 HMAC..." + html_format_end)
-            logger.warning(str({"log_event_type": "debug", "title": "HMAC",
-                                "description": "Generating HMAC..."}))
+            # logger.warning('"log_event_type": "debug"')
+            logger.debug('"title": "HMAC"')
+            logger.debug('"description": "Generating HMAC..."')
+            # logger.warning(str({"log_event_type": "debug", "title": "HMAC",
+            #                     "description": "Generating HMAC..."}))
             hash_sha512_hmac_b64 = self.crypto_tools.prepare_bucket_entry_hmac(shards_manager.shards)
             hash_sha512_hmac = hashlib.sha224(str(hash_sha512_hmac_b64["SHA-512"])).hexdigest()
             logger.debug(hash_sha512_hmac)
@@ -553,8 +556,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             if success:
                 self.ui_single_file_upload.current_state.setText(
                     html_format_begin + "Upload success! Waiting for user..." + html_format_end)
-                logger.warning(str({"log_event_type": "success", "title": "File uploaded",
-                                    "description": "File uploaded successfully!"}))
+                # logger.warning('"log_event_type": "success"')
+                logger.debug('"title": "File uploaded"')
+                logger.debug('"description": "File uploaded successfully!"')
+                # logger.warning(str({"log_event_type": "success", "title": "File uploaded",
+                #                     "description": "File uploaded successfully!"}))
                 self.emit(QtCore.SIGNAL("showFileUploadedSuccessfully"))
 
         self.connect(self, QtCore.SIGNAL("finishUpload"), lambda: finish_upload(self))
