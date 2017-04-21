@@ -17,7 +17,7 @@ import storj
 from crypto.crypto_tools import CryptoTools
 import hashlib
 import threading
-#import magic
+# import magic
 import mimetypes
 
 from sys import platform
@@ -277,6 +277,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             """Lazy function (generator) to read a file piece by piece.
             Default chunk size: 1k."""
 
+            # chunk number (first is 0)
             i = 0
             while chunks:
                 data = file_object.read(blocksize)
@@ -284,8 +285,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                     break
                 yield data
                 i += 1
-                t1 = float(shard_size) / float((self.uploadblocksize))
-                if shard_size <= (self.uploadblocksize):
+                t1 = float(shard_size) / float(self.uploadblocksize)
+                if shard_size <= self.uploadblocksize:
                     t1 = 1
 
                 percent_uploaded = int(round((100.0 * i) / t1))
@@ -461,10 +462,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 # logger.warning('"log_event_type": "error"')
                 logger.error('"title": "Unhandled exception"')
                 logger.error('"description": "Unhandled exception occured\
-                               while trying to upload shard or negotiate \
-                               contract for shard at index "' +
-                               str(chapters) +
-                               " . Retrying...")
+                             while trying to upload shard or negotiate \
+                             contract for shard at index "' +
+                             str(chapters) +
+                             " . Retrying...")
                 # logger.warning(str({"log_event_type": "error", "title": "Unhandled exception",
                 #                     "description": "Unhandled exception occured while trying to upload shard or negotiate contract for shard at index " + str(chapters) + " . Retrying..."}))
                 current_timestamp = int(time.time())
@@ -610,13 +611,13 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             logger.debug(bname + "npliku")
 
             # Temporary replace magic with mimetypes python library
-            if mimetypes.guess_type(file_path)[0] != None:
-                file_mime_type =  mimetypes.guess_type(file_path)[0]
+            if mimetypes.guess_type(file_path)[0] is not None:
+                file_mime_type = mimetypes.guess_type(file_path)[0]
             else:
                 file_mime_type = "text/plain"
 
-            #mime = magic.Magic(mime=True)
-            #file_mime_type = str(mime.from_file(file_path))
+            # mime = magic.Magic(mime=True)
+            # file_mime_type = str(mime.from_file(file_path))
 
             logger.debug(file_mime_type)
             # file_mime_type = str("A")
