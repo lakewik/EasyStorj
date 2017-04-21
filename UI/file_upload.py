@@ -269,34 +269,30 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         rowcount = self.ui_single_file_upload.shard_queue_table_widget.rowCount()
         return rowcount
 
+    def _read_in_chunks(self, file_object, shard_size, rowposition, blocksize=4096, chunks=-1, shard_index=None):
+        """Lazy function (generator) to read a file piece by piece.
+        Default chunk size: 1k."""
+        # chunk number (first is 0)
+        i = 0
+        while chunks:
+            data = file_object.read(blocksize)
+            if not data:
+                break
+            yield data
+            i += 1
+            t1 = float(shard_size) / float(blocksize)
+            if shard_size <= blocksize:
+                t1 = 1
+
+            percent_uploaded = int(round((100.0 * i) / t1))
+
+            logger.debug(i)
+            chunks -= 1
+            self.emit(QtCore.SIGNAL("updateShardUploadProgress"), int(rowposition), percent_uploaded)  # update progress bar in upload queue table
+            self.shard_upload_percent_list[shard_index] = percent_uploaded
+            self.emit(QtCore.SIGNAL("refreshOverallProgress"), 0.1)  # update overall progress bar
+
     def upload_shard(self, shard, chapters, frame, file_name_ready_to_shard_upload):
-
-        self.uploadblocksize = 4096
-
-        def read_in_chunks(file_object, shard_size, rowposition, blocksize=self.uploadblocksize, chunks=-1, shard_index=None):
-            """Lazy function (generator) to read a file piece by piece.
-            Default chunk size: 1k."""
-
-            # chunk number (first is 0)
-            i = 0
-            while chunks:
-                data = file_object.read(blocksize)
-                if not data:
-                    break
-                yield data
-                i += 1
-                t1 = float(shard_size) / float(self.uploadblocksize)
-                if shard_size <= self.uploadblocksize:
-                    t1 = 1
-
-                percent_uploaded = int(round((100.0 * i) / t1))
-
-                logger.debug(i)
-                chunks -= 1
-                self.emit(QtCore.SIGNAL("updateShardUploadProgress"), int(rowposition), percent_uploaded)  # update progress bar in upload queue table
-                self.shard_upload_percent_list[shard_index] = percent_uploaded
-                self.emit(QtCore.SIGNAL("refreshOverallProgress"), 0.1)  # update overall progress bar
-
         contract_negotiation_tries = 0
         while self.max_retries_negotiate_contract > contract_negotiation_tries:
             contract_negotiation_tries += 1
@@ -322,8 +318,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                                                        chapters)   # Add a row to the table
 
                 logger.debug('-' * 30)
-                logger.debug("FRAME CONTENT: " + str(frame_content))
-                logger.debug("SHARD: " + str(shard))
+                # logger.debug("FRAME CONTENT: " + str(frame_content))
+                # logger.debug("SHARD: " + str(shard))
                 logger.debug(frame_content["farmer"]["address"])
 
                 farmerNodeID = frame_content["farmer"]["nodeID"]
@@ -357,12 +353,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 while self.max_retries_upload_to_same_farmer > farmer_tries:
                     farmer_tries += 1
                     try:
-                        # logger.warning('"log_event_type": "debug"')
-                        logger.debug('"title": "Uploading shard"')
-                        logger.debug('"description": "Uploading shard at \
-                                     index "' +
-                                     str(shard.index) +
-                                     " to " +
+                        logger.debug("Upload shard at index " +
+                                     str(shard.index) + " to " +
                                      str(frame_content["farmer"]["address"]) +
                                      ":" +
                                      str(frame_content["farmer"]["port"]))
@@ -376,7 +368,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                                               '-' + str(chapters + 1))
                         # with open(self.parametrs.tmpPath + file_name_ready_to_shard_upload + '-' + str(chapters + 1), 'rb') as f:
                         with open(mypath, 'rb') as f:
-                            response = requests.post(url, data=read_in_chunks(f, shard_size, rowposition, shard_index=chapters), timeout=1)
+                            response = requests.post(url, data=self._read_in_chunks(f, shard_size, rowposition, shard_index=chapters), timeout=1)
 
                         j = json.loads(str(response.content))
                         if (j.get("result") == "The supplied token is not accepted"):
@@ -413,8 +405,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                     else:
                         self.emit(QtCore.SIGNAL("incrementShardsProgressCounters"))  # update already uploaded shards count
                         # logger.warning('"log_event_type": "success"')
-                        logger.debug('"title": "Uploading shard"')
-                        logger.debug('"description": "Shard uploaded successfully to "' +
+                        logger.debug("Shard uploaded successfully to " +
                                      str(frame_content["farmer"]["address"]) +
                                      ":" +
                                      str(frame_content["farmer"]["port"]))
@@ -485,8 +476,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 exchange_report.exchangeResultMessage = exchange_report.STORJ_REPORT_SHARD_UPLOADED
                 self.set_current_status("Sending Exchange Report for shard " + str(chapters + 1))
                 # logger.warning('"log_event_type": "debug"')
-                logger.debug('"title":"Shard added"')
-                logger.info('"description": "Shard "' + str(chapters + 1) +
+                logger.info("Shard " + str(chapters + 1) +
                             " successfully added and exchange report sent.")
                 # logger.warning(str({"log_event_type": "debug", "title": "Shard added",
                 #                     "description": "Shard " + str(chapters + 1) + " successfully added and exchange report sent."}))
