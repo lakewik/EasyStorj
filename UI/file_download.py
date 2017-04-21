@@ -46,7 +46,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.ui_single_file_download.setupUi(self)
         # QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine()  # init StorjEngine
-
+        self.filename_from_bridge = ""
         self.tools = Tools()
 
         # init loggers
@@ -234,7 +234,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             file_metadata = self.storj_engine.storj_client.file_metadata(str(bucket_id),
                                                                          str(file_id))
             self.ui_single_file_download.file_name.setText(
-                html_format_begin + str(file_metadata.filename) + html_format_end)
+                html_format_begin + str(file_metadata.filename.replace("[DECRYPTED]", "")) + html_format_end)
 
             tools = Tools()
             self.ui_single_file_download.file_size.setText(
@@ -242,7 +242,12 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             self.ui_single_file_download.file_id.setText(html_format_begin + str(file_id) + html_format_end)
 
             self.ui_single_file_download.file_save_path.setText(
-                str(tools.get_home_user_directory() + "/" + str(file_metadata.filename)))
+                str(tools.get_home_user_directory() + "/" + str(file_metadata.filename.replace("[DECRYPTED]", ""))))
+
+            self.filename_from_bridge = str(file_metadata.filename)
+
+            self.resolved_file_metadata = True
+
         except storj.exception.StorjBridgeApiError as e:
             self.emit(QtCore.SIGNAL("showStorjBridgeException"), "Error while resolving file metadata. " + str(e))  # emit Storj Bridge Exception
         except Exception as e:
@@ -437,8 +442,13 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         def finish_download(self):
 
             fileisencrypted = False
+            if "[DECRYPTED]" in self.filename_from_bridge:
+                fileisencrypted = False
+            else:
+                fileisencrypted = True
 
-            # Join shards
+
+                # Join shards
             sharing_tools = ShardingTools()
             self.set_current_status("Joining shards...")
             # logger.warning(str({"log_event_type": "debug", "title": "Sharding", "description": "Joining shards..."}))
