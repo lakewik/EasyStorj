@@ -28,6 +28,7 @@ GUI Client for Storj Distributed Storage Network written in Python and PyQt4. Th
 - [x] specified farmer node details
 
 # Planned features:
+- multilipe file upload
 - analyzing geodistribution of nodes, mirrors
 - file syncing
 
