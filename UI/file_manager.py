@@ -14,7 +14,6 @@ from utilities.log_manager import logger
 
 # Files section
 class FileManagerUI(QtGui.QMainWindow):
-
     def __init__(self, parent=None, bucketid=None):
         QtGui.QWidget.__init__(self, parent)
         self.file_manager_ui = Ui_FileManager()
@@ -60,18 +59,23 @@ class FileManagerUI(QtGui.QMainWindow):
             selected_file_id = str(tablemodel.data(index).toString())
             selected_file_name = str(tablemodel.data(index_filename).toString())
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Question",
-                                       "Are you sure you want to delete this file? File name: " + selected_file_name, (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
+                                       "Are you sure you want to delete this file? File name: " + selected_file_name,
+                                       (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
             result = msgBox.exec_()
             logger.debug(result)
             if result == QtGui.QMessageBox.Yes:
                 try:
-                    self.storj_engine.storj_client.file_remove(str(self.current_selected_bucket_id), str(selected_file_id))
+                    self.storj_engine.storj_client.file_remove(str(self.current_selected_bucket_id),
+                                                               str(selected_file_id))
                     self.createNewFileListUpdateThread()  # update files list
-                    QtGui.QMessageBox.about(self, "Success", 'File "' + str(selected_file_name) + '" was deleted successfully')
+                    QtGui.QMessageBox.about(self, "Success",
+                                            'File "' + str(selected_file_name) + '" was deleted successfully')
                 except sjexc.StorjBridgeApiError as e:
-                    QtGui.QMessageBox.about(self, "Error", "Bridge exception occured while trying to delete file: " + str(e))
+                    QtGui.QMessageBox.about(self, "Error",
+                                            "Bridge exception occured while trying to delete file: " + str(e))
                 except Exception as e:
-                    QtGui.QMessageBox.about(self, "Error", "Unhandled exception occured while trying to delete file: " + str(e))
+                    QtGui.QMessageBox.about(self, "Error",
+                                            "Unhandled exception occured while trying to delete file: " + str(e))
 
         if not selected:
             QtGui.QMessageBox.about(self, "Information", "Please select file which you want to delete")
@@ -120,7 +124,7 @@ class FileManagerUI(QtGui.QMainWindow):
 
         try:
             for self.file_details in self.storj_engine.storj_client.bucket_files(str(self.current_selected_bucket_id)):
-                item = QtGui.QStandardItem(str(self.file_details["filename"]))
+                item = QtGui.QStandardItem(str(self.file_details["filename"].replace("[DECRYPTED]", "")))
                 model.setItem(i, 0, item)  # row, column, item (StandardItem)
 
                 file_size_str = self.tools.human_size(int(self.file_details["size"]))  # get human readable file size
