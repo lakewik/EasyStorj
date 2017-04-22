@@ -17,6 +17,7 @@ from engine import StorjEngine
 import storj
 # import storj.exception
 import threading
+import storj.exception as stjex
 
 # from logs_backend import LogsUI
 # from logs_backend import LogHandler, logger
@@ -231,6 +232,21 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         file_name_resolve_thread = threading.Thread(target=self.set_file_metadata, args=(bucket_id, file_id))
         file_name_resolve_thread.start()
 
+    def get_file_frame_id(self, bucket_id, file_id):
+        try:
+            file_metadata = self.storj_engine.storj_client.file_metadata(str(bucket_id),
+                                                                         str(file_id))
+            self.file_frame = file_metadata.frame
+
+        except storj.exception.StorjBridgeApiError as e:
+            self.emit(QtCore.SIGNAL("showStorjBridgeException"),
+                      "Error while resolving file frame ID. " + str(e))  # emit Storj Bridge Exception
+        except Exception as e:
+            self.emit(QtCore.SIGNAL("showUnhandledException"),
+                      "Unhandled error while resolving file frame ID. " + str(e))  # emit unhandled Exception
+        else:
+            return self.file_frame
+
     def set_file_metadata(self, bucket_id, file_id):
         try:
             file_metadata = self.storj_engine.storj_client.file_metadata(str(bucket_id),
@@ -275,6 +291,13 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.ui_single_file_download.tmp_dir.setText(str(self.selected_tmp_dir))
 
     def init_download_file_pointers(self, bucket_id, file_id):
+
+        def get_file_pointers_count(self, bucket_id, file_id):
+            file_frame = self.get_file_frame_id(bucket_id, file_id)
+            frame_data = self.storj_engine.storj_client.frame_get(file_frame.id)
+
+
+
         try:
             # logger.warning("log_event_type": "debug")
             logger.debug('"title": "File pointers"')
@@ -284,8 +307,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             # logger.warning(str({"log_event_type": "debug", "title": "File pointers",
             #                     "description": "Resolving file pointers to download file with ID: " + str(
             #                         file_id) + "..."}))
-
-            file_pointers = self.storj_engine.storj_client.file_pointers(str(bucket_id), file_id)
+            #get_file_pointers_count(self, bucket_id, file_id)
+            file_pointers = self.storj_engine.storj_client.file_pointers(str(bucket_id), file_id, limit="500", skip="0")
             self.emit(QtCore.SIGNAL("beginDownloadProccess"), file_pointers)
         except storj.exception.StorjBridgeApiError as e:
             # logger.warning("log_event_type": "error")
@@ -383,6 +406,14 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
                     f.close()
                     downloaded = True
+                if r.status_code != 200 and r.status_code != 304:
+                    raise stjex.StorjFarmerError()
+                
+            except stjex.StorjFarmerError as e:
+                self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
+                          "First try failed. Retrying... (" + str(farmer_tries) + ")")  # update shard download state
+                continue
+
             except Exception as e:
                 logger.error(e)
                 # logger.warning('"log_event_type": "warning"')
@@ -560,7 +591,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                                  str(part) + "zapisane")
                     part = part + 1
 
-            except storj.exception.StorjBridgeApiError as e:
+            except stjex.StorjBridgeApiError as e:
                 self.emit(QtCore.SIGNAL("showStorjBridgeException"),
                           "Error while resolving file pointers for download. " + str(e))  # emit Storj Bridge Exception
                 continue
