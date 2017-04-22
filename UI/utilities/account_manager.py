@@ -1,5 +1,6 @@
 import xml.etree.cElementTree as ET
 from log_manager import logger
+import hashlib
 
 ACCOUNT_FILE = "storj_account_conf.xml"
 
@@ -15,7 +16,7 @@ class AccountManager:
         doc = ET.SubElement(root, "credentials")
 
         ET.SubElement(doc, "login_email").text = str(self.login_email)
-        ET.SubElement(doc, "password").text = str(self.password)
+        ET.SubElement(doc, "password").text = str(hashlib.sha256(self.password.encode('ascii')).hexdigest())
         ET.SubElement(doc, "logged_in").text = "1"
         tree = ET.ElementTree(root)
         tree.write("storj_account_conf.xml")
@@ -48,7 +49,8 @@ class AccountManager:
         try:
             et = ET.parse("storj_account_conf.xml")
             for tags in et.iter('password'):
-                password = tags.text
+                password = str(tags.text.encode('ascii'))
+                print "zpliku " + tags.text
         except IOError:
             logger.error("Error in Account Manager get password")
             logger.error("Credentials file not existing")
