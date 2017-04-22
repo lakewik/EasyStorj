@@ -513,7 +513,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 'x-filesize': str(file_size),
                 'frame': frame.id,
                 'mimetype': file_mime_type,
-                'filename': str(bname),
+                'filename': str(bname) + str(self.fileisdecrypted_str),
                 'hmac': {
                     'type': "sha512",
                     # 'value': hash_sha512_hmac["sha512_checksum"]
@@ -621,6 +621,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 # QInputDialog.getText(self, 'Warning!', 'File with name ' + str(bname) + " already exist in bucket! Please use different name:", "test" )
                 logger.warning("Same file exist!")
 
+            self.fileisdecrypted_str = ""
             if self.ui_single_file_upload.encrypt_files_checkbox.isChecked():
                 # encrypt file
                 self.set_current_status("Encrypting file...")
@@ -642,7 +643,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 # file_path_ready = self.parametrs.tmpPath + "/" + bname +\
                 #     ".encrypted"  # get path to encrypted file in temp dir
                 file_name_ready_to_shard_upload = bname + ".encrypted"
+                self.fileisdecrypted_str = ""
             else:
+                self.fileisdecrypted_str = "[DECRYPTED]"
                 file_path_ready = file_path
                 file_name_ready_to_shard_upload = bname
 
