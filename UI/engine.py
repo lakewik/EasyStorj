@@ -13,6 +13,6 @@ class StorjEngine:
             self.email = self.account_manager.get_user_email()
             # initialize Storj
             self.storj_client = storj.Client(email=self.email,
-                                             password=self.password)
+                                             password=self.password, do_hashing=False)
             logger.debug("Login from credentials xml file")
         logger.debug("testlogin, StorjEngine")
