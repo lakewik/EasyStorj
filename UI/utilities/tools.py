@@ -3,10 +3,20 @@ import os
 import platform
 import pingparser
 from os.path import expanduser
-
-
+import tempfile
+import errno
 
 class Tools:
+    def isWritable(self, path):
+        try:
+            testfile = tempfile.TemporaryFile(dir=path)
+            testfile.close()
+        except OSError as e:
+            if e.errno == errno.EACCES:  # 13
+                return False
+            e.filename = path
+            raise
+        return True
 
     def check_email(self, email):
         if not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email):
