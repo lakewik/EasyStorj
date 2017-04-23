@@ -174,7 +174,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.save_to_bucket_select.addItems(self.buckets_list)
 
     def increment_shards_progress_counters(self):
-        self.shards_already_uploaded += 1
+        #self.shards_already_uploaded += 1
         self.ui_single_file_upload.shards_uploaded.setText(html_format_begin + str(self.shards_already_uploaded) + html_format_end)
 
     def add_row_upload_queue_table(self, row_data):
@@ -404,6 +404,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         continue
                     else:
                         self.emit(QtCore.SIGNAL("incrementShardsProgressCounters"))  # update already uploaded shards count
+                        self.shards_already_uploaded += 1
                         # logger.warning('"log_event_type": "success"')
                         logger.debug("Shard uploaded successfully to " +
                                      str(frame_content["farmer"]["address"]) +
@@ -419,7 +420,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                         logger.debug(str(self.all_shards_count) + " shards, " +
                                      str(self.shards_already_uploaded) + "sent")
-                        if int(self.all_shards_count) <= int(self.shards_already_uploaded + 1):
+                        if int(self.all_shards_count) <= int(self.shards_already_uploaded):
                             self.emit(QtCore.SIGNAL("finishUpload"))  # send signal to save to bucket after all files are uploaded
                         break
 
