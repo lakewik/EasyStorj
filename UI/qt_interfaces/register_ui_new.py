@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_UI_Register(object):
     def setupUi(self, UI_Register):
         UI_Register.setObjectName(_fromUtf8("UI_Register"))
-        UI_Register.resize(321, 532)
+        UI_Register.resize(319, 542)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -74,7 +74,7 @@ class Ui_UI_Register(object):
         self.label_3 = QtGui.QLabel(UI_Register)
         self.label_3.setGeometry(QtCore.QRect(90, 5, 141, 141))
         self.label_3.setText(_fromUtf8(""))
-        self.label_3.setPixmap(QtGui.QPixmap(_fromUtf8("Storj_io-logo.png")))
+        self.label_3.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/Storj_io-logo.png")))
         self.label_3.setScaledContents(True)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.label = QtGui.QLabel(UI_Register)
@@ -196,3 +196,4 @@ class Ui_UI_Register(object):
         self.label_4.setText(_translate("UI_Register", "<html><head/><body><p align=\"center\"><span style=\" color:#555555;\">Password again</span></p></body></html>", None))
         self.label_5.setText(_translate("UI_Register", "<html><head/><body><p align=\"center\"><span style=\" color:#555555;\">Bridge URL</span></p></body></html>", None))
 
+import resources_rc
