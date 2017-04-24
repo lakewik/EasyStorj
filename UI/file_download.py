@@ -94,7 +94,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("addRowToDownloadQueueTable"), self.add_row_download_queue_table)
         self.connect(self, QtCore.SIGNAL("getNextSetOfPointers"), self.request_and_download_next_set_of_pointers)
 
-        self.connect(self, QtCore.SIGNAL("finishDownload"), lambda: self.finish_download(os.path.split(str(self.ui_single_file_download.file_save_path.text()))[1]))
+        self.connect(self, QtCore.SIGNAL("finishDownload"), lambda: self.create_download_finish_thread(os.path.split(str(self.ui_single_file_download.file_save_path.text()))[1]))
         #print "polaczono"
 
         self.shards_already_downloaded = 0
@@ -165,8 +165,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         tablerowdata = {}
         tablerowdata["farmer_address"] = pointers_content["farmer"]["address"]
         tablerowdata["farmer_port"] = pointers_content["farmer"]["port"]
-        tablerowdata["hash"] = str(shard)
-        #tablerowdata["hash"] = str(shard.hash)
+        tablerowdata["hash"] = str(pointers_content["hash"])
         tablerowdata["state"] = "Uploading..."
         tablerowdata["shard_index"] = str(chapters)
 
@@ -237,6 +236,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # actual_upload_progressbar_value = self.ui_single_file_upload.overall_progress.value()
 
         self.ui_single_file_download.overall_progress.setValue(int(total_percent))
+
+    def create_download_finish_thread(self, file_name):
+        download_finish_thread = threading.Thread(target=self.finish_download(file_name=file_name), args=())
+        download_finish_thread.start()
 
     #### Begin file download finish function ####
     # Wait for signal to do shards joining and encryption
