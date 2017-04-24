@@ -722,7 +722,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
                 chapters += 1
 
-                # delete encrypted file TODO
+            # delete encrypted file
+            logger.info("Remove file " + file_path_ready)
+            os.remove(file_path_ready)
 
         # self.emit(QtCore.SIGNAL("finishUpload")) # send signal to save to bucket after all filea are uploaded
 
