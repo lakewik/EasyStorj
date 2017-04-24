@@ -70,7 +70,7 @@ class Ui_InitialWindow(object):
         self.label_3 = QtGui.QLabel(InitialWindow)
         self.label_3.setGeometry(QtCore.QRect(90, 10, 141, 141))
         self.label_3.setText(_fromUtf8(""))
-        self.label_3.setPixmap(QtGui.QPixmap(_fromUtf8("Storj_io-logo.png")))
+        self.label_3.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/Storj_io-logo.png")))
         self.label_3.setScaledContents(True)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.label = QtGui.QLabel(InitialWindow)
@@ -113,3 +113,4 @@ class Ui_InitialWindow(object):
         self.label.setText(_translate("InitialWindow", "<html><head/><body><p align=\"center\"><span style=\" color:#2683ff;\">Already have an account?</span></p></body></html>", None))
         self.register_bt.setText(_translate("InitialWindow", "REGISTER", None))
 
+import resources_rc
