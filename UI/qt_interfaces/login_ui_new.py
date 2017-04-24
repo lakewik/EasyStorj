@@ -74,7 +74,7 @@ class Ui_Login(object):
         self.label_3 = QtGui.QLabel(Login)
         self.label_3.setGeometry(QtCore.QRect(90, 5, 141, 141))
         self.label_3.setText(_fromUtf8(""))
-        self.label_3.setPixmap(QtGui.QPixmap(_fromUtf8("Storj_io-logo.png")))
+        self.label_3.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/Storj_io-logo.png")))
         self.label_3.setScaledContents(True)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.label = QtGui.QLabel(Login)
@@ -153,3 +153,4 @@ class Ui_Login(object):
         self.cancel_bt.setText(_translate("Login", "CANCEL", None))
         self.label_2.setText(_translate("Login", "<html><head/><body><p align=\"center\"><span style=\" color:#555555;\">Password</span></p></body></html>", None))
 
+import resources_rc
