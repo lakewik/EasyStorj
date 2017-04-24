@@ -68,6 +68,7 @@ class BucketManagerUI(QtGui.QMainWindow):
 
                 if success:
                     QtGui.QMessageBox.about(self, "Success", "Bucket was deleted successfully!")
+                    self.initialize_buckets_table()
         else:
             QtGui.QMessageBox.about(self, "Warning", "Please select bucket which you want to delete.")
 
