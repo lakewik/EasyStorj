@@ -58,5 +58,6 @@ class BucketCreateUI(QtGui.QMainWindow):
 
         if bucket_created:
             self.emit(QtCore.SIGNAL("showBucketCreatedSuccessfully"), str(self.bucket_name))  # show dialog - bucket created successfully
+            self.close()
 
         logger.debug(1)
