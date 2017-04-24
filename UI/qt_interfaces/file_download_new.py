@@ -141,6 +141,10 @@ class Ui_SingleFileDownload(object):
         font.setBold(True)
         font.setWeight(75)
         self.file_name.setFont(font)
+        self.file_name.setStyleSheet(_fromUtf8("QLabel{\n"
+"color: #2683ff;\n"
+"}\n"
+""))
         self.file_name.setObjectName(_fromUtf8("file_name"))
         self.label_5 = QtGui.QLabel(SingleFileDownload)
         self.label_5.setGeometry(QtCore.QRect(20, 89, 91, 16))
@@ -182,7 +186,7 @@ class Ui_SingleFileDownload(object):
         self.tmp_dir.setGeometry(QtCore.QRect(170, 120, 391, 31))
         self.tmp_dir.setObjectName(_fromUtf8("tmp_dir"))
         self.label_15 = QtGui.QLabel(SingleFileDownload)
-        self.label_15.setGeometry(QtCore.QRect(20, 210, 181, 16))
+        self.label_15.setGeometry(QtCore.QRect(20, 210, 211, 16))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -191,13 +195,17 @@ class Ui_SingleFileDownload(object):
         self.label_15.setFont(font)
         self.label_15.setObjectName(_fromUtf8("label_15"))
         self.downloaded_shards = QtGui.QLabel(SingleFileDownload)
-        self.downloaded_shards.setGeometry(QtCore.QRect(210, 210, 151, 20))
+        self.downloaded_shards.setGeometry(QtCore.QRect(230, 210, 151, 21))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
         font.setBold(True)
         font.setWeight(75)
         self.downloaded_shards.setFont(font)
+        self.downloaded_shards.setStyleSheet(_fromUtf8("QLabel{\n"
+"color: #2683ff;\n"
+"}\n"
+""))
         self.downloaded_shards.setObjectName(_fromUtf8("downloaded_shards"))
         self.connections_onetime = QtGui.QSpinBox(SingleFileDownload)
         self.connections_onetime.setGeometry(QtCore.QRect(170, 160, 61, 32))
@@ -228,7 +236,23 @@ class Ui_SingleFileDownload(object):
         font.setBold(True)
         font.setWeight(75)
         self.file_id.setFont(font)
+        self.file_id.setStyleSheet(_fromUtf8("QLabel{\n"
+"color: #2683ff;\n"
+"}\n"
+""))
         self.file_id.setObjectName(_fromUtf8("file_id"))
+        self.current_state = QtGui.QLabel(SingleFileDownload)
+        self.current_state.setGeometry(QtCore.QRect(120, 520, 351, 21))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.current_state.setFont(font)
+        self.current_state.setStyleSheet(_fromUtf8("QLabel {\n"
+"text-align: center;\n"
+"}"))
+        self.current_state.setObjectName(_fromUtf8("current_state"))
 
         self.retranslateUi(SingleFileDownload)
         QtCore.QMetaObject.connectSlotsByName(SingleFileDownload)
@@ -255,4 +279,5 @@ class Ui_SingleFileDownload(object):
         self.label_19.setText(_translate("SingleFileDownload", "<html><head/><body><p><span style=\" color:#555555;\">CONNECTIONS:</span></p></body></html>", None))
         self.label_9.setText(_translate("SingleFileDownload", "<html><head/><body><p><span style=\" color:#555555;\">FILE ID:</span></p></body></html>", None))
         self.file_id.setText(_translate("SingleFileDownload", "<html><head/><body><p><span style=\" color:#2683ff;\">SOME_FILE_ID</span></p></body></html>", None))
+        self.current_state.setText(_translate("SingleFileDownload", "<html><head/><body><p><span style=\" color:#555555;\">WAITING TO START DOWNLOAD</span></p></body></html>", None))
 
