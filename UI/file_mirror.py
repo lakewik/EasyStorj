@@ -1,11 +1,13 @@
 import json
 import threading
 from PyQt4 import QtCore, QtGui
-from qt_interfaces.file_mirrors_list_ui import Ui_FileMirrorsList
+from qt_interfaces.file_mirrors_ui_new import Ui_FileMirrorsList
 import storj.exception as sjexc
 
-from UI.engine import StorjEngine
-from UI.node_details import NodeDetailsUI
+from engine import StorjEngine
+from node_details import NodeDetailsUI
+#from UI.engine import StorjEngine
+#from UI.node_details import NodeDetailsUI
 
 from resources.html_strings import html_format_begin, html_format_end
 from utilities.log_manager import logger
@@ -41,7 +43,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         self.bucketid = bucketid
         self.fileid = fileid
 
-        self.file_mirrors_list_ui.file_id_label.setText(html_format_begin + str(self.fileid) + html_format_end)
+        self.file_mirrors_list_ui.file_id.setText(html_format_begin + str(self.fileid) + html_format_end)
 
         logger.info(self.fileid)
         self.storj_engine = StorjEngine()  # init StorjEngine
@@ -98,8 +100,8 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         # model = QtGui.QFileSystemModel()
         # model.setRootPath(QtCore.QDir.currentPath())
 
-        self.file_mirrors_list_ui.loading_label_mirrors_established.setStyleSheet('color: red')  # set loading color
-        self.file_mirrors_list_ui.loading_label_mirrors_available.setStyleSheet('color: red')  # set loading color
+        #self.file_mirrors_list_ui.loading_label_mirrors_established.setStyleSheet('color: red')  # set loading color
+        #self.file_mirrors_list_ui.loading_label_mirrors_available.setStyleSheet('color: red')  # set loading color
 
         self.mirror_tree_view_header = ['Shard Hash / Address', 'User agent', 'Last seed', 'Node ID']
 
@@ -141,7 +143,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
 
                     recent_shard_hash = mirror["shardHash"]
 
-            self.file_mirrors_list_ui.loading_label_mirrors_established.setText("")
+            #self.file_mirrors_list_ui.loading_label_mirrors_established.setText("")
 
             # dbQueryModel.itemData(treeView.selectedIndexes()[0])
 
@@ -179,12 +181,12 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                     # self.established_mirrors_tree_view.setFirstColumnSpanned(1, self.established_mirrors_tree_view.rootIndex(), True)
 
                     recent_shard_hash_2 = mirror_2["shardHash"]
-            self.file_mirrors_list_ui.loading_label_mirrors_available.setText("")
+            #self.file_mirrors_list_ui.loading_label_mirrors_available.setText("")
 
             self.file_mirrors_list_ui.established_mirrors_count.setText(
-                html_format_begin + str(self.established_mirrors_count_for_file) + html_format_end)
+                html_format_begin + "ESTABLISHED (" + str(self.established_mirrors_count_for_file) + ")" + html_format_end)
             self.file_mirrors_list_ui.available_mirrors_count.setText(
-                html_format_begin + str(self.available_mirrors_count_for_file) + html_format_end)
+                html_format_begin +  "AVAILABLE (" + str(self.available_mirrors_count_for_file) + ")" + html_format_end)
         except sjexc.StorjBridgeApiError as e:
             self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))  # emit Storj Bridge Exception
         except Exception as e:
