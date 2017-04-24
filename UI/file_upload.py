@@ -28,6 +28,8 @@ from utilities.log_manager import logger
 # from logs_backend import LogHandler, logger
 
 from resources.html_strings import html_format_begin, html_format_end
+from resources.constants import MAX_RETRIES_UPLOAD_TO_SAME_FARMER,\
+    MAX_RETRIES_NEGOTIATE_CONTRACT
 
 
 """
@@ -98,12 +100,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # self.emit(QtCore.SIGNAL("addRowToUploadQueueTable"), "important", "information")
         # self.emit(QtCore.SIGNAL("addRowToUploadQueueTable"), "important", "information")
         # self.emit(QtCore.SIGNAL("incrementShardsProgressCounters"))
-
-        self.max_retries_upload_to_same_farmer = 3
-        self.max_retries_negotiate_contract = 10
-
-        #
-        # print self.config.max_retries_upload_to_same_farmer
 
         # self.initialize_shard_queue_table(file_pointers)
 
@@ -294,7 +290,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
     def upload_shard(self, shard, chapters, frame, file_name_ready_to_shard_upload):
         contract_negotiation_tries = 0
-        while self.max_retries_negotiate_contract > contract_negotiation_tries:
+        while MAX_RETRIES_NEGOTIATE_CONTRACT > contract_negotiation_tries:
             contract_negotiation_tries += 1
 
             # emit signal to add row to upload queue table
@@ -350,7 +346,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                 farmer_tries = 0
                 response = None
-                while self.max_retries_upload_to_same_farmer > farmer_tries:
+                while MAX_RETRIES_UPLOAD_TO_SAME_FARMER > farmer_tries:
                     farmer_tries += 1
                     try:
                         logger.debug("Upload shard at index " +
