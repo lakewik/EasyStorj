@@ -626,6 +626,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 file_name_ready_to_shard_upload = bname + ".encrypted"
                 self.fileisdecrypted_str = ""
             else:
+                encryption_enabled = False
                 self.fileisdecrypted_str = "[DECRYPTED]"
                 file_path_ready = file_path
                 file_name_ready_to_shard_upload = bname
@@ -722,9 +723,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
                 chapters += 1
 
-            # delete encrypted file
-            logger.info("Remove file " + file_path_ready)
-            os.remove(file_path_ready)
+            # delete encrypted file (if encrypted and duplicated)
+            if encryption_enabled:
+                logger.info("Remove file " + file_path_ready)
+                os.remove(file_path_ready)
 
         # self.emit(QtCore.SIGNAL("finishUpload")) # send signal to save to bucket after all filea are uploaded
 
