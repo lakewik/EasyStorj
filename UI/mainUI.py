@@ -10,6 +10,7 @@ from file_manager import FileManagerUI
 from file_mirror import FileMirrorsListUI
 from file_upload import SingleFileUploadUI
 from bucket_edition import BucketEditingUI
+from client_config import ClientConfigurationUI
 # from login import LoginUI
 # from registration import RegisterUI
 from resources.html_strings import html_format_begin, html_format_end
@@ -24,6 +25,13 @@ import threading
 from qt_interfaces.file_upload_new import Ui_SingleFileUpload
 from utilities.log_manager import logger
 
+
+class ExtendedQLabel(QtGui.QLabel):
+    def __init(self, parent):
+        QtGui.QLabel.__init__(self, parent)
+
+    def mouseReleaseEvent(self, ev):
+        self.emit(QtCore.SIGNAL('clicked()'))
 
 # Main UI section
 class MainUI(QtGui.QMainWindow):
@@ -45,6 +53,10 @@ class MainUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.file_manager_ui.file_delete_bt, QtCore.SIGNAL("clicked()"),
                                self.delete_selected_file)  # delete selected file
 
+        self.file_manager_ui.settings_bt.mousePressEvent = self.open_settings_window
+
+        #self.file_manager_ui.refresh_bt.mousePressEvent = self.createNewFileListUpdateThread()
+
         QtCore.QObject.connect(self.file_manager_ui.new_file_upload_bt, QtCore.SIGNAL("clicked()"),
                                self.open_single_file_upload_window)  # delete selected file
 
@@ -64,6 +76,10 @@ class MainUI(QtGui.QMainWindow):
     def open_single_file_upload_window(self):
         self.single_file_upload_window = SingleFileUploadUI(self)
         self.single_file_upload_window.show()
+
+    def open_settings_window(self, b):
+        self.open_settings_window = ClientConfigurationUI(self)
+        self.open_settings_window.show()
 
     def delete_selected_file(self):
         self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()
