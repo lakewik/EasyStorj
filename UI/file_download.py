@@ -118,7 +118,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             temp_dir = "/tmp/"
         elif platform == "win32":
             # Windows
-            temp_dir = "C:/Windows/temp/"
+            temp_dir = "C:\\Windows\\temp\\"
 
         self.ui_single_file_download.tmp_dir.setText(str(temp_dir))
 
@@ -518,8 +518,18 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
              #   html_format_begin + str(tools.human_size(int(file_metadata.size))) + html_format_end)
             self.ui_single_file_download.file_id.setText(str(file_id))
 
-            self.ui_single_file_download.file_save_path.setText(
-                str(tools.get_home_user_directory() + "/" + str(file_metadata.filename.replace("[DECRYPTED]", ""))))
+            if platform == "linux" or platform == "linux2":
+                # linux
+                self.ui_single_file_download.file_save_path.setText(
+                    str(tools.get_home_user_directory() + "/" + str(file_metadata.filename.replace("[DECRYPTED]", ""))))
+            elif platform == "darwin":
+                # OS X
+                self.ui_single_file_download.file_save_path.setText(
+                    str(tools.get_home_user_directory() + "/" + str(file_metadata.filename.replace("[DECRYPTED]", ""))))
+            elif platform == "win32":
+                self.ui_single_file_download.file_save_path.setText(
+                    str(tools.get_home_user_directory() + "\\" + str(file_metadata.filename.replace("[DECRYPTED]", ""))))
+
 
             self.filename_from_bridge = str(file_metadata.filename)
 
