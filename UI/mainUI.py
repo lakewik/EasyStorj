@@ -53,6 +53,11 @@ class MainUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.file_manager_ui.file_delete_bt, QtCore.SIGNAL("clicked()"),
                                self.delete_selected_file)  # delete selected file
 
+        self.account_manager = AccountManager()  # init AccountManager
+
+        user_email = self.account_manager.get_user_email()
+        self.file_manager_ui.account_label.setText(str(user_email))
+
         self.file_manager_ui.settings_bt.mousePressEvent = self.open_settings_window
 
         #self.file_manager_ui.refresh_bt.mousePressEvent = self.createNewFileListUpdateThread()
