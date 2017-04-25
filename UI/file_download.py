@@ -1,7 +1,7 @@
 import json
 # import logging
 import os
-
+from sys import platform
 import requests
 from PyQt4 import QtCore, QtGui
 
@@ -25,6 +25,7 @@ from utilities.log_manager import logger
 
 from resources.html_strings import html_format_begin, html_format_end
 from utilities.account_manager import AccountManager
+import time
 
 """
 ######################### Logging ####################
@@ -108,7 +109,18 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.max_retries_get_file_pointers = 10
 
         # set default paths
-        self.ui_single_file_download.tmp_dir.setText(str("/tmp/"))
+        temp_dir = ""
+        if platform == "linux" or platform == "linux2":
+            # linux
+            temp_dir = "/tmp/"
+        elif platform == "darwin":
+            # OS X
+            temp_dir = "/tmp/"
+        elif platform == "win32":
+            # Windows
+            temp_dir = "C:/Windows/temp/"
+
+        self.ui_single_file_download.tmp_dir.setText(str(temp_dir))
 
         # set config variables
 
@@ -388,6 +400,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 tries_get_file_pointers = 0
                 while self.max_retries_get_file_pointers > tries_get_file_pointers:
                     tries_get_file_pointers += 1
+                    time.sleep(1)
                     try:
                         options_array = {}
                         options_array["tmp_path"] = self.tmp_path
@@ -411,6 +424,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                         continue
                     else:
                         break
+
 
                 self.already_started_shard_downloads_count += 1
 
@@ -497,7 +511,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             file_metadata = self.storj_engine.storj_client.file_metadata(str(bucket_id),
                                                                          str(file_id))
             self.ui_single_file_download.file_name.setText(
-                html_format_begin + str(file_metadata.filename.replace("[DECRYPTED]", "")) + html_format_end)
+               str(file_metadata.filename.replace("[DECRYPTED]", "")))
 
             tools = Tools()
             #self.ui_single_file_download.file_size.setText(
@@ -758,12 +772,11 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                              str(part) + "zapisane")
                 part = part + 1
 
-            except IOError as e:
-                print " perm error " + str(e)
-                if str(e) == str(13):
-                    self.emit(QtCore.SIGNAL("showException"),
-                              "Error while saving or reading file or temporary file. Probably this is caused by insufficient permisions. Please check if you have permissions to write or read from selected directories.  ")  # emit Storj Bridge Exception
 
+            except Exception as e:
+                logger.error(e)
+                # logger.warning('"log_event_type": "warning"')
+                logger.debug('"title": "Unhandled error"' + str(e))
                     #except Exception as e:
              #   self.emit(QtCore.SIGNAL("showStorjBridgeException"),
               #            "Unhandled error while resolving file pointers for download. " + str(
@@ -775,6 +788,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 self.emit(QtCore.SIGNAL("showException"),
                     "Error while saving or reading file or temporary file. Probably this is caused by insufficient permisions. Please check if you have permissions to write or read from selected directories.  ")  # emit Storj Bridge Exception
 
+        except Exception as e:
+            logger.error(e)
+            # logger.warning('"log_event_type": "warning"')
+            logger.debug('"title": "Unhandled error"')
         #except Exception as e:
          #   self.emit(QtCore.SIGNAL("showException"),
           #            "Unhandled exception: " + str(e) )
