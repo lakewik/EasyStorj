@@ -1,6 +1,6 @@
 from PyQt4 import QtCore, QtGui
 from utilities.backend_config import Configuration
-from qt_interfaces.client_configuration_ui import Ui_ClientConfiguration
+from qt_interfaces.settings_ui_new import Ui_ClientConfiguration
 from utilities.log_manager import logger
 
 

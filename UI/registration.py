@@ -1,5 +1,5 @@
 from PyQt4 import QtCore, QtGui
-from qt_interfaces.storj_register_ui import Ui_Register
+from qt_interfaces.register_ui_new import Ui_UI_Register
 from login import LoginUI
 from utilities.tools import Tools
 import json
@@ -14,7 +14,7 @@ class RegisterUI(QtGui.QMainWindow):
         QtGui.QWidget.__init__(self, parent)
 
         # register UI
-        self.register_ui = Ui_Register()
+        self.register_ui = Ui_UI_Register()
         self.register_ui.setupUi(self)
 
         self.register_ui.password.setEchoMode(QtGui.QLineEdit.Password)

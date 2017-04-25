@@ -2,7 +2,7 @@ import json
 import storj
 from PyQt4 import QtCore, QtGui
 from mainUI import MainUI
-from qt_interfaces.storj_login_ui import Ui_Login
+from qt_interfaces.login_ui_new import Ui_Login
 from utilities.account_manager import AccountManager
 
 from utilities.log_manager import logger

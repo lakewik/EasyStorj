@@ -2,7 +2,7 @@ import json
 import socket
 from PyQt4 import QtCore, QtGui
 
-from qt_interfaces.node_details_ui import Ui_NodeDetails
+from qt_interfaces.node_details_new import Ui_NodeDetails
 from engine import StorjEngine
 from utilities.tools import Tools
 
@@ -51,21 +51,21 @@ class NodeDetailsUI(QtGui.QMainWindow):
             self.node_details_content = self.storj_engine.storj_client.contact_lookup(str(self.nodeid))
 
             self.node_details_ui.address_label.setText(
-                html_format_begin + str(self.node_details_content.address) + html_format_end)  # get given node address
+                str(self.node_details_content.address) )  # get given node address
             self.node_details_ui.last_timeout_label.setText(
-                html_format_begin + str(self.node_details_content.lastTimeout) + html_format_end)  # get last timeout
+               str(self.node_details_content.lastTimeout) )  # get last timeout
             self.node_details_ui.timeout_rate_label.setText(
-                html_format_begin + str(self.node_details_content.timeoutRate) + html_format_end)  # get timeout rate
+                str(self.node_details_content.timeoutRate))  # get timeout rate
             self.node_details_ui.user_agent_label.setText(
-                html_format_begin + str(self.node_details_content.userAgent) + html_format_end)  # get user agent
+                str(self.node_details_content.userAgent) )  # get user agent
             self.node_details_ui.protocol_version_label.setText(
-                html_format_begin + str(self.node_details_content.protocol) + html_format_end)  # get protocol version
-            self.node_details_ui.response_time_label.setText(html_format_begin + str(
-                self.node_details_content.responseTime) + html_format_end)  # get farmer node response time
+                 str(self.node_details_content.protocol) )  # get protocol version
+            self.node_details_ui.response_time_label.setText( str(
+                self.node_details_content.responseTime))  # get farmer node response time
             self.node_details_ui.port_label.setText(
-                html_format_begin + str(self.node_details_content.port) + html_format_end)  # get farmer node port
+                 str(self.node_details_content.port) )  # get farmer node port
             self.node_details_ui.node_id_label.setText(
-                html_format_begin + str(self.nodeid) + html_format_end)  # get farmer node response time
+                str(self.nodeid) )  # get farmer node response time
 
             # ping_to_node = self.tools.measure_ping_latency(str(self.node_details_content.address))
 
@@ -80,7 +80,7 @@ class NodeDetailsUI(QtGui.QMainWindow):
             country_full_name = country_parsed.name
 
             self.node_details_ui.country_label.setText(
-                html_format_begin + str(country_full_name) + html_format_end)  # set full country name
+                 str(country_full_name))  # set full country name
 
             ### Display country flag ###
 
