@@ -28,7 +28,8 @@ from utilities.log_manager import logger
 # from logs_backend import LogHandler, logger
 
 from resources.html_strings import html_format_begin, html_format_end
-
+from resources.constants import MAX_RETRIES_UPLOAD_TO_SAME_FARMER,\
+    MAX_RETRIES_NEGOTIATE_CONTRACT
 
 """
 ######################### Logging ####################
@@ -72,7 +73,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.temp_dir = "/tmp"
         elif platform == "win32":
             # Windows
-            self.temp_dir = "C://Windows/temp"
+            self.temp_dir = "C:/Windows/temp"
         self.ui_single_file_upload.tmp_path.setText(self.temp_dir)
 
         # initialize variables
@@ -101,8 +102,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # self.emit(QtCore.SIGNAL("addRowToUploadQueueTable"), "important", "information")
         # self.emit(QtCore.SIGNAL("incrementShardsProgressCounters"))
 
-        self.max_retries_upload_to_same_farmer = 3
-        self.max_retries_negotiate_contract = 10
+        self.max_retries_upload_to_same_farmer = MAX_RETRIES_UPLOAD_TO_SAME_FARMER
+        self.max_retries_negotiate_contract = MAX_RETRIES_NEGOTIATE_CONTRACT
 
         #
         # print self.config.max_retries_upload_to_same_farmer
@@ -354,6 +355,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                 farmer_tries = 0
                 response = None
+                success_shard_upload = False
                 while self.max_retries_upload_to_same_farmer > farmer_tries:
                     farmer_tries += 1
                     try:
@@ -378,6 +380,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         if (j.get("result") == "The supplied token is not accepted"):
                             raise storj.exception.StorjFarmerError(
                                 storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
+                        success_shard_upload = True
 
                     except storj.exception.StorjFarmerError as e:
                         # upload failed due to Farmer Failure
@@ -427,6 +430,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         if int(self.all_shards_count) <= int(self.shards_already_uploaded):
                             self.emit(QtCore.SIGNAL("finishUpload"))  # send signal to save to bucket after all files are uploaded
                         break
+                if success_shard_upload == False:
+                    self.emit(QtCore.SIGNAL("updateUploadTaskState"), rowposition,
+                              "Failed. Trying to upload to another farmer...")  # update shard upload state
+
 
                 logger.debug(response.content)
 
@@ -608,6 +615,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 file_mime_type = mimetypes.guess_type(file_path)[0]
             else:
                 file_mime_type = "text/plain"
+
+            file_mime_type = "text/plain"
 
             # mime = magic.Magic(mime=True)
             # file_mime_type = str(mime.from_file(file_path))
