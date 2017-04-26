@@ -53,10 +53,7 @@ class MainUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.file_manager_ui.file_delete_bt, QtCore.SIGNAL("clicked()"),
                                self.delete_selected_file)  # delete selected file
 
-        self.account_manager = AccountManager()  # init AccountManager
 
-        user_email = self.account_manager.get_user_email()
-        self.file_manager_ui.account_label.setText(str(user_email))
 
         self.file_manager_ui.settings_bt.mousePressEvent = self.open_settings_window
 
@@ -72,10 +69,20 @@ class MainUI(QtGui.QMainWindow):
                                lambda: self.open_bucket_editing_window(action="add"))  # open bucket edit window
 
         self.storj_engine = StorjEngine()  # init StorjEngine
+        #self.account_manager = AccountManager()  # init AccountManager
+
+        user_email = self.storj_engine.account_manager.get_user_email()
+        self.file_manager_ui.account_label.setText(str(user_email))
+
+
         self.createNewBucketResolveThread()
 
+
     def open_bucket_editing_window(self, action):
-        self.bucket_editing_window = BucketEditingUI(self, action=action, bucketid=str(self.current_selected_bucket_id))
+        if action == "edit":
+            self.bucket_editing_window = BucketEditingUI(self, action=action, bucketid=str(self.current_selected_bucket_id))
+        else:
+            self.bucket_editing_window = BucketEditingUI(self, action=action)
         self.bucket_editing_window.show()
 
     def open_single_file_upload_window(self):
