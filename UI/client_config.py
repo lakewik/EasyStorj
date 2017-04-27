@@ -17,12 +17,18 @@ class ClientConfigurationUI(QtGui.QMainWindow):
         self.configuration_manager = Configuration()
 
         QtCore.QObject.connect(self.client_configuration_ui.apply_bt, QtCore.SIGNAL("clicked()"),
-                               self.save_settings)  # valudate and register user
+                               self.save_settings)  # save settings action
+
+        QtCore.QObject.connect(self.client_configuration_ui.cancel_bt, QtCore.SIGNAL("clicked()"),
+                               self.close)  # close form
 
     def save_settings(self):
         # validate settings
 
         self.configuration_manager.save_client_configuration(self.client_configuration_ui)  # save configuration
+        QtGui.QMessageBox.about(self, "Success", "Configuration saved successfully!")
+
+
 
     def reset_settings_to_default(self):
         logger.debug(1)
