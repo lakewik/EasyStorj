@@ -1,5 +1,10 @@
 # Storj GUI Client
 
+[![Build Status](https://travis-ci.org/lakewik/storj-gui-client.svg?branch=master)](https://travis-ci.org/lakewik/storj-gui-client)
+[![Code Health](https://landscape.io/github/lakewik/storj-gui-client/master/landscape.svg?style=flat)](https://landscape.io/github/lakewik/storj-gui-client/master)
+[![Coverage Status](https://coveralls.io/repos/github/lakewik/storj-gui-client/badge.svg?branch=master)](https://coveralls.io/r/lakewik/storj-gui-client)
+[![Requirements Status](https://requires.io/github/lakewik/storj-gui-client/requirements.svg?branch=master)](https://requires.io/github/lakewik/storj-gui-client/requirements/?branch=master)
+
 GUI Client for Storj Distributed Storage Network written in Python and PyQt4.
 
 This app finally will work on most desktop platforms: Linux, Windows, Mac OS X.
