@@ -4,7 +4,6 @@ import os
 
 import requests
 from PyQt4 import QtCore, QtGui
-
 import time
 from PyQt4.QtGui import QMessageBox
 
@@ -46,7 +45,7 @@ def get_global_logger(handler):
 
 class SingleFileUploadUI(QtGui.QMainWindow):
 
-    def __init__(self, parent=None, bucketid=None, fileid=None):
+    def __init__(self, parent=None, bucketid=None, fileid=None, dashboard_instance=None):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_upload = Ui_SingleFileUpload()
         self.ui_single_file_upload.setupUi(self)
@@ -59,6 +58,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.storj_engine = StorjEngine()  # init StorjEngine
 
         self.initialize_upload_queue_table()
+        self.dashboard_instance = dashboard_instance
 
         # init loggers
         # self.log_handler = LogHandler()
@@ -571,6 +571,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             #                     "description": "File uploaded successfully!"}))
             self.emit(QtCore.SIGNAL("showFileUploadedSuccessfully"))
             self.emit(QtCore.SIGNAL("setCurrentUploadState"), "File uploaded successfully!")
+            self.dashboard_instance.createNewFileListUpdateThread()
 
     def file_upload_begin(self):
         self.ui_single_file_upload.overall_progress.setValue(0)
