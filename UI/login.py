@@ -15,6 +15,8 @@ from utilities.account_manager import AccountManager
 class LoginUI(QtGui.QMainWindow):
     """Login section."""
 
+    __logger = logging.getLogger('%s.LoginUI' % __name__)
+
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 

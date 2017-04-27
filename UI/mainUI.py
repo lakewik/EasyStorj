@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import threading
 
 import storj.exception as sjexc
@@ -26,6 +27,8 @@ class ExtendedQLabel(QtGui.QLabel):
 
 class MainUI(QtGui.QMainWindow):
     """Main UI section."""
+
+    __logger = logging.getLogger('%s.MainUI' % __name__)
 
     def __init__(self, parent=None, bucketid=None):
         QtGui.QWidget.__init__(self, parent)
