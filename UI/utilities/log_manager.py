@@ -8,6 +8,8 @@ import logging
 
 from logging import handlers
 
+logging.getLogger('UI').addHandler(logging.NullHandler())
+
 LOGGER_NAME = 'storj-python-gui-log'
 LOG_FILENAME = 'test.log'
 PATH = os.path.join(os.getcwd(), LOG_FILENAME)
