@@ -56,6 +56,7 @@ class MainUI(QtGui.QMainWindow):
 
 
         self.file_manager_ui.settings_bt.mousePressEvent = self.open_settings_window
+        self.file_manager_ui.refresh_bt.mousePressEvent = self.createNewFileListUpdateThread
 
         #self.file_manager_ui.refresh_bt.mousePressEvent = self.createNewFileListUpdateThread()
 
@@ -80,9 +81,9 @@ class MainUI(QtGui.QMainWindow):
 
     def open_bucket_editing_window(self, action):
         if action == "edit":
-            self.bucket_editing_window = BucketEditingUI(self, action=action, bucketid=str(self.current_selected_bucket_id))
+            self.bucket_editing_window = BucketEditingUI(self, action=action, bucketid=str(self.current_selected_bucket_id), dashboard_instance=self)
         else:
-            self.bucket_editing_window = BucketEditingUI(self, action=action)
+            self.bucket_editing_window = BucketEditingUI(self, action=action, dashboard_instance=self)
         self.bucket_editing_window.show()
 
     def open_single_file_upload_window(self):
@@ -157,7 +158,7 @@ class MainUI(QtGui.QMainWindow):
 
         logger.debug(1)
 
-    def createNewFileListUpdateThread(self):
+    def createNewFileListUpdateThread(self, a=None):
         download_thread = threading.Thread(target=self.update_files_list, args=())
         download_thread.start()
 
@@ -205,6 +206,7 @@ class MainUI(QtGui.QMainWindow):
         download_thread.start()
 
     def initialize_bucket_select_combobox(self):
+        self.file_manager_ui.bucket_select_combo_box.clear()
         self.buckets_list = []
         self.bucket_id_list = []
         self.storj_engine = StorjEngine()  # init StorjEngine
