@@ -1,11 +1,21 @@
-click
+click==6.7
+colorama==0.3.8
 configparser
+ecdsa>=0.13
 ipwhois
 libmagic
 lxml
-pycountry
 python-magic
-requests
-#storj
-
-# NOTE: PyQt4 must be install separately. On Debian, this is possible via `sudo apt install python-qt4`
+pycountry
+pycrypto>=2.6.1
+pytz>=2016.2
+requests>=2.7.0
+six>=1.10.0
+steenzout.object>=1.0.8
+steenzout.serialization.json>=1.0.2
+strict_rfc3339>=0.7
+ws4py>=0.3.4
+pycoin>=0.62
+base58>=0.2.4
+# NOTE: PyQt4 must be install separately.
+# On Debian, this is possible via `sudo apt install python-qt4`
