@@ -86,7 +86,7 @@ class MainUI(QtGui.QMainWindow):
         self.bucket_editing_window.show()
 
     def open_single_file_upload_window(self):
-        self.single_file_upload_window = SingleFileUploadUI(self)
+        self.single_file_upload_window = SingleFileUploadUI(self, dashboard_instance=self)
         self.single_file_upload_window.show()
 
     def open_settings_window(self, b):
