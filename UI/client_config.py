@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from PyQt4 import QtCore, QtGui
-from utilities.backend_config import Configuration
+
 from qt_interfaces.settings_ui_new import Ui_ClientConfiguration
-from utilities.log_manager import logger
+from utilities.backend_config import Configuration
 
 
-# Configuration Ui section
 class ClientConfigurationUI(QtGui.QMainWindow):
+    """Configuration Ui section."""
+
+    __logger = logging.getLogger('%s.ClientConfigurationUI' % __name__)
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -33,4 +37,4 @@ class ClientConfigurationUI(QtGui.QMainWindow):
 
 
     def reset_settings_to_default(self):
-        logger.debug(1)
+        self.__logger.debug(1)

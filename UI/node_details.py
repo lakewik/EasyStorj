@@ -1,24 +1,25 @@
 # -*- coding: utf-8 -*-
 
 import json
+import logging
 import socket
+import threading
+
+import pycountry
+import storj.exception as sjexc
+
 from PyQt4 import QtCore, QtGui
 
 from qt_interfaces.node_details_new import Ui_NodeDetails
 from engine import StorjEngine
-from utilities.tools import Tools
-
 from ipwhois import IPWhois
-import pycountry
-import threading
-import storj.exception as sjexc
-from utilities.log_manager import logger
-
-from resources.html_strings import html_format_begin, html_format_end
+from utilities.tools import Tools
 
 
 # Node details section
 class NodeDetailsUI(QtGui.QMainWindow):
+
+    __logger = logging.getLogger('%s.NodeDetailsUI' % __name__)
 
     def __init__(self, parent=None, nodeid=None):
         QtGui.QWidget.__init__(self, parent)
@@ -30,18 +31,19 @@ class NodeDetailsUI(QtGui.QMainWindow):
         self.nodeid = nodeid
         self.tools = Tools()
 
-        QtCore.QObject.connect(self.node_details_ui.ok_bt, QtCore.SIGNAL("clicked()"), self.close)  # close window
-        self.connect(self, QtCore.SIGNAL("showBridgeExceptionMessageBox"), self.show_storj_bridge_exception)
+        # close window
+        QtCore.QObject.connect(self.node_details_ui.ok_bt, QtCore.SIGNAL('clicked()'), self.close)
+        self.connect(self, QtCore.SIGNAL('showBridgeExceptionMessageBox'), self.show_storj_bridge_exception)
 
         self.createNewNodeDetailsResolveThread()
 
     def show_storj_bridge_exception(self, exception_content):
         try:
             j = json.loads(str(exception_content))
-            QtGui.QMessageBox.critical(self, "Bridge error", str(j["error"]))
+            QtGui.QMessageBox.critical(self, 'Bridge error', str(j['error']))
         except Exception as e:
-            QtGui.QMessageBox.critical(self, "Bridge error", str(exception_content))
-            logger.error(e)
+            self.__logger.error(e)
+            QtGui.QMessageBox.critical(self, 'Bridge error', str(exception_content))
 
     def createNewNodeDetailsResolveThread(self):
         download_thread = threading.Thread(target=self.initialize_node_details, args=())
@@ -52,22 +54,30 @@ class NodeDetailsUI(QtGui.QMainWindow):
         try:
             self.node_details_content = self.storj_engine.storj_client.contact_lookup(str(self.nodeid))
 
+            # get given node address
             self.node_details_ui.address_label.setText(
-                str(self.node_details_content.address) )  # get given node address
+                str(self.node_details_content.address))
+            # get last timeout
             self.node_details_ui.last_timeout_label.setText(
-               str(self.node_details_content.lastTimeout) )  # get last timeout
+               str(self.node_details_content.lastTimeout))
+            # get timeout rate
             self.node_details_ui.timeout_rate_label.setText(
-                str(self.node_details_content.timeoutRate))  # get timeout rate
+                str(self.node_details_content.timeoutRate))
+            # get user agent
             self.node_details_ui.user_agent_label.setText(
-                str(self.node_details_content.userAgent) )  # get user agent
+                str(self.node_details_content.userAgent))
+            # get protocol version
             self.node_details_ui.protocol_version_label.setText(
-                 str(self.node_details_content.protocol) )  # get protocol version
-            self.node_details_ui.response_time_label.setText( str(
-                self.node_details_content.responseTime))  # get farmer node response time
+                 str(self.node_details_content.protocol))
+            # get farmer node response time
+            self.node_details_ui.response_time_label.setText(str(
+                self.node_details_content.responseTime))
+            # get farmer node port
             self.node_details_ui.port_label.setText(
-                 str(self.node_details_content.port) )  # get farmer node port
+                 str(self.node_details_content.port))
+            # get farmer node response time
             self.node_details_ui.node_id_label.setText(
-                str(self.nodeid) )  # get farmer node response time
+                str(self.nodeid))
 
             # ping_to_node = self.tools.measure_ping_latency(str(self.node_details_content.address))
 
@@ -75,7 +85,7 @@ class NodeDetailsUI(QtGui.QMainWindow):
 
             obj = IPWhois(ip_addr)
             res = obj.lookup_whois()
-            country = res["nets"][0]['country']
+            country = res['nets'][0]['country']
 
             country_parsed = pycountry.countries.get(alpha_2=str(country))
 
@@ -84,7 +94,7 @@ class NodeDetailsUI(QtGui.QMainWindow):
             self.node_details_ui.country_label.setText(
                  str(country_full_name))  # set full country name
 
-            ### Display country flag ###
+            # ## Display country flag ###
 
             self.scene = QtGui.QGraphicsScene()
 
@@ -105,8 +115,14 @@ class NodeDetailsUI(QtGui.QMainWindow):
 
             grview.show()
 
-            logger.info(country_full_name)
+            self.__logger.info(country_full_name)
+
         except sjexc.StorjBridgeApiError as e:
-            self.emit(QtCore.SIGNAL("showBridgeExceptionMessageBox"), str(e))  # emit signal to show message box with bridge exception
+            self.__logger.error(e)
+            # emit signal to show message box with bridge exception
+            self.emit(QtCore.SIGNAL('showBridgeExceptionMessageBox'), str(e))
+
         except Exception as e:
-            self.emit(QtCore.SIGNAL("showUnhandledExceptionMessageBox"), str(e))  # emit signal to show message box with unhandled exception
+            self.__logger.error(e)
+            # emit signal to show message box with unhandled exception
+            self.emit(QtCore.SIGNAL('showUnhandledExceptionMessageBox'), str(e))

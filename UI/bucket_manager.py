@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 
+import logging
+import threading
+import storj.exception as sjexc
+
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QStandardItem, QStandardItemModel
-from qt_interfaces.bucket_manager_ui import Ui_BucketManager
-from engine import StorjEngine
-import storj.exception as sjexc
-import threading
+
 from bucket_create import BucketCreateUI
+from engine import StorjEngine
+from qt_interfaces.bucket_manager_ui import Ui_BucketManager
 from utilities.log_manager import logger
 
 
-# Buckets section
 class BucketManagerUI(QtGui.QMainWindow):
+    """Buckets section."""
+
+    __logger = logging.getLogger('%s.BucketManagerUI' % __name__)
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -39,8 +44,8 @@ class BucketManagerUI(QtGui.QMainWindow):
 
     def delete_bucket(self):
         # initialize variables
-        bucket_id = ""
-        bucket_name = ""
+        bucket_id = ''
+        bucket_name = ''
 
         tablemodel = self.bucket_manager_ui.bucket_list_tableview.model()
         rows = sorted(set(index.row() for index in self.bucket_manager_ui.bucket_list_tableview.selectedIndexes()))
@@ -55,9 +60,11 @@ class BucketManagerUI(QtGui.QMainWindow):
             break
 
         if i != 0:
-            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Are you sure?",
-                                       "Are you sure to delete this bucket? Bucket name: '" + bucket_name + "'",
-                                       (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
+            msgBox = QtGui.QMessageBox(
+                QtGui.QMessageBox.Question,
+                'Are you sure?',
+                'Are you sure to delete this bucket? Bucket name: \'%s\'' % bucket_name,
+                (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Yes:
                 success = False
@@ -65,14 +72,24 @@ class BucketManagerUI(QtGui.QMainWindow):
                     self.storj_engine.storj_client.bucket_delete(str(bucket_id))
                     success = True
                 except sjexc.StorjBridgeApiError as e:
-                    QtGui.QMessageBox.about(self, "Unhandled exception deleting bucket", "Exception: " + str(e))
+                    self.__logger.error(e)
+                    QtGui.QMessageBox.about(
+                        self,
+                        'Unhandled exception deleting bucket',
+                        'Exception: %s' % e)
                     success = False
 
                 if success:
-                    QtGui.QMessageBox.about(self, "Success", "Bucket was deleted successfully!")
+                    QtGui.QMessageBox.about(
+                        self,
+                        'Success',
+                        'Bucket was deleted successfully!')
                     self.initialize_buckets_table()
         else:
-            QtGui.QMessageBox.about(self, "Warning", "Please select bucket which you want to delete.")
+            QtGui.QMessageBox.about(
+                self,
+                'Warning',
+                'Please select bucket which you want to delete.')
 
     def open_bucket_edit_window(self):
         logger.debug(1)
@@ -104,8 +121,12 @@ class BucketManagerUI(QtGui.QMainWindow):
                 model.setItem(i, 3, item)  # row, column, item (QStandardItem)
 
                 i = i + 1
+
         except sjexc.StorjBridgeApiError as e:
-            QtGui.QMessageBox.about(self, "Unhandled bucket resolving exception", "Exception: " + str(e))
+            QtGui.QMessageBox.about(
+                self,
+                'Unhandled bucket resolving exception',
+                'Exception: %s' % e)
 
         self.bucket_manager_ui.total_buckets_label.setText(str(i))  # set label of user buckets number
         self.bucket_manager_ui.bucket_list_tableview.setModel(model)

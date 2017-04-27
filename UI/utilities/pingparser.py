@@ -113,7 +113,7 @@ def format_ping_result(ping_result, format_string=default_format):
     return output
 
 
-def main(argv=sys.argv):
+def main():
 
     usage = 'Usage: %prog [OPTIONS] [+FORMAT]\n\n'\
             'Parses output from the system ping command piped in via stdin.'
@@ -177,10 +177,10 @@ def main(argv=sys.argv):
     output = format_ping_result(ping_result, format_string)
     sys.stdout.write(output)
 
-    sys.exit(0)
+    sys.exit(os.EX_OK)
 
 if __name__ == '__main__':
     try:
-        main(sys.argv)
+        main()
     except KeyboardInterrupt:
         pass
