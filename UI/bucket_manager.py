@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QStandardItem, QStandardItemModel
 from qt_interfaces.bucket_manager_ui import Ui_BucketManager

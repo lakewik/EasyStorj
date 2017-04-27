@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 import storj
 from PyQt4 import QtCore, QtGui

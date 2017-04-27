@@ -2,10 +2,8 @@
 import json
 import os
 from PyQt4 import QtCore, QtGui
-from logging import Formatter
 import logging.handlers
 
-import datetime
 from PyQt4.QtGui import QHBoxLayout
 from PyQt4.QtGui import QTableWidgetItem
 from PyQt4.QtGui import QWidget
@@ -14,9 +12,9 @@ from qt_interfaces.logs_table_ui import Ui_Logs
 
 from image_widget import ImageWidget
 
-#__all__ = ["UI.logs_backend", "get_log"]
 
 logger = logging.getLogger(__name__)
+
 
 # Files section
 class LogsUI(QtGui.QMainWindow):

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 from qt_interfaces.bucket_editing_ui import Ui_BucketEditing
 from engine import StorjEngine

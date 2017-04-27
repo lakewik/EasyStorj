@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import re
 import os
 import platform
@@ -5,6 +7,7 @@ import pingparser
 from os.path import expanduser
 import tempfile
 import errno
+
 
 class Tools:
     def isWritable(self, path):

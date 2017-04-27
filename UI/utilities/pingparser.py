@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-# coding: utf-8
+# -*- coding: utf-8 -*-
 """
 Parses the output of the system ping command.
 """
+
 __version__ = '0.4'
 
 from optparse import OptionGroup, OptionParser

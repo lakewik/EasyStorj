@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 # import logging
 import os
@@ -668,7 +670,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 if r.status_code != 200 and r.status_code != 304:
                     raise stjex.StorjFarmerError()
                 downloaded = True
-                
+
             except stjex.StorjFarmerError as e:
                 self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
                           "First try failed. Retrying... (" + str(farmer_tries) + ")")  # update shard download state

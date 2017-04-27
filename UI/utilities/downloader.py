@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore
 from log_manager import logger
 import requests

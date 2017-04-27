@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from utilities.account_manager import AccountManager
 import storj
 from utilities.log_manager import logger

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 from qt_interfaces.dashboard_ui import Ui_MainMenu
 from utilities.account_manager import AccountManager

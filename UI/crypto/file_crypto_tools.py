@@ -1,5 +1,9 @@
-############ Module with cryptographics functions for Storj GUI Client ##########
-## Based on: <http://stackoverflow.com/questions/16761458/how-to-aes-encrypt-decrypt-files-using-python-pycrypto-in-an-openssl-compatible> ##
+# -*- coding: utf-8 -*-
+"""
+Module with cryptographics functions for Storj GUI Client.
+
+Based on: <http://stackoverflow.com/questions/16761458/how-to-aes-encrypt-decrypt-files-using-python-pycrypto-in-an-openssl-compatible>
+"""
 
 from hashlib import md5
 from Crypto.Cipher import AES

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 from qt_interfaces.initial_window_ui_new import Ui_InitialWindow
 from login import LoginUI

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 import socket
 from PyQt4 import QtCore, QtGui

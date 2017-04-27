@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore, QtGui
 from utilities.backend_config import Configuration
 from qt_interfaces.settings_ui_new import Ui_ClientConfiguration
