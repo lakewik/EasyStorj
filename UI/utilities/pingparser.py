@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-Parses the output of the system ping command.
-"""
+"""Parses the output of the system ping command."""
 
-__version__ = '0.4'
+import sys
+import os
+
+import re
 
 from optparse import OptionGroup, OptionParser
 
-import re
-import sys
 
-__all__ = ["parse",
-           "format_ping_result",
-           "main",
-           ]
+__version__ = '0.4'
+
+__all__ = [
+    'parse',
+    'format_ping_result',
+    'main',
+]
 
 # Pull regex compilation out of parser() so it only gets done once
 
@@ -84,15 +86,16 @@ def parse(ping_output):
     except:
         minping = avgping = maxping = jitter = 'NaN'
 
-    return {'host'        : host,
-            'sent'        : sent,
-            'received'    : received,
-            'packet_loss' : packet_loss,
-            'minping'     : minping,
-            'avgping'     : avgping,
-            'maxping'     : maxping,
-            'jitter'      : jitter
-            }
+    return {
+        'host': host,
+        'sent': sent,
+        'received': received,
+        'packet_loss': packet_loss,
+        'minping': minping,
+        'avgping': avgping,
+        'maxping': maxping,
+        'jitter': jitter
+    }
 
 
 def format_ping_result(ping_result, format_string=default_format):
@@ -123,17 +126,18 @@ def main(argv=sys.argv):
     # parser.add_option("+", dest="format",
     #                  help="optional format string")
 
-    format_group = OptionGroup(parser,
-    """FORMAT controls the output. Interpreted sequences are:
-    \t%h    host name or IP address
-    \t%s    packets sent
-    \t%r    packets received
-    \t%p    packet_loss
-    \t%m    minimum ping in milliseconds
-    \t%a    average ping in milliseconds
-    \t%M    maximum ping in milliseconds
-    \t%j    jitter in milliseconds
-    Default FORMAT is: """ + default_format)
+    format_group = OptionGroup(
+        parser,
+        """FORMAT controls the output. Interpreted sequences are:
+        \t%h    host name or IP address
+        \t%s    packets sent
+        \t%r    packets received
+        \t%p    packet_loss
+        \t%m    minimum ping in milliseconds
+        \t%a    average ping in milliseconds
+        \t%M    maximum ping in milliseconds
+        \t%j    jitter in milliseconds
+        Default FORMAT is: """ + default_format)
 
     parser.add_option_group(format_group)
     (options, args) = parser.parse_args()
@@ -150,7 +154,7 @@ def main(argv=sys.argv):
 
     if ping_output is None:
         parser.print_help()
-        sys.exit(1)
+        sys.exit(os.EX_DATAERR)
 
     ping_result = parse(ping_output)
 
@@ -168,14 +172,14 @@ def main(argv=sys.argv):
             format_string = ' '.join(args[0:])
         else:
             parser.print_help()
-            sys.exit(1)
+            sys.exit(os.EX_DATAERR)
 
     output = format_ping_result(ping_result, format_string)
     sys.stdout.write(output)
 
     sys.exit(0)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     try:
         main(sys.argv)
     except KeyboardInterrupt:
