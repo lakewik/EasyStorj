@@ -275,7 +275,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         rowcount = self.ui_single_file_upload.shard_queue_table_widget.rowCount()
         return rowcount
 
-    def _read_in_chunks(self, file_object, shard_size, rowposition, blocksize=4096, chunks=-1, shard_index=None):
+    def _read_in_chunks(self, file_object, shard_size, rowposition, blocksize=1024, chunks=-1, shard_index=None):
         """Lazy function (generator) to read a file piece by piece.
         Default chunk size: 1k."""
         # chunk number (first is 0)
@@ -302,6 +302,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         contract_negotiation_tries = 0
         while MAX_RETRIES_NEGOTIATE_CONTRACT > contract_negotiation_tries:
             contract_negotiation_tries += 1
+            exchange_report = storj.model.ExchangeReport()
 
             # emit signal to add row to upload queue table
             # self.emit(QtCore.SIGNAL("addRowToUploadQueueTable"), "important", "information")
@@ -349,7 +350,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.emit(QtCore.SIGNAL("setCurrentUploadState"), "Uploading shard " + str(chapters + 1) + " to farmer...")
 
                 # begin recording exchange report
-                exchange_report = storj.model.ExchangeReport()
 
                 current_timestamp = int(time.time())
 
