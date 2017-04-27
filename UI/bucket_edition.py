@@ -8,7 +8,7 @@ from utilities.log_manager import logger
 
 class BucketEditingUI(QtGui.QMainWindow):
 
-    def __init__(self, parent=None, bucketid=None, action=None):
+    def __init__(self, parent=None, bucketid=None, action=None, dashboard_instance=None):
         QtGui.QWidget.__init__(self, parent)
         self.bucket_create_ui = Ui_BucketEditing()
         self.bucket_create_ui.setupUi(self)
@@ -24,7 +24,7 @@ class BucketEditingUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("showBucketCreatedSuccessfully"), self.show_bucket_created_successfully)
         self.connect(self, QtCore.SIGNAL("showBucketDeletedSuccessfully"), self.show_bucket_deleted_successfully)
         self.connect(self, QtCore.SIGNAL("showBucketCreationMissingFields"), lambda: QtGui.QMessageBox.about(self, "Warning", "Please fill out all fields!"))
-
+        self.dashboard_instance = dashboard_instance
         self.storj_engine = StorjEngine()  # init StorjEngine
 
         if action == "add":
@@ -88,6 +88,7 @@ class BucketEditingUI(QtGui.QMainWindow):
             success = False
 
         if success:
+            self.dashboard_instance.createNewBucketResolveThread()
             self.emit(QtCore.SIGNAL("showBucketDeletedSuccessfully"),
                       str(self.bucket_name))  # show dialog - bucket deleted successfully
 
@@ -128,6 +129,7 @@ class BucketEditingUI(QtGui.QMainWindow):
             bucket_created = False
 
         if bucket_created:
+            self.dashboard_instance.createNewBucketResolveThread()
             self.emit(QtCore.SIGNAL("showBucketCreatedSuccessfully"), str(self.bucket_name))  # show dialog - bucket created successfully
 
         logger.debug(1)
