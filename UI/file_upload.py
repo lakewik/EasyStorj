@@ -60,6 +60,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.initialize_upload_queue_table()
         self.dashboard_instance = dashboard_instance
 
+        self.ui_single_file_upload.uploaded_shards.setText("Waiting...")
+
         # init loggers
         # self.log_handler = LogHandler()
         # logging.setLoggerClass(get_global_logger(self.log_handler))
@@ -93,6 +95,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("showFileUploadedSuccessfully"), self.show_upload_finished_message)
         self.connect(self, QtCore.SIGNAL("finishUpload"), lambda: self.finish_upload(os.path.split(str(self.ui_single_file_upload.file_path.text()))[1], str(self.current_selected_bucket_id)))
         self.connect(self, QtCore.SIGNAL("setCurrentUploadState"), self.set_current_status)
+        self.connect(self, QtCore.SIGNAL("updateShardUploadCounters"), self.update_shards_counters)
+
 
 
 
@@ -136,9 +140,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.ui_single_file_upload.overall_progress.setValue(int(total_percent))
 
+    def update_shards_counters(self):
+        self.ui_single_file_upload.uploaded_shards.setText(str(self.shards_already_uploaded) + "/" + str(self.all_shards_count))
+
     def update_shard_upload_progess(self, row_position_index, value):
         self.upload_queue_progressbar_list[row_position_index].setValue(value)
-        logger.debug("kotek")
         return 1
 
     def update_upload_task_state(self, row_position, state):
@@ -418,6 +424,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                     else:
                         self.emit(QtCore.SIGNAL("incrementShardsProgressCounters"))  # update already uploaded shards count
                         self.shards_already_uploaded += 1
+                        self.emit(QtCore.SIGNAL("updateShardUploadCounters"))  # update already uploaded shards count
                         # logger.warning('"log_event_type": "success"')
                         logger.debug("Shard uploaded successfully to " +
                                      str(frame_content["farmer"]["address"]) +
@@ -746,7 +753,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             logger.debug('"description": "Splitting file to shards..."')
             # logger.warning(str({"log_event_type": "debug", "title": "Sharding",
             #                     "description": "Splitting file to shards..."}))
+
             shards_manager = storj.model.ShardManager(filepath=file_path_ready, tmp_path=self.parametrs.tmpPath)
+            self.all_shards_count = len(shards_manager.shards)
+            self.emit(QtCore.SIGNAL("updateShardUploadCounters"))
 
             self.shard_manager_result = shards_manager
             # self.ui_single_file_upload.current_state.setText(html_format_begin + "Generating shards..." + html_format_end)
