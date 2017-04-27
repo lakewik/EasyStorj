@@ -808,8 +808,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             except storj.exception.StorjBridgeApiError as e:
                 QMessageBox.about(
                     self,
-                    "Unhandled exception while creating file staging frame",
-                    "Exception: " + str(e))
+                    'Unhandled exception while creating file staging frame',
+                    'Exception: %s' % e)
                 # self.__logger.warning('"log_event_type": "error"')
                 self.__logger.debug('"title": "Frame"')
                 self.__logger.debug('"description": "Error while resolving frame for\
@@ -819,12 +819,12 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             self.ui_single_file_upload.file_frame_id.setText(str(frame.id))
 
-            self.__logger.debug("Frame ID: " + frame.id)
+            self.__logger.debug('Frame ID: %s', frame.id)
             # Now encrypt file
-            self.__logger.debug(file_path_ready + "sciezka")
+            self.__logger.debug('%s sciezka', file_path_ready)
 
             # Now generate shards
-            self.emit(QtCore.SIGNAL("setCurrentUploadState"), "Splitting file to shards...")
+            self.emit(QtCore.SIGNAL('setCurrentUploadState'), 'Splitting file to shards...')
             # self.__logger.warning('"log_event_type": "debug"')
             self.__logger.debug('"title": "Sharding"')
             self.__logger.debug('"description": "Splitting file to shards..."')
