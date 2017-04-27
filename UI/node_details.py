@@ -59,7 +59,7 @@ class NodeDetailsUI(QtGui.QMainWindow):
                 str(self.node_details_content.address))
             # get last timeout
             self.node_details_ui.last_timeout_label.setText(
-               str(self.node_details_content.lastTimeout))
+                str(self.node_details_content.lastTimeout))
             # get timeout rate
             self.node_details_ui.timeout_rate_label.setText(
                 str(self.node_details_content.timeoutRate))
@@ -68,13 +68,13 @@ class NodeDetailsUI(QtGui.QMainWindow):
                 str(self.node_details_content.userAgent))
             # get protocol version
             self.node_details_ui.protocol_version_label.setText(
-                 str(self.node_details_content.protocol))
+                str(self.node_details_content.protocol))
             # get farmer node response time
             self.node_details_ui.response_time_label.setText(str(
                 self.node_details_content.responseTime))
             # get farmer node port
             self.node_details_ui.port_label.setText(
-                 str(self.node_details_content.port))
+                str(self.node_details_content.port))
             # get farmer node response time
             self.node_details_ui.node_id_label.setText(
                 str(self.nodeid))
@@ -92,7 +92,7 @@ class NodeDetailsUI(QtGui.QMainWindow):
             country_full_name = country_parsed.name
 
             self.node_details_ui.country_label.setText(
-                 str(country_full_name))  # set full country name
+                str(country_full_name))  # set full country name
 
             # ## Display country flag ###
 

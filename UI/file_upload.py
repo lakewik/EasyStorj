@@ -516,7 +516,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                 j = json.loads(str(response.content))
                 if j.get('result') == 'The supplied token is not accepted':
-                    raise storj.exception.StorjFarmerError(storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
+                    raise storj.exception.StorjFarmerError(
+                        storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
 
             except storj.exception.StorjBridgeApiError as e:
                 self.__logger.error(e)
@@ -716,7 +717,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             file_existence_in_bucket = False
 
             # if self.configuration.sameFileNamePrompt or self.configuration.sameFileHashPrompt:
-            # file_existence_in_bucket = self.storj_engine.storj_client.check_file_existence_in_bucket(bucket_id=bucket_id, filepath=file_path) # chech if exist file with same file name
+            # file_existence_in_bucket =
+            # self.storj_engine.storj_client.check_file_existence_in_bucket(bucket_id=bucket_id,
+            # filepath=file_path) # chech if exist file with same file name
 
             if file_existence_in_bucket == 1:
                 # QInputDialog.getText(self, 'Warning!', 'File with name ' + str(bname) + " already exist in bucket! Please use different name:", "test" )
@@ -803,7 +806,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 frame = self.storj_engine.storj_client.frame_create()  # Create file frame
                 self.frame = frame
             except storj.exception.StorjBridgeApiError as e:
-                QMessageBox.about(self, "Unhandled exception while creating file staging frame", "Exception: " + str(e))
+                QMessageBox.about(
+                    self,
+                    "Unhandled exception while creating file staging frame",
+                    "Exception: " + str(e))
                 # self.__logger.warning('"log_event_type": "error"')
                 self.__logger.debug('"title": "Frame"')
                 self.__logger.debug('"description": "Error while resolving frame for\

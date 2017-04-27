@@ -63,7 +63,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
             j = json.loads(str(exception_content))
             QtGui.QMessageBox.critical(self, 'Bridge error', str(j['error']))
 
-        except:
+        except BaseException:
             QtGui.QMessageBox.critical(self, 'Bridge error', str(exception_content))
 
     def open_mirror_details_window(self, mirror_state):
@@ -98,7 +98,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                     'Please select farmer node from list')
                 logger.warning('Unhandled error')
 
-        except StandardError as e:
+        except Exception as e:
             self.__logger.error(e)
             QtGui.QMessageBox.about(
                 self,

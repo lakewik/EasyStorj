@@ -33,7 +33,8 @@ class BucketManagerUI(QtGui.QMainWindow):
                                self.open_bucket_create_window)  # open bucket create window
         QtCore.QObject.connect(self.bucket_manager_ui.edit_bucket_bt, QtCore.SIGNAL("clicked()"),
                                self.open_bucket_edit_window)  # open bucket edit window
-        # QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"), self.open_register_window) # open login window
+        # QtCore.QObject.connect(self.ui.pushButton_4, QtCore.SIGNAL("clicked()"),
+        # self.open_register_window) # open login window
 
     def createNewBucketGetThread(self):
         download_thread = threading.Thread(target=self.initialize_buckets_table, args=())

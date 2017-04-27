@@ -26,7 +26,13 @@ class BucketCreateUI(QtGui.QMainWindow):
 
         self.connect(self, QtCore.SIGNAL('showBucketCreatingException'), self.show_bucket_creating_exception_dialog)
         self.connect(self, QtCore.SIGNAL('showBucketCreatedSuccessfully'), self.show_bucket_crated_successfully)
-        self.connect(self, QtCore.SIGNAL('showBucketCreationMissingFields'), lambda: QtGui.QMessageBox.about(self, "Warning", "Please fill out all fields!"))
+        self.connect(
+            self,
+            QtCore.SIGNAL('showBucketCreationMissingFields'),
+            lambda: QtGui.QMessageBox.about(
+                self,
+                "Warning",
+                "Please fill out all fields!"))
 
         self.storj_engine = StorjEngine()  # init StorjEngine
 

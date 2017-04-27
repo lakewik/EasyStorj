@@ -83,7 +83,7 @@ def parse(ping_output):
     try:
         minping, avgping, maxping, jitter = _get_match_groups(ping_output,
                                                               minmax_matcher)
-    except:
+    except Exception:
         minping = avgping = maxping = jitter = 'NaN'
 
     return {
@@ -178,6 +178,7 @@ def main():
     sys.stdout.write(output)
 
     sys.exit(os.EX_OK)
+
 
 if __name__ == '__main__':
     try:

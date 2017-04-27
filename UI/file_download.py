@@ -52,7 +52,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         self.user_password = self.account_manager.get_user_password()
 
-        ######## 3
+        # 3
 
         # open file select dialog
         QtCore.QObject.connect(
@@ -225,12 +225,13 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             else:
                 QMessageBox.critical(self, 'Bridge error', str(j['error']))
 
-        except StandardError as e:
+        except Exception as e:
             self.__logger.error(e)
             QMessageBox.critical(self, 'Bridge error', str(exception_content))
 
     def update_download_task_state(self, row_position, state):
-        self.ui_single_file_download.shard_queue_table.setItem(int(row_position), 3, QtGui.QTableWidgetItem(str(state)))
+        self.ui_single_file_download.shard_queue_table.setItem(
+            int(row_position), 3, QtGui.QTableWidgetItem(str(state)))
 
     def show_error_not_selected_file(self):
         QMessageBox.about(self, 'Error', 'Please select destination file save path!')
@@ -437,7 +438,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                         options_array['progressbars_enabled'] = '1'
                         options_array['file_size_is_given'] = '1'
                         options_array['shards_count'] = str(self.all_shards_count)
-                        shard_pointer = self.storj_engine.storj_client.file_pointers(str(bucket_id), file_id, limit='1')
+                        shard_pointer = self.storj_engine.storj_client.file_pointers(
+                            str(bucket_id), file_id, limit='1')
 
                         self.__logger.debug('%s wskaznik', shard_pointer)
                         # if shard_pointer[0]["parity"] == False:
@@ -830,7 +832,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
                 self.__logger.debug('%s zapisane', '%s/%s-%s' % (self.tmp_path, file_name, part))
                 part = part + 1
-
 
             except Exception as e:
                 self.__logger.error(e)

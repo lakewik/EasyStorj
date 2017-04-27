@@ -21,7 +21,7 @@ class Configuration:
 
             try:
                 et = ET.parse(CONFIG_FILE)
-            except StandardError as e:
+            except Exception as e:
                 self.__logger.error(e)
                 self.__logger.error('Unspecified XML parse error')
 
@@ -53,7 +53,7 @@ class Configuration:
             et = ET.parse(CONFIG_FILE)
             for tags in et.iter(str(parametr)):
                 output = tags.text
-        except StandardError as e:
+        except Exception as e:
             self.__logger.error(e)
             self.__logger.error('Unspecified error')
 
@@ -64,7 +64,7 @@ class Configuration:
             et = ET.parse(CONFIG_FILE)
             for tags in et.iter('password'):
                 output = tags.text
-        except StandardError as e:
+        except Exception as e:
             self.__logger.error(e)
             self.__logger.error('Unspecified error')
 
