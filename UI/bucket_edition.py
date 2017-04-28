@@ -71,7 +71,7 @@ class BucketEditingUI(QtGui.QMainWindow):
         msgBox = QtGui.QMessageBox(
             QtGui.QMessageBox.Information,
             'Success',
-            'Bucket \'%s\' was removed successfully!' % (bucket_name),
+            'Bucket \'%s\' was removed successfully!' % bucket_name,
             QtGui.QMessageBox.Ok)
         msgBox.exec_()
 

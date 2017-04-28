@@ -556,8 +556,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 current_timestamp = int(time.time())
 
                 exchange_report.exchangeEnd = str(current_timestamp)
-                exchange_report.exchangeResultCode = (exchange_report.FAILURE)
-                exchange_report.exchangeResultMessage = (exchange_report.STORJ_REPORT_UPLOAD_ERROR)
+                exchange_report.exchangeResultCode = exchange_report.FAILURE
+                exchange_report.exchangeResultMessage = exchange_report.STORJ_REPORT_UPLOAD_ERROR
 
                 self.emit(
                     QtCore.SIGNAL('setCurrentUploadState'),

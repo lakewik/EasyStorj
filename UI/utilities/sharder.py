@@ -19,7 +19,7 @@ class ShardingTools(object):
         shard_parameters = {}
         accumulator = 0
         shard_size = None
-        while (shard_size is None):
+        while shard_size is None:
             shard_size = self.determine_shard_size(file_size, accumulator)
             accumulator += 1
         shard_parameters['shard_size'] = str(shard_size)
@@ -33,14 +33,14 @@ class ShardingTools(object):
 
         hops = 0
 
-        if (file_size <= 0):
+        if file_size <= 0:
             return 0
             # if accumulator != True:
             # accumulator  = 0
         self.__logger.debug(accumulator)
 
         # Determine hops back by accumulator
-        if ((accumulator - self.SHARD_MULTIPLES_BACK) < 0):
+        if (accumulator - self.SHARD_MULTIPLES_BACK) < 0:
             hops = 0
         else:
             hops = accumulator - self.SHARD_MULTIPLES_BACK

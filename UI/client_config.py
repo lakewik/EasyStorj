@@ -34,7 +34,5 @@ class ClientConfigurationUI(QtGui.QMainWindow):
         self.configuration_manager.save_client_configuration(self.client_configuration_ui)  # save configuration
         QtGui.QMessageBox.about(self, "Success", "Configuration saved successfully!")
 
-
-
     def reset_settings_to_default(self):
         self.__logger.debug(1)
