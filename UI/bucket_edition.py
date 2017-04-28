@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import storj.exception as sjexc
 import threading
+
+import storj.exception as sjexc
 
 from PyQt4 import QtCore, QtGui
 
@@ -20,6 +21,7 @@ class BucketEditingUI(QtGui.QMainWindow):
 
         QtCore.QObject.connect(
             self.bucket_create_ui.cancel_bt, QtCore.SIGNAL('clicked()'),  self.close)
+
 
         self.connect(self, QtCore.SIGNAL('printBucketDetails'), self.set_bucket_details)
         self.connect(self, QtCore.SIGNAL('showBucketCreatingException'), self.show_bucket_creating_exception_dialog)
@@ -153,8 +155,9 @@ class BucketEditingUI(QtGui.QMainWindow):
             bucket_created = False
 
         if bucket_created:
-            # show dialog - bucket created successfully
             self.dashboard_instance.createNewBucketResolveThread()
+
+            # show dialog - bucket created successfully
             self.emit(QtCore.SIGNAL('showBucketCreatedSuccessfully'), str(self.bucket_name))
 
         self.logger.debug(1)
