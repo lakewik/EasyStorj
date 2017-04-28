@@ -111,6 +111,20 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.overall_progress.setValue(0)
 
     def show_upload_finished_message(self):
+        self.ui_single_file_upload.start_upload_bt.setStyleSheet(("QPushButton:hover{\n"
+                                                                  "  background-color: #83bf20;\n"
+                                                                  "  border-color: #83bf20;\n"
+                                                                  "}\n"
+                                                                  "QPushButton:active {\n"
+                                                                  "  background-color: #93cc36;\n"
+                                                                  "  border-color: #93cc36;\n"
+                                                                  "}\n"
+                                                                  "QPushButton{\n"
+                                                                  "  background-color: #88c425;\n"
+                                                                  "    border: 1px solid #88c425;\n"
+                                                                  "    color: #fff;\n"
+                                                                  "    border-radius: 7px;\n"
+                                                                  "}"))
         QMessageBox.information(self, 'Success!', 'File uploaded successfully!')
 
     def refresh_overall_progress(self, base_percent):
@@ -235,6 +249,20 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # self.download_thread.tick.connect(progress_bars_list.setValue)
 
         # Refactor to QtTrhead
+        self.ui_single_file_upload.start_upload_bt.setStyleSheet(("QPushButton:hover{\n"
+                                                                  "  background-color: #8C8A87;\n"
+                                                                  "  border-color: #8C8A87;\n"
+                                                                  "}\n"
+                                                                  "QPushButton:active {\n"
+                                                                  "  background-color: #8C8A87;\n"
+                                                                  "  border-color: #8C8A87;\n"
+                                                                  "}\n"
+                                                                  "QPushButton{\n"
+                                                                  "  background-color: #8C8A87;\n"
+                                                                  "    border: 1px solid #8C8A87;\n"
+                                                                  "    color: #fff;\n"
+                                                                  "    border-radius: 7px;\n"
+                                                                  "}"))
         upload_thread = threading.Thread(target=self.file_upload_begin, args=())
         upload_thread.start()
 
