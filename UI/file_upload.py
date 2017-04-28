@@ -51,12 +51,22 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.ui_single_file_upload.tmp_path_select_bt,
             QtCore.SIGNAL('clicked()'),
             self.select_tmp_directory)
+
+        # handle cancel action
+        QtCore.QObject.connect(
+            self.ui_single_file_upload.cancel_bt,
+            QtCore.SIGNAL('clicked()'),
+            self.handle_cancel_action)
+
+
         self.storj_engine = StorjEngine()
 
         self.initialize_upload_queue_table()
         self.dashboard_instance = dashboard_instance
 
         self.ui_single_file_upload.uploaded_shards.setText("Waiting...")
+
+        self.is_upload_active = False
 
         if platform == 'linux' or platform == 'linux2':
             # linux
@@ -90,6 +100,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 str(self.current_selected_bucket_id)))
         self.connect(self, QtCore.SIGNAL('setCurrentUploadState'), self.set_current_status)
         self.connect(self, QtCore.SIGNAL('updateShardUploadCounters'), self.update_shards_counters)
+        #self.connect(self, QtCore.SIGNAL('handleCancelAction'), self.ha)
 
         # resolve buckets and put to buckets combobox
         self.createBucketResolveThread()
@@ -110,7 +121,20 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.ui_single_file_upload.overall_progress.setValue(0)
 
+    def handle_cancel_action(self):
+        if self.is_upload_active:
+            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Question",
+                                       "Are you sure that you want cancel upload and close this window?",
+                                       (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
+            result = msgBox.exec_()
+            if result == QtGui.QMessageBox.Yes:
+                self.close()
+        else:
+            self.close()
+
+
     def show_upload_finished_message(self):
+        self.is_upload_active = False
         self.ui_single_file_upload.start_upload_bt.setStyleSheet(("QPushButton:hover{\n"
                                                                   "  background-color: #83bf20;\n"
                                                                   "  border-color: #83bf20;\n"
@@ -253,20 +277,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # self.download_thread.tick.connect(progress_bars_list.setValue)
 
         # Refactor to QtTrhead
-        self.ui_single_file_upload.start_upload_bt.setStyleSheet(("QPushButton:hover{\n"
-                                                                  "  background-color: #8C8A87;\n"
-                                                                  "  border-color: #8C8A87;\n"
-                                                                  "}\n"
-                                                                  "QPushButton:active {\n"
-                                                                  "  background-color: #8C8A87;\n"
-                                                                  "  border-color: #8C8A87;\n"
-                                                                  "}\n"
-                                                                  "QPushButton{\n"
-                                                                  "  background-color: #8C8A87;\n"
-                                                                  "    border: 1px solid #8C8A87;\n"
-                                                                  "    color: #fff;\n"
-                                                                  "    border-radius: 7px;\n"
-                                                                  "}"))
+
         upload_thread = threading.Thread(target=self.file_upload_begin, args=())
         upload_thread.start()
 
@@ -805,6 +816,23 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             #   html_format_begin + "Resolving PUSH token..." + html_format_end)
 
             # self.__logger.warning('"log_event_type": "debug"')
+
+            self.is_upload_active = True
+            self.ui_single_file_upload.start_upload_bt.setStyleSheet(("QPushButton:hover{\n"
+                                                                      "  background-color: #8C8A87;\n"
+                                                                      "  border-color: #8C8A87;\n"
+                                                                      "}\n"
+                                                                      "QPushButton:active {\n"
+                                                                      "  background-color: #8C8A87;\n"
+                                                                      "  border-color: #8C8A87;\n"
+                                                                      "}\n"
+                                                                      "QPushButton{\n"
+                                                                      "  background-color: #8C8A87;\n"
+                                                                      "    border: 1px solid #8C8A87;\n"
+                                                                      "    color: #fff;\n"
+                                                                      "    border-radius: 7px;\n"
+                                                                      "}"))
+
             self.__logger.debug('"title": "PUSH token"')
             self.__logger.debug('"description": "Resolving PUSH Token for upload..."')
             # self.__logger.warning(str({"log_event_type": "debug", "title": "PUSH token",
@@ -817,6 +845,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                                                                          'PUSH')  # get the PUSH token from Storj Bridge
                 self.push_token = push_token
             except storj.exception.StorjBridgeApiError as e:
+                self.is_upload_active = False
                 QMessageBox.about(self, "Unhandled PUSH token create exception", "Exception: " + str(e))
 
             self.ui_single_file_upload.push_token.setText(
@@ -838,6 +867,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 frame = self.storj_engine.storj_client.frame_create()  # Create file frame
                 self.frame = frame
             except storj.exception.StorjBridgeApiError as e:
+                self.is_upload_active = False
                 QMessageBox.about(
                     self,
                     'Unhandled exception while creating file staging frame',
