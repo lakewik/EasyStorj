@@ -330,9 +330,12 @@ class Ui_SingleFileUpload(object):
         self.current_state.setGeometry(QtCore.QRect(120, 549, 711, 31))
         font = QtGui.QFont()
         font.setPointSize(-1)
+        font.setBold(True)
+        font.setWeight(75)
         self.current_state.setFont(font)
         self.current_state.setStyleSheet(_fromUtf8("QLabel{\n"
 "    font-size: 12px;\n"
+"font-weight: bold;\n"
 "}\n"
 ""))
         self.current_state.setObjectName(_fromUtf8("current_state"))
@@ -367,7 +370,7 @@ class Ui_SingleFileUpload(object):
         self.label_13.setText(_translate("SingleFileUpload", "<html><head/><body><p><span style=\" color:#555555;\">FILE FRAME ID:</span></p></body></html>", None))
         self.file_frame_id.setText(_translate("SingleFileUpload", "<html><head/><body><p><span style=\" color:#2683ff;\">58fa49dfd2720b0fb9d9845f</span></p></body></html>", None))
         self.label_15.setText(_translate("SingleFileUpload", "<html><head/><body><p><span style=\" color:#555555;\">UPLOADED SHARDS:</span></p></body></html>", None))
-        self.uploaded_shards.setText(_translate("SingleFileUpload", "<html><head/><body><p align=\"right\"><span style=\" color:#2683ff;\">256/2015594</span></p></body></html>", None))
+        self.uploaded_shards.setText(_translate("SingleFileUpload", "<html><head/><body><p align=\"right\"><span style=\" color:#2683ff;\">Waiting...</span></p></body></html>", None))
         self.label_17.setText(_translate("SingleFileUpload", "<html><head/><body><p><span style=\" color:#555555;\">AVG SPEED:</span></p></body></html>", None))
         self.avg_bandwidth.setText(_translate("SingleFileUpload", "<html><head/><body><p><span style=\" color:#2683ff;\">1024KB/S</span></p></body></html>", None))
         self.current_state.setText(_translate("SingleFileUpload", "<html><head/><body><p><span style=\" color:#555555;\">WAITING TO START UPLOAD</span></p></body></html>", None))
