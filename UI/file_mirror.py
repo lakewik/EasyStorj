@@ -63,7 +63,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
             j = json.loads(str(exception_content))
             QtGui.QMessageBox.critical(self, 'Bridge error', str(j['error']))
 
-        except BaseException:
+        except StandardError:
             QtGui.QMessageBox.critical(self, 'Bridge error', str(exception_content))
 
     def open_mirror_details_window(self, mirror_state):
