@@ -1,14 +1,15 @@
-import math
+# -*- coding: utf-8 -*-
+
 import os
-from log_manager import logger
 
-# global SHARD_MULTIPLES_BACK, MAX_SHARD_SIZE
-
-# MAX_SHARD_SIZE = 4294967296  # 4Gb
-# SHARD_MULTIPLES_BACK = 4
+import logging
+import math
+import re
 
 
-class ShardingTools():
+class ShardingTools(object):
+
+    __logger = logging.getLogger('%s.ShardingTools' % __name__)
 
     def __init__(self):
         self.MAX_SHARD_SIZE = 4294967296  # 4Gb
@@ -18,12 +19,12 @@ class ShardingTools():
         shard_parameters = {}
         accumulator = 0
         shard_size = None
-        while (shard_size is None):
+        while shard_size is None:
             shard_size = self.determine_shard_size(file_size, accumulator)
             accumulator += 1
-        shard_parameters["shard_size"] = str(shard_size)
-        shard_parameters["shard_count"] = math.ceil(file_size / shard_size)
-        shard_parameters["file_size"] = file_size
+        shard_parameters['shard_size'] = str(shard_size)
+        shard_parameters['shard_count'] = math.ceil(file_size / shard_size)
+        shard_parameters['file_size'] = file_size
         return shard_parameters
 
     def determine_shard_size(self, file_size, accumulator):
@@ -32,14 +33,14 @@ class ShardingTools():
 
         hops = 0
 
-        if (file_size <= 0):
+        if file_size <= 0:
             return 0
             # if accumulator != True:
             # accumulator  = 0
-        logger.debug(accumulator)
+        self.__logger.debug(accumulator)
 
         # Determine hops back by accumulator
-        if ((accumulator - self.SHARD_MULTIPLES_BACK) < 0):
+        if (accumulator - self.SHARD_MULTIPLES_BACK) < 0:
             hops = 0
         else:
             hops = accumulator - self.SHARD_MULTIPLES_BACK
@@ -49,8 +50,8 @@ class ShardingTools():
 
         check = file_size / byte_multiple
         # print check
-        if (check > 0 and check <= 1):
-            while (hops > 0 and self.shard_size(hops) > self.MAX_SHARD_SIZE):
+        if 0 < check <= 1:
+            while hops > 0 and self.shard_size(hops) > self.MAX_SHARD_SIZE:
                 if hops - 1 <= 0:
                     hops = 0
                 else:
@@ -58,7 +59,7 @@ class ShardingTools():
             return self.shard_size(hops)
 
         # Maximum of 2 ^ 41 * 8 * 1024 * 1024
-        if (accumulator > 41):
+        if accumulator > 41:
             return 0
 
             # return self.determine_shard_size(file_size, ++accumulator)
@@ -78,9 +79,8 @@ class ShardingTools():
 
     def join_shards(self, shards_filepath, pattern, destination_file_path):
         # Based on <http://code.activestate.com/recipes/224800-simple-file-splittercombiner-module/>
-        import re
 
-        logger.info('Creating file', destination_file_path)
+        self.__logger.info('Creating file %s', destination_file_path)
 
         bname = (os.path.split(destination_file_path))[1]
         bname_input = (os.path.split(shards_filepath))[1]
@@ -98,36 +98,42 @@ class ShardingTools():
         chunkre = re.compile(bname2_input + '-' + '[0-9]+')
 
         chunkfiles = []
-        for f in os.listdir(str(input_directory)):
-            logger.debug(f)
-            if chunkre.match(f):
-                chunkfiles.append(f)
+        for chunk in os.listdir(str(input_directory)):
+            self.__logger.debug(chunk)
+            if chunkre.match(chunk):
+                chunkfiles.append(chunk)
 
-        logger.info('Number of chunks', len(chunkfiles))
+        self.__logger.info('Number of chunks', len(chunkfiles))
+
         chunkfiles.sort(self.sort_index)
-        logger.info(chunkfiles)
+        self.__logger.info(chunkfiles)
+
         data = ''
-        for f in chunkfiles:
+
+        for chunk in chunkfiles:
 
             try:
-                logger.info('Appending chunk',
-                            os.path.join(str(input_directory), f))
-                data += open(str(input_directory) + "/" + str(f), 'rb').read()
-                logger.info(str(input_directory) + "/" + str(f) +
-                            "katalog wejsciowy")
+                self.__logger.info(
+                    'Appending chunk %s/%s',
+                    os.path.join(input_directory, chunk))
+                with open('%s/%s' % (input_directory, chunk), 'rb') as f:
+                    data += f.read()
+                self.__logger.info('data read from %s/%s %s', input_directory, chunk, 'katalog wejsciowy')
             except (OSError, IOError, EOFError) as e:
-                logger.error(e)
+                self.__logger.error('failed to read %s/%s', input_directory, chunk)
+                self.__logger.error(e)
                 continue
 
         try:
-            logger.info(str(output_directory) + "katalog wyjsciowy")
-            f = open(str(output_directory) + "/" + str(bname), 'wb')
-            f.write(data)
-            f.close()
+            self.__logger.info('%s %s', output_directory, 'katalog wyjsciowy')
+            with open('%s/%s' % (output_directory, bname), 'wb') as f:
+                f.write(data)
         except (OSError, IOError, EOFError) as e:
+            self.__logger.error('failed to write %s/%s', output_directory, bname)
+            self.__logger.error(e)
             raise ShardingException(str(e))
 
-        logger.info('Wrote file', bname)
+        self.__logger.info('Wrote file %s', bname)
         return 1
 
 
