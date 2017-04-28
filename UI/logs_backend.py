@@ -21,7 +21,7 @@ class LogsUI(QtGui.QMainWindow):
         self.logs_ui = Ui_Logs()
         self.logs_ui.setupUi(self)
 
-        # TODO hardcoded will need replacemenet
+        # TODO hardcoded will need replacement
         fs_watcher = QtCore.QFileSystemWatcher([
             '/home/lakewik/PycharmProjects/storjguibeta/storj-gui-client/upload_log.json'])
         fs_watcher.connect(fs_watcher, QtCore.SIGNAL('fileChanged(QString)'), self.refresh_logs)
