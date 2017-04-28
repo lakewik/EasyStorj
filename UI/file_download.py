@@ -280,14 +280,16 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.__logger.debug('"description": "Joining shards..."')
 
         if fileisencrypted:
-            path = '%s/%s-%s.encrypted' % (self.tmp_path, file_name, self.destination_file_path)
-            self.__logger.debug('path=%s', path)
-            sharing_tools.join_shards(path)
+            source = '%s/%s' % (self.tmp_path, file_name)
+            destination = '%s/.encrypted' % self.destination_file_path
+            self.__logger.debug('source=%s destination=%s', source, destination)
+            sharing_tools.join_shards(source, '-', destination)
 
         else:
-            path = '%s/%s-%s' % (self.tmp_path, file_name, self.destination_file_path)
-            self.__logger.debug('path=%s', path)
-            sharing_tools.join_shards(path)
+            source = '%s/%s' % (self.tmp_path, file_name)
+            destination = '%s/.encrypted' % self.destination_file_path
+            self.__logger.debug('source=%s destination=%s', source, destination)
+            sharing_tools.join_shards(source, '-', destination)
 
         if fileisencrypted:
             # decrypt file
@@ -302,7 +304,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             # begin file decryption
             file_crypto_tools.decrypt_file(
                 'AES',
-                '%s.encrypted' % self.destination_file_path,
+                destination,
                 self.destination_file_path,
                 str(self.user_password))
 
@@ -673,7 +675,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
                 self.__logger.debug('%s statushttp', r.status_code)
                 if r.status_code != 200 and r.status_code != 304:
-                    raise stjex.StorjFarmerError()
+                    raise stjex.StorjFarmerError(r.status_code)
                 downloaded = True
 
             except stjex.StorjFarmerError as e:
