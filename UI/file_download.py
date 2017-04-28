@@ -787,9 +787,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
                 shards_count = int(options_array['shards_count'])
 
-                shard_size_array = []
-                shard_size_array.append(
-                    int(options_array['file_size_shard_%s' % options_array["shard_index"]]))
+                shard_size_array = [int(options_array['file_size_shard_%s' % options_array["shard_index"]])]
                 self.__logger.debug(shard_size_array)
 
                 part = options_array['shard_index']
