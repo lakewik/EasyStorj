@@ -48,8 +48,10 @@ class Tools:
             # because I really hate unnecessary plurals
             return "1 byte"
 
+        precision = 0
         suffixes_table = [('bytes', 0), ('KB', 0), ('MB', 1), ('GB', 2), ('TB', 2), ('PB', 2)]
 
+        suffix = ''
         num = float(size_bytes)
         for suffix, precision in suffixes_table:
             if num < 1024.0:
