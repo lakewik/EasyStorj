@@ -67,6 +67,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.uploaded_shards.setText("Waiting...")
 
         self.is_upload_active = False
+        self.current_active_connections = 0
 
         if platform == 'linux' or platform == 'linux2':
             # linux
@@ -100,6 +101,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 str(self.current_selected_bucket_id)))
         self.connect(self, QtCore.SIGNAL('setCurrentUploadState'), self.set_current_status)
         self.connect(self, QtCore.SIGNAL('updateShardUploadCounters'), self.update_shards_counters)
+        self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'), self.set_current_active_connections)
         #self.connect(self, QtCore.SIGNAL('handleCancelAction'), self.ha)
 
         # resolve buckets and put to buckets combobox
@@ -167,8 +169,12 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.ui_single_file_upload.overall_progress.setValue(int(total_percent))
 
+    def set_current_active_connections(self):
+        self.ui_single_file_upload.current_active_connections.setText(str(self.current_active_connections))
+
     def update_shards_counters(self):
         self.ui_single_file_upload.uploaded_shards.setText(str(self.shards_already_uploaded) + "/" + str(self.all_shards_count))
+
 
     def update_shard_upload_progess(self, row_position_index, value):
         self.upload_queue_progressbar_list[row_position_index].setValue(value)
@@ -466,7 +472,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         # with open(
                         #   self.parametrs.tmpPath + file_name_ready_to_shard_upload + '-' +
                         #   str(chapters + 1), 'rb') as f:
-
+                        self.current_active_connections += 1
+                        self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
                         with open(mypath, 'rb') as f:
                             response = requests.post(
                                 url,
@@ -486,6 +493,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                     except storj.exception.StorjFarmerError as e:
                         self.__logger.error(e)
+                        self.current_active_connections -= 1
+                        self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
 
                         # upload failed due to Farmer Failure
                         if str(e) == str(storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED):
@@ -495,6 +504,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                     except Exception as e:
                         self.__logger.error(e)
+                        self.current_active_connections -= 1
+                        self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
 
                         # update shard upload state
                         self.emit(
@@ -519,6 +530,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         continue
 
                     else:
+                        self.current_active_connections -= 1
+                        self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
                         self.emit(
                             # update already uploaded shards count
                             QtCore.SIGNAL('incrementShardsProgressCounters'))
