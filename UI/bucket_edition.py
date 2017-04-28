@@ -4,8 +4,9 @@ import storj.exception as sjexc
 import threading
 
 from PyQt4 import QtCore, QtGui
-from qt_interfaces.bucket_editing_ui import Ui_BucketEditing
+
 from engine import StorjEngine
+from qt_interfaces.bucket_editing_ui import Ui_BucketEditing
 
 
 class BucketEditingUI(QtGui.QMainWindow):
@@ -30,17 +31,23 @@ class BucketEditingUI(QtGui.QMainWindow):
         self.storj_engine = StorjEngine()
 
         if action == 'add':
-            QtCore.QObject.connect(self.bucket_create_ui.create_edit_bucket_bt, QtCore.SIGNAL('clicked()'),
-                                   self.createNewBucketCreateThread)  # create bucket action
+            # create bucket action
+            QtCore.QObject.connect(
+                self.bucket_create_ui.create_edit_bucket_bt,
+                QtCore.SIGNAL('clicked()'),
+                self.createNewBucketCreateThread)
             self.bucket_create_ui.create_edit_bucket_bt.setText('CREATE')
             self.bucket_create_ui.remove_bucket_bt.setVisible(False)
             self.setWindowTitle('Add bucket - Storj GUI')
         else:
             self.createBucketDetailsLoadThread()
+
+            # edit bucket action
             QtCore.QObject.connect(self.bucket_create_ui.create_edit_bucket_bt, QtCore.SIGNAL('clicked()'),
-                                   lambda: self.createNewBucketEditThread(bucketid))  # create bucket action
+                                   lambda: self.createNewBucketEditThread(bucketid))
+            # remove bucket action
             QtCore.QObject.connect(self.bucket_create_ui.remove_bucket_bt, QtCore.SIGNAL('clicked()'),
-                                   self.createNewBucketRemoveThread)  # create bucket action
+                                   self.createNewBucketRemoveThread)
             self.bucket_create_ui.create_edit_bucket_bt.setText('SAVE')
 
     def set_bucket_details(self, bucket_name, bucket_transfer, bucket_storage):
@@ -49,9 +56,10 @@ class BucketEditingUI(QtGui.QMainWindow):
         self.bucket_create_ui.bucket_size.setText(str(bucket_storage))
 
     def resolve_bucket_details(self):
+        # update bucket details
         bucket_details = self.storj_engine.storj_client.bucket_get(str(self.bucket_id))
         self.emit(QtCore.SIGNAL('printBucketDetails'), bucket_details.name,
-                  bucket_details.transfer, bucket_details.storage)  # update bucket details
+                  bucket_details.transfer, bucket_details.storage)
 
     def show_bucket_creating_exception_dialog(self, exception):
         QtGui.QMessageBox.about(
