@@ -4,6 +4,7 @@ import logging
 import threading
 
 import storj.exception as sjexc
+import os
 
 from PyQt4 import QtCore, QtGui
 
@@ -35,6 +36,7 @@ class MainUI(QtGui.QMainWindow):
         self.file_manager_ui = Ui_MainMenu()
         self.file_manager_ui.setupUi(self)
 
+        #self.change_loading_gif()
         QtCore.QObject.connect(self.file_manager_ui.bucket_select_combo_box,
                                QtCore.SIGNAL('currentIndexChanged(const QString&)'),
                                self.createNewFileListUpdateThread)  # connect ComboBox change listener
@@ -46,6 +48,9 @@ class MainUI(QtGui.QMainWindow):
                                self.open_single_file_download_window)  # create bucket action
         QtCore.QObject.connect(self.file_manager_ui.file_delete_bt, QtCore.SIGNAL('clicked()'),
                                self.delete_selected_file)  # delete selected file
+
+        self.connect(self, QtCore.SIGNAL("changeLoadingGif"), self.change_loading_gif)
+
 
         self.file_manager_ui.settings_bt.mousePressEvent = self.open_settings_window
         self.file_manager_ui.refresh_bt.mousePressEvent = self.createNewFileListUpdateThread
@@ -70,6 +75,15 @@ class MainUI(QtGui.QMainWindow):
         self.file_manager_ui.account_label.setText(str(user_email))
 
         self.createNewBucketResolveThread()
+
+    def change_loading_gif(self, is_visible):
+        if is_visible:
+            movie = QtGui.QMovie(os.path.join(os.path.dirname(__file__), 'resources/img/loading.gif'))
+            self.file_manager_ui.refresh_bt.setMovie(movie)
+            movie.start()
+        else:
+            self.file_manager_ui.refresh_bt.setPixmap(QtGui.QPixmap((":/resources/refresh.png")))
+
 
     def open_bucket_editing_window(self, action):
         if action == 'edit':
@@ -186,6 +200,7 @@ class MainUI(QtGui.QMainWindow):
         i = 0
 
         try:
+            self.emit(QtCore.SIGNAL("changeLoadingGif"), True)
             for self.file_details in self.storj_engine.storj_client.bucket_files(str(self.current_selected_bucket_id)):
                 item = QtGui.QStandardItem(str(self.file_details['filename'].replace('[DECRYPTED]', "")))
                 model.setItem(i, 0, item)  # row, column, item (StandardItem)
@@ -210,6 +225,7 @@ class MainUI(QtGui.QMainWindow):
         self.file_manager_ui.files_list_tableview.clearFocus()
         self.file_manager_ui.files_list_tableview.setModel(model)
         self.file_manager_ui.files_list_tableview.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.emit(QtCore.SIGNAL("changeLoadingGif"), False)
 
     def createNewBucketResolveThread(self):
         download_thread = threading.Thread(target=self.initialize_bucket_select_combobox, args=())
@@ -221,6 +237,7 @@ class MainUI(QtGui.QMainWindow):
         self.bucket_id_list = []
         self.storj_engine = StorjEngine()  # init StorjEngine
         i = 0
+        self.emit(QtCore.SIGNAL("changeLoadingGif"), True)
         try:
             for bucket in self.storj_engine.storj_client.bucket_list():
                 self.buckets_list.append(str(bucket.name))  # append buckets to list
@@ -230,7 +247,9 @@ class MainUI(QtGui.QMainWindow):
             self.__logger.error(e)
             QtGui.QMessageBox.about(self, 'Unhandled bucket resolving exception', 'Exception: ' % e)
 
+
         self.file_manager_ui.bucket_select_combo_box.addItems(self.buckets_list)
+        self.emit(QtCore.SIGNAL("changeLoadingGif"), False)
 
     def open_single_file_download_window(self):
         self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()
