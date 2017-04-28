@@ -22,7 +22,7 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-class Ui_SingleFileUpload(object):
+class Ui_SingleFileDownload(object):
     def setupUi(self, SingleFileUpload):
         SingleFileUpload.setObjectName(_fromUtf8("SingleFileUpload"))
         SingleFileUpload.resize(975, 591)
