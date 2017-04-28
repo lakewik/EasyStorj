@@ -719,7 +719,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             # if self.configuration.sameFileNamePrompt or self.configuration.sameFileHashPrompt:
             # file_existence_in_bucket =
             # self.storj_engine.storj_client.check_file_existence_in_bucket(bucket_id=bucket_id,
-            # filepath=file_path) # chech if exist file with same file name
+            # filepath=file_path) # check if exist file with same file name
 
             if file_existence_in_bucket == 1:
                 # QInputDialog.getText(self, 'Warning!', 'File with name ' + str(bname) + " already exist in bucket! Please use different name:", "test" )

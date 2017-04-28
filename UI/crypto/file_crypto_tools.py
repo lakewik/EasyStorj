@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Module with cryptographics functions for Storj GUI Client.
+Module with cryptographic functions for Storj GUI Client.
 
 Based on: <http://bit.ly/2pmaImR>
 """

@@ -79,7 +79,7 @@ class RegisterUI(QtGui.QMainWindow):
                 'clicking the link that has been sent to you. '
                 'Then you can login',
                 QtGui.QMessageBox.Ok)
-            self.__logger.debug('New user registrated')
+            self.__logger.debug('New user registered')
             self.__logger.debug('Email: %s', self.email)
             self.__logger.debug('Password: %s', self.password)
             result = msgBox.exec_()
