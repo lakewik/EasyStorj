@@ -78,7 +78,7 @@ class MainUI(QtGui.QMainWindow):
 
     def change_loading_gif(self, is_visible):
         if is_visible:
-            movie = QtGui.QMovie(os.path.join(os.path.dirname(__file__), 'resources/img/loading.gif'))
+            movie = QtGui.QMovie(':/resources/loading.gif')
             self.file_manager_ui.refresh_bt.setMovie(movie)
             movie.start()
         else:
