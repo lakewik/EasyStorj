@@ -59,6 +59,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.handle_cancel_action)
 
 
+        self.tools = Tools()
+
         self.storj_engine = StorjEngine()
 
         self.initialize_upload_queue_table()
@@ -102,6 +104,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('setCurrentUploadState'), self.set_current_status)
         self.connect(self, QtCore.SIGNAL('updateShardUploadCounters'), self.update_shards_counters)
         self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'), self.set_current_active_connections)
+        self.connect(self, QtCore.SIGNAL('setShardSize'), self.set_shard_size)
         #self.connect(self, QtCore.SIGNAL('handleCancelAction'), self.ha)
 
         # resolve buckets and put to buckets combobox
@@ -122,6 +125,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.shard_upload_percent_list = []
 
         self.ui_single_file_upload.overall_progress.setValue(0)
+
+    def set_shard_size(self, shard_size):
+        self.ui_single_file_upload.shardsize.setText(str(self.tools.human_size(int(shard_size))))
+
 
     def handle_cancel_action(self):
         if self.is_upload_active:
@@ -821,9 +828,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.uploaded_file_size = file_size
             self.file_mime_type = file_mime_type
 
-            tools = Tools()
 
-            self.ui_single_file_upload.file_size.setText(str(tools.human_size(int(file_size))))
+
+            self.ui_single_file_upload.file_size.setText(str(self.tools.human_size(int(file_size))))
 
             # self.ui_single_file_upload.current_state.setText(
             #   html_format_begin + "Resolving PUSH token..." + html_format_end)
@@ -927,7 +934,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             chapters = 0
 
+
             for shard in shards_manager.shards:
+                self.emit(QtCore.SIGNAL("setShardSize"), int(shard.size))
+
                 self.shard_upload_percent_list.append(0)
                 self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
                 chapters += 1
