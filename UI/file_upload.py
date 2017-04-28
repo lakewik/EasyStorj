@@ -27,7 +27,7 @@ from utilities.tools import Tools
 from resources.html_strings import html_format_begin, html_format_end
 from resources.constants import MAX_RETRIES_UPLOAD_TO_SAME_FARMER, \
     MAX_RETRIES_NEGOTIATE_CONTRACT
-
+from resources.internal_backend_config_variables import APPLY_SELECTED_BUCKET_TO_UPLOADER
 
 class SingleFileUploadUI(QtGui.QMainWindow):
     __logger = logging.getLogger('%s.SingleFileUploadUI' % __name__)
@@ -195,6 +195,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 'Exception: %s' % e)
 
         self.ui_single_file_upload.save_to_bucket_select.addItems(self.buckets_list)
+
+        if APPLY_SELECTED_BUCKET_TO_UPLOADER:
+            self.ui_single_file_upload.save_to_bucket_select.setCurrentIndex(int(self.dashboard_instance.current_bucket_index))
+
 
     def increment_shards_progress_counters(self):
         # self.shards_already_uploaded += 1
