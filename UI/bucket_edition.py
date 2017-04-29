@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+
+
 import threading
 
 import storj.exception as sjexc
@@ -27,6 +33,7 @@ class BucketEditingUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('showBucketCreatingException'), self.show_bucket_creating_exception_dialog)
         self.connect(self, QtCore.SIGNAL('showBucketCreatedSuccessfully'), self.show_bucket_created_successfully)
         self.connect(self, QtCore.SIGNAL('showBucketDeletedSuccessfully'), self.show_bucket_deleted_successfully)
+        self.connect(self, QtCore.SIGNAL('showBucketUpdatedSuccessfully'), self.show_bucket_updated_successfully)
         self.connect(self, QtCore.SIGNAL('showBucketCreationMissingFields'),
             lambda: QtGui.QMessageBox.about(self, 'Warning', 'Please fill out all fields!'))
         self.dashboard_instance = dashboard_instance
@@ -46,7 +53,7 @@ class BucketEditingUI(QtGui.QMainWindow):
 
             # edit bucket action
             QtCore.QObject.connect(self.bucket_create_ui.create_edit_bucket_bt, QtCore.SIGNAL('clicked()'),
-                                   lambda: self.createNewBucketEditThread(bucketid))
+                                   lambda: self.createNewBucketEditThread())
             # remove bucket action
             QtCore.QObject.connect(self.bucket_create_ui.remove_bucket_bt, QtCore.SIGNAL('clicked()'),
                                    self.createNewBucketRemoveThread)
@@ -84,6 +91,16 @@ class BucketEditingUI(QtGui.QMainWindow):
             'Bucket \'%s\' was removed successfully!' % bucket_name,
             QtGui.QMessageBox.Ok)
         msgBox.exec_()
+
+
+    def show_bucket_updated_successfully(self):
+        msgBox = QtGui.QMessageBox(
+            QtGui.QMessageBox.Information,
+            'Success',
+            'Bucket was updated successfully!',
+            QtGui.QMessageBox.Ok)
+        msgBox.exec_()
+
 
     def createNewBucketRemoveThread(self):
         self.bucket_name = self.bucket_create_ui.bucket_name.text()
@@ -128,6 +145,7 @@ class BucketEditingUI(QtGui.QMainWindow):
         bucket_create_thread.start()
 
     def edit_bucket(self):
+        self.emit(QtCore.SIGNAL('showBucketUpdatedSuccessfully'))
         return 1
 
     def create_bucket(self):
