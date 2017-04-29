@@ -141,7 +141,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
     def handle_cancel_action(self):
         if self.is_upload_active:
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Question",
-                                       "Are you sure that you want cancel upload and close this window?",
+                                       "Are you sure that you want cancel download and close this window?",
                                        (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Yes:
