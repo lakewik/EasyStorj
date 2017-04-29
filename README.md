@@ -12,6 +12,7 @@ This app finally will work on most desktop platforms: Linux, Windows, Mac OS X.
 Very early alpha dev version, we are working on download and uploads but
 others functions like buckets, file managing, mirrors listing have been implemented.
 
+Layout of this gui is created by @Davasny (https://github.com/Davasny)
 
 ## How to run (Alpha version)
 
