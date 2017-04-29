@@ -278,10 +278,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.temp_dir,
             QtGui.QFileDialog.ShowDirsOnly)
         self.__logger.debug('Chosen temp dir: %s', self.selected_tmp_dir)
-        self.ui_single_file_upload.tmp_path.setText(self.selected_tmp_dir)
+        self.ui_single_file_upload.tmp_path.setText(str(self.selected_tmp_dir).decode('utf-8'))
 
     def select_file_path(self):
-        self.ui_single_file_upload.file_path.setText(QtGui.QFileDialog.getOpenFileName())
+        self.ui_single_file_upload.file_path.setText(str(QtGui.QFileDialog.getOpenFileName()).decode('utf-8'))
 
     def createNewUploadThread(self):
         # self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
