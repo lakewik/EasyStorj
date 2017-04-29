@@ -849,10 +849,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                                                  str(file_name) +
                                                  "-" + str(part),
                                                  options_chain,
-                                                 rowposition, part)
+                                                 rowposition-1, part)
                 else:
                     self.createNewDownloadThread(url, self.tmp_path + "/" + str(file_name) + "-" + str(part),
-                                                 options_chain, part, part)
+                                                 options_chain, rowposition-1, part)
 
                 logger.debug(self.tmp_path + "/" + str(file_name) + "-" +
                              str(part))
