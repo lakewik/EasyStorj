@@ -751,7 +751,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         else:
             self.parametrs.tmpPath = str(self.ui_single_file_upload.tmp_path.text())
             self.validation["file_path"] = True
-            file_path = str(self.ui_single_file_upload.file_path.text())
+            file_path = str(self.ui_single_file_upload.file_path.text()).decode('utf-8')
 
         if self.validation["file_path"]:
 
