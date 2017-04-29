@@ -222,7 +222,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             for bucket in self.storj_engine.storj_client.bucket_list():
                 self.__logger.debug('Found bucket: %s', bucket.name)
                 # append buckets to list
-                self.buckets_list.append(bucket.name)
+                self.buckets_list.append(str(bucket.name).decode('utf8'))
                 self.bucket_id_list.append(bucket.id)
         except storj.exception.StorjBridgeApiError as e:
             self.__logger.error(e)
@@ -401,7 +401,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             if contract_negotiation_tries > 1:
                 self.emit(
                     QtCore.SIGNAL('setCurrentUploadState'),
-                    'Trying to negotiate storage contract for shard at index %s... Retry %s... "' % (
+                    'Trying to negotiate storage contract for shard at index %s... Retry %s... ' % (
                         str(chapters), contract_negotiation_tries))
             else:
                 self.emit(
