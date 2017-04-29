@@ -138,7 +138,7 @@ class MainUI(QtGui.QMainWindow):
                     QtGui.QMessageBox.about(
                         self,
                         'Success',
-                        'File "%s" was deleted successfully' % selected_file_name)
+                        'File "%s" has been deleted successfully' % selected_file_name)
                 except sjexc.StorjBridgeApiError as e:
                     self.__logger.error(e)
                     QtGui.QMessageBox.about(
