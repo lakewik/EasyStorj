@@ -202,7 +202,7 @@ class MainUI(QtGui.QMainWindow):
         try:
             self.emit(QtCore.SIGNAL("changeLoadingGif"), True)
             for self.file_details in self.storj_engine.storj_client.bucket_files(str(self.current_selected_bucket_id)):
-                item = QtGui.QStandardItem(str(self.file_details['filename'].replace('[DECRYPTED]', "")))
+                item = QtGui.QStandardItem(str(self.file_details['filename'].replace('[DECRYPTED]', "")).decode('utf8'))
                 model.setItem(i, 0, item)  # row, column, item (StandardItem)
 
                 file_size_str = self.tools.human_size(int(self.file_details['size']))  # get human readable file size
@@ -240,7 +240,7 @@ class MainUI(QtGui.QMainWindow):
         self.emit(QtCore.SIGNAL("changeLoadingGif"), True)
         try:
             for bucket in self.storj_engine.storj_client.bucket_list():
-                self.buckets_list.append(str(bucket.name))  # append buckets to list
+                self.buckets_list.append(str(bucket.name).decode('utf8'))  # append buckets to list
                 self.bucket_id_list.append(str(bucket.id))  # append buckets to list
                 i = i + 1
         except sjexc.StorjBridgeApiError as e:
