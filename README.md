@@ -9,8 +9,7 @@ GUI Client for Storj Distributed Storage Network written in Python and PyQt4.
 
 This app finally will work on most desktop platforms: Linux, Windows, Mac OS X.
 
-Very early alpha dev version, we are working on download and uploads but
-others functions like buckets, file managing, mirrors listing have been implemented.
+This is Alpha version
 
 Layout of this GUI is created by @Davasny (https://github.com/Davasny)
 
