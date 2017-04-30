@@ -170,10 +170,12 @@ class MainUI(QtGui.QMainWindow):
         for row in rows:
             self.__logger.info('Row %d is selected' % row)
             index = tablemodel.index(row, 2)  # get file ID
+            index_filename = tablemodel.index(row, 0)  # get file ID
             # We suppose data are strings
             selected_file_id = str(tablemodel.data(index).toString())
+            selected_file_name = str(tablemodel.data(index_filename).toString())
             self.file_mirrors_list_window = FileMirrorsListUI(self, str(self.current_selected_bucket_id),
-                                                              selected_file_id)
+                                                              selected_file_id, filename=selected_file_name)
             self.file_mirrors_list_window.show()
             i += 1
 
