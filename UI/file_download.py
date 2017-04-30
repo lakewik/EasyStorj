@@ -28,6 +28,7 @@ from utilities.log_manager import logger
 from resources.html_strings import html_format_begin, html_format_end
 from utilities.account_manager import AccountManager
 import time
+#from resources.custom_qt_components import YesNoCheckboxDialog
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
     def __init__(self, parent=None, bucketid=None, fileid=None):
@@ -429,7 +430,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         msgBox = QtGui.QMessageBox(
             QtGui.QMessageBox.Question,
             'Question',
-            'File %s already exist! Do you want to overwrite?' % str(file_name),
+            'File %s already exist! Do you want to overwrite?' % str(file_name).decode('utf-8'),
             (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
 
         self.overwrite_question_result = msgBox.exec_()
@@ -676,7 +677,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         return 1
 
     def create_download_connection(self, url, path_to_save, options_chain, rowposition, shard_index):
-        local_filename = path_to_save
+        local_filename = str(path_to_save).decode('utf-8')
         downloaded = False
         farmer_tries = 0
 
