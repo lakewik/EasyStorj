@@ -14,6 +14,10 @@ others functions like buckets, file managing, mirrors listing have been implemen
 
 Layout of this GUI is created by @Davasny (https://github.com/Davasny)
 
+
+## Honor supporters
+ - Will Topping
+
 ## How to run (Alpha version)
 
 - Clone newest version of python-sdk:
@@ -71,5 +75,3 @@ Also I accept donations in SJCX, BTC:
 
 *Thank you very much for your support!*
 
-## Honor supporters
- - Will Topping
