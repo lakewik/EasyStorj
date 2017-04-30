@@ -670,7 +670,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         return len(frame_data.shards)
 
     def select_file_save_path(self):
-        file_save_path = QtGui.QFileDialog.getSaveFileName(self, 'Save file to...', '')
+        file_save_path = QtGui.QFileDialog.getSaveFileName(self, 'Save file to...', str(self.ui_single_file_download.file_save_path.text()).decode('utf-8'))
         self.ui_single_file_download.file_save_path.setText(str(file_save_path))
 
     def calculate_final_hmac(self):
