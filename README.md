@@ -19,10 +19,7 @@ The layout has been designed by @Davasny (https://github.com/Davasny)
 - Clone newest version of python-sdk:
 
 ```
-$ git clone https://github.com/Storj/storj-python-sdk.git
-$ cd storj-python-sdk
-$ python setup.py install
-$ cd ..
+
 $ git clone https://github.com/lakewik/storj-gui-client.git
 $ cd storj-gui-client
 ```
