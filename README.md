@@ -39,10 +39,10 @@ $ cd storj-gui-client
 - [X] File manager
 - [X] Listing mirros
 - [X] Creating new user in network
+- [X] Improve uploader
+- [X] Improve downloader
 
 ## To do:
-- [ ] Improve uploader
-- [ ] Improve downloader
 - [ ] Drag and drop feature
 - [ ] Limits for maximum connection speed
 - [ ] Multiple file uploader and downloader
