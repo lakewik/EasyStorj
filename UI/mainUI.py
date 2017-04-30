@@ -17,7 +17,8 @@ from file_mirror import FileMirrorsListUI
 from file_upload import SingleFileUploadUI
 from utilities.tools import Tools
 
-from resources.constants import DISPLAY_FILE_CREATION_DATE_IN_MAIN
+from resources.constants import DISPLAY_FILE_CREATION_DATE_IN_MAIN, FILE_LIST_SORTING_MAIN_ENABLED
+from resources.custom_qt_interfaces import TableModel
 
 
 class ExtendedQLabel(QtGui.QLabel):
@@ -194,7 +195,9 @@ class MainUI(QtGui.QMainWindow):
 
         self.tools = Tools()
 
-        model = QtGui.QStandardItemModel(1, 1)  # initialize model for inserting to table
+        #model = MyTableModel(headerdata = )
+        model = TableModel(1, 1)
+        #model = QtGui.QStandardItemModel(1, 1)  # initialize model for inserting to table
 
         file_list_header_labels = ['File name', 'File size', 'File ID']
 
@@ -228,7 +231,7 @@ class MainUI(QtGui.QMainWindow):
                 #print self.file_details
 
                 if DISPLAY_FILE_CREATION_DATE_IN_MAIN:
-                    item = QtGui.QStandardItem(str(self.file_details['created']))
+                    item = QtGui.QStandardItem(str(self.file_details['created']).replace('Z', "").replace('T', " "))
                     model.setItem(i, 3, item)  # row, column, item (QStandardItem)
 
                 i = i + 1
@@ -240,7 +243,17 @@ class MainUI(QtGui.QMainWindow):
         self.file_manager_ui.files_list_tableview.clearFocus()
         self.file_manager_ui.files_list_tableview.setModel(model)
         self.file_manager_ui.files_list_tableview.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        if FILE_LIST_SORTING_MAIN_ENABLED:
+            self.file_manager_ui.files_list_tableview.setSortingEnabled(True)
+            self.file_manager_ui.files_list_tableview.horizontalHeader().sortIndicatorChanged.connect(
+                self.handleSortIndicatorChanged)
+            self.file_manager_ui.files_list_tableview.sortByColumn(0, QtCore.Qt.AscendingOrder)
         self.emit(QtCore.SIGNAL("changeLoadingGif"), False)
+
+    def handleSortIndicatorChanged(self, index, order):
+        if index != 0:
+            self.file_manager_ui.files_list_tableview.horizontalHeader().setSortIndicator(
+                0, self.file_manager_ui.files_list_tableview.model().sortOrder())
 
     def createNewBucketResolveThread(self):
         download_thread = threading.Thread(target=self.initialize_bucket_select_combobox, args=())
