@@ -158,6 +158,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                                                                   "    color: #fff;\n"
                                                                   "    border-radius: 7px;\n"
                                                                   "}"))
+        self.ui_single_file_upload.file_path.setText("")
         QMessageBox.information(self, 'Success!', 'File uploaded successfully!')
 
     def refresh_overall_progress(self, base_percent):
