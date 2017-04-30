@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_FileMirrorsList(object):
     def setupUi(self, FileMirrorsList):
         FileMirrorsList.setObjectName(_fromUtf8("FileMirrorsList"))
-        FileMirrorsList.resize(1241, 496)
+        FileMirrorsList.resize(1241, 491)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -65,10 +65,10 @@ class Ui_FileMirrorsList(object):
         font.setBold(True)
         font.setWeight(75)
         self.file_name.setFont(font)
-        self.file_name.setStyleSheet(_fromUtf8("QLabel {\n"
-"    \n"
-"    color:#555555;\n"
-"}"))
+        self.file_name.setStyleSheet(_fromUtf8("QLabel{\n"
+"color: #2683ff;\n"
+"}\n"
+""))
         self.file_name.setObjectName(_fromUtf8("file_name"))
         self.label_11 = QtGui.QLabel(FileMirrorsList)
         self.label_11.setGeometry(QtCore.QRect(10, 30, 81, 16))
@@ -87,10 +87,10 @@ class Ui_FileMirrorsList(object):
         font.setBold(True)
         font.setWeight(75)
         self.file_id.setFont(font)
-        self.file_id.setStyleSheet(_fromUtf8("QLabel {\n"
-"    \n"
-"    color:#555555;\n"
-"}"))
+        self.file_id.setStyleSheet(_fromUtf8("QLabel{\n"
+"color: #2683ff;\n"
+"}\n"
+""))
         self.file_id.setObjectName(_fromUtf8("file_id"))
         self.available_mirrors_tree = QtGui.QTreeView(FileMirrorsList)
         self.available_mirrors_tree.setGeometry(QtCore.QRect(620, 90, 611, 351))
@@ -140,6 +140,7 @@ class Ui_FileMirrorsList(object):
 "}"))
         self.mirror_details_bt.setObjectName(_fromUtf8("mirror_details_bt"))
         self.mirror_details_bt_2 = QtGui.QPushButton(FileMirrorsList)
+        self.mirror_details_bt_2.setEnabled(True)
         self.mirror_details_bt_2.setGeometry(QtCore.QRect(790, 450, 291, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
@@ -185,6 +186,12 @@ class Ui_FileMirrorsList(object):
 "    border-color: #ce0e0e;\n"
 "}"))
         self.quit_bt.setObjectName(_fromUtf8("quit_bt"))
+        self.loading_img = QtGui.QLabel(FileMirrorsList)
+        self.loading_img.setEnabled(True)
+        self.loading_img.setGeometry(QtCore.QRect(590, 10, 71, 61))
+        self.loading_img.setText(_fromUtf8(""))
+        self.loading_img.setScaledContents(True)
+        self.loading_img.setObjectName(_fromUtf8("loading_img"))
 
         self.retranslateUi(FileMirrorsList)
         QtCore.QMetaObject.connectSlotsByName(FileMirrorsList)
@@ -205,3 +212,4 @@ class Ui_FileMirrorsList(object):
         self.mirror_details_bt_2.setText(_translate("FileMirrorsList", "MORE MIRROR DETAILS", None))
         self.quit_bt.setText(_translate("FileMirrorsList", "CLOSE", None))
 
+import resources_rc
