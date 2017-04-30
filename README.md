@@ -16,10 +16,7 @@ The layout has been designed by @Davasny (https://github.com/Davasny)
 
 ## How to run (Alpha version)
 
-- Clone newest version of python-sdk:
-
 ```
-
 $ git clone https://github.com/lakewik/storj-gui-client.git
 $ cd storj-gui-client
 ```
