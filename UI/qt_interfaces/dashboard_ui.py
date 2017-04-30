@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_MainMenu(object):
     def setupUi(self, MainMenu):
         MainMenu.setObjectName(_fromUtf8("MainMenu"))
-        MainMenu.resize(529, 431)
+        MainMenu.resize(531, 430)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -49,7 +49,7 @@ class Ui_MainMenu(object):
         MainMenu.setAutoFillBackground(False)
         MainMenu.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.file_download_bt = QtGui.QPushButton(MainMenu)
-        self.file_download_bt.setGeometry(QtCore.QRect(370, 390, 141, 31))
+        self.file_download_bt.setGeometry(QtCore.QRect(360, 390, 161, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -78,7 +78,7 @@ class Ui_MainMenu(object):
         self.label_3.setScaledContents(True)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.file_delete_bt = QtGui.QPushButton(MainMenu)
-        self.file_delete_bt.setGeometry(QtCore.QRect(70, 390, 131, 31))
+        self.file_delete_bt.setGeometry(QtCore.QRect(10, 390, 41, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -176,7 +176,7 @@ class Ui_MainMenu(object):
 ""))
         self.account_label.setObjectName(_fromUtf8("account_label"))
         self.file_mirrors_bt = QtGui.QPushButton(MainMenu)
-        self.file_mirrors_bt.setGeometry(QtCore.QRect(220, 390, 131, 31))
+        self.file_mirrors_bt.setGeometry(QtCore.QRect(240, 390, 111, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -199,7 +199,7 @@ class Ui_MainMenu(object):
 "}"))
         self.file_mirrors_bt.setObjectName(_fromUtf8("file_mirrors_bt"))
         self.new_file_upload_bt = QtGui.QPushButton(MainMenu)
-        self.new_file_upload_bt.setGeometry(QtCore.QRect(15, 390, 31, 31))
+        self.new_file_upload_bt.setGeometry(QtCore.QRect(60, 390, 171, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -207,16 +207,16 @@ class Ui_MainMenu(object):
         font.setWeight(75)
         self.new_file_upload_bt.setFont(font)
         self.new_file_upload_bt.setStyleSheet(_fromUtf8("QPushButton:hover{\n"
-"  background-color: #f5a005;\n"
-"  border-color: #f5a005;\n"
+"  background-color: #83bf20;\n"
+"  border-color: #83bf20;\n"
 "}\n"
 "QPushButton:active {\n"
-"  background-color: #f7ac23;\n"
-"  border-color: #f7ac23;\n"
+"  background-color: #93cc36;\n"
+"  border-color: #93cc36;\n"
 "}\n"
 "QPushButton{\n"
-"  background-color: #ffa500;\n"
-"    border: 1px solid #ffa500;\n"
+"  background-color: #88c425;\n"
+"    border: 1px solid #88c425;\n"
 "    color: #fff;\n"
 "    border-radius: 7px;\n"
 "}"))
@@ -256,13 +256,13 @@ class Ui_MainMenu(object):
     def retranslateUi(self, MainMenu):
         MainMenu.setWindowTitle(_translate("MainMenu", "Storj GUI", None))
         self.file_download_bt.setText(_translate("MainMenu", "DOWNLOAD", None))
-        self.file_delete_bt.setText(_translate("MainMenu", "REMOVE", None))
+        self.file_delete_bt.setText(_translate("MainMenu", "X", None))
         self.label_4.setText(_translate("MainMenu", "<html><head/><body><p align=\"center\"><span style=\" color:#555555;\">LOGGED AS:</span></p></body></html>", None))
         self.create_bucket_bt.setText(_translate("MainMenu", "+", None))
         self.edit_bucket_bt.setText(_translate("MainMenu", "EDIT", None))
         self.account_label.setText(_translate("MainMenu", "<html><head/><body><p><span style=\" color:#2683ff;\">JOHN.SMITH.STORJ.80@GMAIL.COM</span></p></body></html>", None))
         self.file_mirrors_bt.setText(_translate("MainMenu", "MIRRORS", None))
-        self.new_file_upload_bt.setText(_translate("MainMenu", "+", None))
+        self.new_file_upload_bt.setText(_translate("MainMenu", "UPLOAD", None))
         self.label_5.setText(_translate("MainMenu", "<html><head/><body><p align=\"center\"><span style=\" color:#555555;\">BUCKET:</span></p></body></html>", None))
 
 import resources_rc
