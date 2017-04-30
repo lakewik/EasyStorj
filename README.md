@@ -5,13 +5,10 @@
 [![Coverage Status](https://coveralls.io/repos/github/lakewik/storj-gui-client/badge.svg?branch=master)](https://coveralls.io/r/lakewik/storj-gui-client)
 [![Requirements Status](https://requires.io/github/lakewik/storj-gui-client/requirements.svg?branch=master)](https://requires.io/github/lakewik/storj-gui-client/requirements/?branch=master)
 
-GUI Client for Storj Distributed Storage Network written in Python and PyQt4.
 
-This app finally will work on most desktop platforms: Linux, Windows, Mac OS X.
+It is GUI Client for Storj Network written in Python 2.7 and PyQt4. Currently we are in alpha version but finally app will work on Linux, Windows and Mac OS X.
 
-This is Alpha version
-
-Layout of this GUI is created by @Davasny (https://github.com/Davasny)
+The layout has been designed by @Davasny (https://github.com/Davasny)
 
 
 ## Honor supporters
@@ -37,39 +34,31 @@ $ cd storj-gui-client
 - execute: `python main.py`
 
 
-## Software features
+## Working features:
+- [X] Bucket manager
+- [X] File manager
+- [X] Listing mirros
+- [X] Creating new user in network
 
-- [x] list buckets
-- [x] create buckets
-- [x] register user 
-- [x] list files in buckets
-- [ ] upload file &nbsp; &nbsp; ![test](http://progressed.io/bar/95)
-- [ ] download file &nbsp; &nbsp; ![test](http://progressed.io/bar/95)
-- [x] list file pointers
-- [x] list file mirrors
-- [x] manage buckets
-- [ ] advanced configuration and bandwidth limiting &nbsp; &nbsp; ![test](http://progressed.io/bar/10)
-- [x] specified farmer node details
+## To do:
+- [ ] Complete uploader
+- [ ] Complete downloader
+- [ ] Drag and drop feature
+- [ ] Limits for maximum connection speed
+- [ ] Multiple file uploader and downloader
+- [ ] Geolocation for nodes in mirror listing
+- [ ] Automatic file synchronization
 
-
-## Planned features
-
-- multilipe file upload
-- analyzing geodistribution of nodes, mirrors
-- file syncing
 
 
 ## Support
 
-You can submit issue (feature request), if you want a feature that hasn't been yet implemented or planned.
-
-If you find any bugs in this app, please submit issue or a pull request containing a fix.
-
+If you want any new feature or you have found a bug, please submit an issue or create a pull request containing fix.
 Please note that this software is currently in Alpha Version.
 
-Also I accept donations in SJCX, BTC:
+I will be grateful for donations:
 
-- `1LWMe1AuQSNQq6zUEtC8vMaV3LhS8r1uFw`
+- BTC and SJCX: `1LWMe1AuQSNQq6zUEtC8vMaV3LhS8r1uFw`
 - Monero (XMR): `42VP4x4CRtwf9PXD3J73ntQHb2f2BYHVR75ovjeSNWzRF4X34mdf367VWD74kD4zDT3ReY6t5uQxAC9FWCPnMQjpQ3xFsV9`.  
 
 *Thank you very much for your support!*
