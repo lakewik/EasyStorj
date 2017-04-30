@@ -17,6 +17,8 @@ from file_mirror import FileMirrorsListUI
 from file_upload import SingleFileUploadUI
 from utilities.tools import Tools
 
+from resources.constants import DISPLAY_FILE_CREATION_DATE_IN_MAIN
+
 
 class ExtendedQLabel(QtGui.QLabel):
     def __init(self, parent):
@@ -194,7 +196,12 @@ class MainUI(QtGui.QMainWindow):
 
         model = QtGui.QStandardItemModel(1, 1)  # initialize model for inserting to table
 
-        model.setHorizontalHeaderLabels(['File name', 'File size', 'File ID'])
+        file_list_header_labels = ['File name', 'File size', 'File ID']
+
+        if DISPLAY_FILE_CREATION_DATE_IN_MAIN:
+            file_list_header_labels.append("Creation date")
+
+        model.setHorizontalHeaderLabels(file_list_header_labels)
 
         self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()
         self.current_selected_bucket_id = self.bucket_id_list[self.current_bucket_index]
@@ -217,6 +224,12 @@ class MainUI(QtGui.QMainWindow):
 
                 item = QtGui.QStandardItem(str(self.file_details['id']))
                 model.setItem(i, 2, item)  # row, column, item (QStandardItem)
+
+                #print self.file_details
+
+                if DISPLAY_FILE_CREATION_DATE_IN_MAIN:
+                    item = QtGui.QStandardItem(str(self.file_details['created']))
+                    model.setItem(i, 3, item)  # row, column, item (QStandardItem)
 
                 i = i + 1
 
