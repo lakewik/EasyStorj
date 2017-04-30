@@ -1,10 +1,15 @@
-import re
+# -*- coding: utf-8 -*-
+
 import os
-import platform
-import pingparser
-from os.path import expanduser
-import tempfile
+
 import errno
+import pingparser
+import platform
+import re
+import tempfile
+
+from os.path import expanduser
+
 
 class Tools:
     def isWritable(self, path):
@@ -19,14 +24,14 @@ class Tools:
         return True
 
     def check_email(self, email):
-        if not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email):
+        if not re.match(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)', email):
             return False
         else:
             return True
 
     def measure_ping_latency(self, destination_host):
         ping_latency = str(os.system(
-            "ping " + ("-n 1 " if platform.system().lower() == "windows" else "-c 1 ") + str(destination_host)))
+            'ping ' + ('-n 1 ' if platform.system().lower() == 'windows' else '-c 1 ') + str(destination_host)))
 
         ping_data_parsed = pingparser.parse(ping_latency)
 
@@ -43,8 +48,10 @@ class Tools:
             # because I really hate unnecessary plurals
             return "1 byte"
 
+        precision = 0
         suffixes_table = [('bytes', 0), ('KB', 0), ('MB', 1), ('GB', 2), ('TB', 2), ('PB', 2)]
 
+        suffix = ''
         num = float(size_bytes)
         for suffix, precision in suffixes_table:
             if num < 1024.0:
@@ -52,12 +59,12 @@ class Tools:
             num /= 1024.0
 
         if precision == 0:
-            formatted_size = "%d" % num
+            formatted_size = '%d' % num
         else:
             formatted_size = str(round(num, ndigits=precision))
 
-        return "%s %s" % (formatted_size, suffix)
+        return '%s %s' % (formatted_size, suffix)
 
     def get_home_user_directory(self):
-        home = expanduser("~")
+        home = expanduser('~')
         return str(home)

@@ -1,0 +1,4 @@
+recommonmark==0.4.0
+semantic_version==2.6.0
+Sphinx==1.5.5
+sphinx_rtd_theme==0.2.4

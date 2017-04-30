@@ -82,12 +82,14 @@ class ShardingTools():
 
         logger.info('Creating file', destination_file_path)
 
-        bname = (os.path.split(destination_file_path))[1]
-        bname_input = (os.path.split(shards_filepath))[1]
+        bname = str((os.path.split(destination_file_path))[1]).decode('utf-8')
+        bname_input = str((os.path.split(shards_filepath))[1]).decode('utf-8')
         bname2_input = bname_input
 
-        input_directory = (os.path.split(shards_filepath))[0]
-        output_directory = (os.path.split(destination_file_path))[0]
+        print "sciezka shardow" + shards_filepath + " " + destination_file_path
+
+        input_directory = str((os.path.split(shards_filepath))[0]).decode('utf-8')
+        output_directory = str((os.path.split(destination_file_path))[0]).decode('utf-8')
 
         # bugfix: if file contains characters like +,.,[]
         # properly escape them, otherwise re will fail to match.
@@ -98,7 +100,7 @@ class ShardingTools():
         chunkre = re.compile(bname2_input + '-' + '[0-9]+')
 
         chunkfiles = []
-        for f in os.listdir(str(input_directory)):
+        for f in os.listdir(str(input_directory).decode('utf-8')):
             logger.debug(f)
             if chunkre.match(f):
                 chunkfiles.append(f)
@@ -112,7 +114,7 @@ class ShardingTools():
             try:
                 logger.info('Appending chunk',
                             os.path.join(str(input_directory), f))
-                data += open(str(input_directory) + "/" + str(f), 'rb').read()
+                data += open(str(str(input_directory) + "/" + str(f)).decode('utf-8'), 'rb').read()
                 logger.info(str(input_directory) + "/" + str(f) +
                             "katalog wejsciowy")
             except (OSError, IOError, EOFError) as e:
@@ -121,7 +123,7 @@ class ShardingTools():
 
         try:
             logger.info(str(output_directory) + "katalog wyjsciowy")
-            f = open(str(output_directory) + "/" + str(bname), 'wb')
+            f = open(str(str(output_directory) + "/" + str(bname)).decode('utf-8'), 'wb')
             f.write(data)
             f.close()
         except (OSError, IOError, EOFError) as e:

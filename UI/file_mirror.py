@@ -16,7 +16,7 @@ from utilities.log_manager import logger
 # Mirrors section
 class FileMirrorsListUI(QtGui.QMainWindow):
 
-    def __init__(self, parent=None, bucketid=None, fileid=None):
+    def __init__(self, parent=None, bucketid=None, fileid=None, filename=None):
         QtGui.QWidget.__init__(self, parent)
         self.file_mirrors_list_ui = Ui_FileMirrorsList()
         self.file_mirrors_list_ui.setupUi(self)
@@ -30,6 +30,8 @@ class FileMirrorsListUI(QtGui.QMainWindow):
 
         self.connect(self, QtCore.SIGNAL("showStorjBridgeException"), self.show_storj_bridge_exception)
         self.connect(self, QtCore.SIGNAL("showUnhandledException"), self.show_unhandled_exception)
+        self.connect(self, QtCore.SIGNAL("changeLoadingGif"), self.change_loading_gif)
+
 
         # self.connect(self.file_mirrors_list_ui.established_mirrors_tree, QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.open_mirror_details_window)
 
@@ -42,12 +44,22 @@ class FileMirrorsListUI(QtGui.QMainWindow):
 
         self.bucketid = bucketid
         self.fileid = fileid
+        self.filename = str(filename).decode('utf-8')
 
-        self.file_mirrors_list_ui.file_id.setText(html_format_begin + str(self.fileid) + html_format_end)
+        self.file_mirrors_list_ui.file_id.setText(str(self.fileid))
+        self.file_mirrors_list_ui.file_name.setText(str(self.filename).decode('utf-8'))
 
         logger.info(self.fileid)
         self.storj_engine = StorjEngine()  # init StorjEngine
         self.createNewMirrorListInitializationThread()
+
+    def change_loading_gif(self, is_visible):
+        if is_visible:
+            movie = QtGui.QMovie(':/resources/loading.gif')
+            self.file_mirrors_list_ui.loading_img.setMovie(movie)
+            movie.start()
+        else:
+            self.file_mirrors_list_ui.loading_img.clear()
 
     def show_unhandled_exception(self, exception_content):
         QtGui.QMessageBox.critical(self, "Unhandled error", str(exception_content))
@@ -96,6 +108,8 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         mirror_list_initialization_thread.start()
 
     def initialize_mirrors_tree(self):
+
+        self.emit(QtCore.SIGNAL("changeLoadingGif"), True)
         # create model
         # model = QtGui.QFileSystemModel()
         # model.setRootPath(QtCore.QDir.currentPath())
@@ -187,6 +201,8 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                 html_format_begin + "ESTABLISHED (" + str(self.established_mirrors_count_for_file) + ")" + html_format_end)
             self.file_mirrors_list_ui.available_mirrors_count.setText(
                 html_format_begin +  "AVAILABLE (" + str(self.available_mirrors_count_for_file) + ")" + html_format_end)
+
+            self.emit(QtCore.SIGNAL("changeLoadingGif"), False)
         except sjexc.StorjBridgeApiError as e:
             self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))  # emit Storj Bridge Exception
         except Exception as e:

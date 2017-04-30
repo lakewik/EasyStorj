@@ -18,6 +18,11 @@ from file_upload import SingleFileUploadUI
 from utilities.tools import Tools
 
 
+from resources.constants import DISPLAY_FILE_CREATION_DATE_IN_MAIN, FILE_LIST_SORTING_MAIN_ENABLED
+from resources.custom_qt_interfaces import TableModel
+
+
+
 class ExtendedQLabel(QtGui.QLabel):
     def __init(self, parent):
         QtGui.QLabel.__init__(self, parent)
@@ -170,10 +175,12 @@ class MainUI(QtGui.QMainWindow):
         for row in rows:
             self.__logger.info('Row %d is selected' % row)
             index = tablemodel.index(row, 2)  # get file ID
+            index_filename = tablemodel.index(row, 0)  # get file ID
             # We suppose data are strings
             selected_file_id = str(tablemodel.data(index).toString())
+            selected_file_name = str(tablemodel.data(index_filename).toString())
             self.file_mirrors_list_window = FileMirrorsListUI(self, str(self.current_selected_bucket_id),
-                                                              selected_file_id)
+                                                              selected_file_id, filename=selected_file_name)
             self.file_mirrors_list_window.show()
             i += 1
 
@@ -190,9 +197,16 @@ class MainUI(QtGui.QMainWindow):
 
         self.tools = Tools()
 
-        model = QtGui.QStandardItemModel(1, 1)  # initialize model for inserting to table
+        #model = MyTableModel(headerdata = )
+        model = TableModel(1, 1)
+        #model = QtGui.QStandardItemModel(1, 1)  # initialize model for inserting to table
 
-        model.setHorizontalHeaderLabels(['File name', 'File size', 'File ID'])
+        file_list_header_labels = ['File name', 'File size', 'File ID']
+
+        if DISPLAY_FILE_CREATION_DATE_IN_MAIN:
+            file_list_header_labels.append("Creation date")
+
+        model.setHorizontalHeaderLabels(file_list_header_labels)
 
         self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()
         self.current_selected_bucket_id = self.bucket_id_list[self.current_bucket_index]
@@ -216,6 +230,12 @@ class MainUI(QtGui.QMainWindow):
                 item = QtGui.QStandardItem(str(self.file_details['id']))
                 model.setItem(i, 2, item)  # row, column, item (QStandardItem)
 
+                #print self.file_details
+
+                if DISPLAY_FILE_CREATION_DATE_IN_MAIN:
+                    item = QtGui.QStandardItem(str(self.file_details['created']).replace('Z', "").replace('T', " "))
+                    model.setItem(i, 3, item)  # row, column, item (QStandardItem)
+
                 i = i + 1
 
                 self.__logger.info(self.file_details)
@@ -225,7 +245,19 @@ class MainUI(QtGui.QMainWindow):
         self.file_manager_ui.files_list_tableview.clearFocus()
         self.file_manager_ui.files_list_tableview.setModel(model)
         self.file_manager_ui.files_list_tableview.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+
+        if FILE_LIST_SORTING_MAIN_ENABLED:
+            self.file_manager_ui.files_list_tableview.setSortingEnabled(True)
+            self.file_manager_ui.files_list_tableview.horizontalHeader().sortIndicatorChanged.connect(
+                self.handleSortIndicatorChanged)
+            self.file_manager_ui.files_list_tableview.sortByColumn(0, QtCore.Qt.AscendingOrder)
         self.emit(QtCore.SIGNAL("changeLoadingGif"), False)
+
+    def handleSortIndicatorChanged(self, index, order):
+        if index != 0:
+            self.file_manager_ui.files_list_tableview.horizontalHeader().setSortIndicator(
+                0, self.file_manager_ui.files_list_tableview.model().sortOrder())
+
 
     def createNewBucketResolveThread(self):
         download_thread = threading.Thread(target=self.initialize_bucket_select_combobox, args=())

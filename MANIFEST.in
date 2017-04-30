@@ -1,0 +1,11 @@
+include README.md
+include LICENSE
+include requirements.txt
+include requirements-test.txt
+include requirements-docs.txt
+include tox.ini
+
+recursive-include tests *.py
+
+recursive-exclude UI *.pyc
+recursive-exclude UI *.pyo

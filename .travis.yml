@@ -1,0 +1,37 @@
+language: python
+
+branches:
+  except:
+    - gh-pages
+
+cache:
+  directories:
+    - "${HOME}/.pip"
+
+before_cache:
+  - "find ${HOME}/.pip -name log -o -name __pycache__ -type d | xargs -I {} rm -rf {}"
+
+matrix:
+  include:
+    - python: 3.6
+    - python: 3.5
+    - python: 3.4
+    - python: 3.3
+    - python: 2.7
+    - python: pypy
+  allow_failures:
+    - python: 3.6
+    - python: 3.5
+    - python: 3.4
+    - python: 3.3
+
+install:
+  - pip install tox
+  - pip install tox-travis
+
+script:
+  - tox
+
+after_success:
+  - pip install coveralls
+  - coveralls
