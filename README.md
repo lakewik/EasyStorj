@@ -12,7 +12,7 @@ The layout has been designed by @Davasny (https://github.com/Davasny)
 
 
 ## Honor supporters 
-([You can support me by donating CryptoCurrency](#support))
+**[You can support me by donating CryptoCurrency](#support)**
  - Will Topping
 
 ## How to run (Alpha version)
