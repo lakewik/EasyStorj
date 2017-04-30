@@ -41,8 +41,8 @@ $ cd storj-gui-client
 - [X] Creating new user in network
 
 ## To do:
-- [ ] Complete uploader
-- [ ] Complete downloader
+- [ ] Improve uploader
+- [ ] Improve downloader
 - [ ] Drag and drop feature
 - [ ] Limits for maximum connection speed
 - [ ] Multiple file uploader and downloader
