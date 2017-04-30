@@ -11,7 +11,8 @@ It is GUI Client for Storj Network written in Python 2.7 and PyQt4. Currently we
 The layout has been designed by @Davasny (https://github.com/Davasny)
 
 
-## Honor supporters ([You can support me by donating CryptoCurrency](#support))
+## Honor supporters 
+([You can support me by donating CryptoCurrency](#support))
  - Will Topping
 
 ## How to run (Alpha version)
