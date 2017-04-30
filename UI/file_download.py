@@ -28,9 +28,8 @@ from utilities.log_manager import logger
 from resources.html_strings import html_format_begin, html_format_end
 from utilities.account_manager import AccountManager
 import time
-
+from resources.constants import USE_USER_ENV_PATH_FOR_TEMP
 #from resources.custom_qt_components import YesNoCheckboxDialog
-
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
     def __init__(self, parent=None, bucketid=None, fileid=None):
@@ -51,6 +50,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # logger.addHandler(self.log_handler)
 
         # self.initialize_shard_queue_table(file_pointers)
+
+        self.tools = Tools()
 
         self.is_upload_active = False
 
@@ -99,12 +100,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("askFileOverwrite"), self.ask_overwrite)
 
         self.connect(self, QtCore.SIGNAL("finishDownload"), lambda: self.create_download_finish_thread(
-
             str(os.path.split(str(self.ui_single_file_download.file_save_path.text()))[1]).decode('utf-8')))
 
         self.overwrite_question_result = None
         self.overwrite_question_closed = False
-
 
         self.ui_single_file_download.current_state.setText("Waiting for user action...")
         self.ui_single_file_download.downloaded_shards.setText("Waiting for user...")
@@ -128,7 +127,11 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             temp_dir = "/tmp/"
         elif platform == "win32":
             # Windows
-            temp_dir = "C:\\Windows\\temp\\"
+            if USE_USER_ENV_PATH_FOR_TEMP:
+                temp_dir = str(self.tools.get_home_user_directory()).decode("utf-8") + "\\" + "AppData\\Local\\Temp\\"
+            else:
+                temp_dir = "C:\\Windows\\temp\\"
+
 
         self.ui_single_file_download.tmp_dir.setText(str(temp_dir))
 
@@ -151,7 +154,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         if self.is_upload_active:
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Question",
                                        "Are you sure that you want cancel download and close this window?",
-
                                        (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Yes:
@@ -339,7 +341,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             # logger.warning('"log_event_type": "debug"')
             #logger.debug('"title": "Decryption"')
             logger.debug('Decrypting file...')
-
+            print "plik wyjsciowy" + str(self.destination_file_path)
             file_crypto_tools = FileCrypto()
             file_crypto_tools.decrypt_file("AES", str(self.destination_file_path) + ".encrypted",
                                            str(self.destination_file_path),
@@ -445,10 +447,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.overwrite_question_closed = False
         self.validation = {}
 
-
         self.all_shards_count = self.get_file_pointers_count(bucket_id, file_id)
         self.shards_already_downloaded = 0
-
 
         self.destination_file_path = str(self.ui_single_file_download.file_save_path.text()).decode('utf-8')
         self.tmp_path = str(self.ui_single_file_download.tmp_dir.text()).decode('utf-8')
@@ -465,7 +465,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 self.tmp_path = "C:\\Windows\\temp\\"
 
         file_name = os.path.split(self.destination_file_path)[1]
-
 
         if self.destination_file_path == "":
             self.validation["file_path"] = False
@@ -507,7 +506,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
             self.emit(QtCore.SIGNAL("updateShardCounters"))
 
-
             try:
                 # logger.warning("log_event_type": "debug")
                 # logger.debug('"title": "File pointers"')
@@ -528,6 +526,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                         tries_get_file_pointers += 1
                         time.sleep(1)
                         try:
+                            if tries_get_file_pointers > 1:
+                                self.emit(QtCore.SIGNAL("setCurrentState"), "Resolving pointer for shard " + str(i) + ". Retry " + str(tries_get_file_pointers) + "...")
+                            else:
+                                self.emit(QtCore.SIGNAL("setCurrentState"), "Resolving pointer for shard " + str(i))
                             options_array = {}
                             options_array["tmp_path"] = self.tmp_path
                             options_array["progressbars_enabled"] = "1"
@@ -590,6 +592,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             # model = QStandardItemModel(1, 1)  # initialize model for inserting to table
 
 
+
+
+
     def createNewDownloadInitThread(self, bucket_id, file_id):
         self.ui_single_file_download.overall_progress.setValue(0)
         self.initialize_download_queue_table()
@@ -621,9 +626,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             file_metadata = self.storj_engine.storj_client.file_metadata(str(bucket_id),
                                                                          str(file_id))
             self.ui_single_file_download.file_name.setText(
-
                 str(file_metadata.filename.replace("[DECRYPTED]", "")).decode('utf-8'))
-
 
             tools = Tools()
             # self.ui_single_file_download.file_size.setText(
@@ -640,16 +643,16 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                     str(tools.get_home_user_directory() + "/" + str(file_metadata.filename.replace("[DECRYPTED]", ""))).decode('utf-8'))
             elif platform == "win32":
                 self.ui_single_file_download.file_save_path.setText(
-                    str(tools.get_home_user_directory() + "\\" + str(
+                    str(tools.get_home_user_directory()).decode("utf-8") + "\\" + str(
+                        file_metadata.filename.replace("[DECRYPTED]", "")).decode('utf-8'))
 
-                        file_metadata.filename.replace("[DECRYPTED]", ""))).decode('utf-8'))
-
-
-
-            self.filename_from_bridge = str(file_metadata.filename)
+            self.filename_from_bridge = str(file_metadata.filename).decode('utf-8')
 
             self.resolved_file_metadata = True
             self.emit(QtCore.SIGNAL("setCurrentState"), "Waiting for user action...")
+
+        except UnicodeDecodeError:
+            pass
 
         except storj.exception.StorjBridgeApiError as e:
             self.emit(QtCore.SIGNAL("showStorjBridgeException"),
@@ -673,7 +676,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
     def select_tmp_directory(self):
         self.selected_tmp_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:', '',
                                                                        QtGui.QFileDialog.ShowDirsOnly)
-        self.ui_single_file_download.tmp_dir.setText(str(self.selected_tmp_dir))
+        self.ui_single_file_download.tmp_dir.setText(str(self.selected_tmp_dir).decode("utf-8"))
 
     def get_file_pointers_count(self, bucket_id, file_id):
         file_frame = self.get_file_frame_id(bucket_id, file_id)
