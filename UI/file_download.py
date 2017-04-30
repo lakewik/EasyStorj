@@ -28,7 +28,9 @@ from utilities.log_manager import logger
 from resources.html_strings import html_format_begin, html_format_end
 from utilities.account_manager import AccountManager
 import time
+
 #from resources.custom_qt_components import YesNoCheckboxDialog
+
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
     def __init__(self, parent=None, bucketid=None, fileid=None):
@@ -97,10 +99,12 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("askFileOverwrite"), self.ask_overwrite)
 
         self.connect(self, QtCore.SIGNAL("finishDownload"), lambda: self.create_download_finish_thread(
+
             str(os.path.split(str(self.ui_single_file_download.file_save_path.text()))[1]).decode('utf-8')))
 
         self.overwrite_question_result = None
         self.overwrite_question_closed = False
+
 
         self.ui_single_file_download.current_state.setText("Waiting for user action...")
         self.ui_single_file_download.downloaded_shards.setText("Waiting for user...")
@@ -147,6 +151,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         if self.is_upload_active:
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Question",
                                        "Are you sure that you want cancel download and close this window?",
+
                                        (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Yes:
@@ -334,7 +339,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             # logger.warning('"log_event_type": "debug"')
             #logger.debug('"title": "Decryption"')
             logger.debug('Decrypting file...')
-            print "plik wyjsciowy" + str(self.destination_file_path)
+
             file_crypto_tools = FileCrypto()
             file_crypto_tools.decrypt_file("AES", str(self.destination_file_path) + ".encrypted",
                                            str(self.destination_file_path),
@@ -440,8 +445,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.overwrite_question_closed = False
         self.validation = {}
 
+
         self.all_shards_count = self.get_file_pointers_count(bucket_id, file_id)
         self.shards_already_downloaded = 0
+
 
         self.destination_file_path = str(self.ui_single_file_download.file_save_path.text()).decode('utf-8')
         self.tmp_path = str(self.ui_single_file_download.tmp_dir.text()).decode('utf-8')
@@ -458,6 +465,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 self.tmp_path = "C:\\Windows\\temp\\"
 
         file_name = os.path.split(self.destination_file_path)[1]
+
 
         if self.destination_file_path == "":
             self.validation["file_path"] = False
@@ -498,6 +506,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                                                                           "}"))
 
             self.emit(QtCore.SIGNAL("updateShardCounters"))
+
 
             try:
                 # logger.warning("log_event_type": "debug")
@@ -581,9 +590,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             # model = QStandardItemModel(1, 1)  # initialize model for inserting to table
 
 
-
-
-
     def createNewDownloadInitThread(self, bucket_id, file_id):
         self.ui_single_file_download.overall_progress.setValue(0)
         self.initialize_download_queue_table()
@@ -615,7 +621,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             file_metadata = self.storj_engine.storj_client.file_metadata(str(bucket_id),
                                                                          str(file_id))
             self.ui_single_file_download.file_name.setText(
+
                 str(file_metadata.filename.replace("[DECRYPTED]", "")).decode('utf-8'))
+
 
             tools = Tools()
             # self.ui_single_file_download.file_size.setText(
@@ -633,7 +641,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             elif platform == "win32":
                 self.ui_single_file_download.file_save_path.setText(
                     str(tools.get_home_user_directory() + "\\" + str(
+
                         file_metadata.filename.replace("[DECRYPTED]", ""))).decode('utf-8'))
+
+
 
             self.filename_from_bridge = str(file_metadata.filename)
 

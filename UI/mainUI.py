@@ -17,8 +17,10 @@ from file_mirror import FileMirrorsListUI
 from file_upload import SingleFileUploadUI
 from utilities.tools import Tools
 
+
 from resources.constants import DISPLAY_FILE_CREATION_DATE_IN_MAIN, FILE_LIST_SORTING_MAIN_ENABLED
 from resources.custom_qt_interfaces import TableModel
+
 
 
 class ExtendedQLabel(QtGui.QLabel):
@@ -243,6 +245,7 @@ class MainUI(QtGui.QMainWindow):
         self.file_manager_ui.files_list_tableview.clearFocus()
         self.file_manager_ui.files_list_tableview.setModel(model)
         self.file_manager_ui.files_list_tableview.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+
         if FILE_LIST_SORTING_MAIN_ENABLED:
             self.file_manager_ui.files_list_tableview.setSortingEnabled(True)
             self.file_manager_ui.files_list_tableview.horizontalHeader().sortIndicatorChanged.connect(
@@ -254,6 +257,7 @@ class MainUI(QtGui.QMainWindow):
         if index != 0:
             self.file_manager_ui.files_list_tableview.horizontalHeader().setSortIndicator(
                 0, self.file_manager_ui.files_list_tableview.model().sortOrder())
+
 
     def createNewBucketResolveThread(self):
         download_thread = threading.Thread(target=self.initialize_bucket_select_combobox, args=())
