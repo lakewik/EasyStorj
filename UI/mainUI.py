@@ -123,7 +123,7 @@ class MainUI(QtGui.QMainWindow):
             msgBox = QtGui.QMessageBox(
                 QtGui.QMessageBox.Question,
                 'Question',
-                'Are you sure you want to delete this file? File name: %s' % selected_file_name,
+                'Are you sure you want to delete this file? File name: %s' % str(selected_file_name).decode('utf-8'),
                 (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
 
             result = msgBox.exec_()
