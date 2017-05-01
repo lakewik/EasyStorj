@@ -342,8 +342,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         total_percent = (base_percent * 100) + \
             (0.90 * actual_percent_downloaded)
 
-        logger.info(str(actual_percent_downloaded) + str(base_percent) +
-                    "total_percent_downloaded")
+        # logger.info("%s %s total_percent_downloaded" %
+        #     actual_percent_downloaded, base_percent)
 
         self.ui_single_file_download.overall_progress.setValue(
             int(total_percent))
@@ -353,6 +353,76 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             target=self.finish_download(file_name=file_name),
             args=())
         download_finish_thread.start()
+
+    def createNewDownloadInitThread(self, bucket_id, file_id):
+        """
+        Interface for callers
+        """
+        self.ui_single_file_download.overall_progress.setValue(0)
+        self.initialize_download_queue_table()
+        self.download_begin(bucket_id, file_id)
+
+    def createNewInitializationThread(self, bucket_id, file_id):
+        file_name_resolve_thread = threading.Thread(
+            target=self.set_file_metadata,
+            args=(bucket_id, file_id))
+        file_name_resolve_thread.start()
+
+    def get_file_frame_id(self, bucket_id, file_id):
+        try:
+            file_metadata = self.storj_engine.storj_client.file_metadata(
+                bucket_id, file_id)
+            self.file_frame = file_metadata.frame
+        except storj.exception.StorjBridgeApiError as e:
+            # Emit Storj Bridge Exception
+            self.emit(QtCore.SIGNAL("showStorjBridgeException"),
+                      "Error while resolving file frame ID. %s" % e)
+        except Exception as e:
+            # Emit unhandled Exception
+            self.emit(QtCore.SIGNAL("showUnhandledException"),
+                      "Unhandled error while resolving file frame ID. %s" % e)
+        else:
+            return self.file_frame
+
+    def set_file_metadata(self, bucket_id, file_id):
+        try:
+            self.emit(QtCore.SIGNAL("setCurrentState"),
+                      "Getting file metadata...")
+            file_metadata = self.storj_engine.storj_client.file_metadata(
+                bucket_id, file_id)
+            self.ui_single_file_download.file_name.setText(
+                str(file_metadata.filename.replace(
+                    "[DECRYPTED]", "")).decode('utf-8'))
+
+            tools = Tools()
+            self.ui_single_file_download.file_id.setText(file_id)
+
+            self.ui_single_file_download.file_save_path.setText(
+                os.path.join(
+                    tools.get_home_user_directory().decode('utf-8'),
+                    file_metadata.filename.replace(
+                        '[DECRYPTED]', '')).decode('utf-8'))
+
+            self.filename_from_bridge = file_metadata.filename.decode('utf-8')
+
+            self.resolved_file_metadata = True
+            self.emit(QtCore.SIGNAL('setCurrentState'),
+                      'Waiting for user action...')
+        except UnicodeDecodeError:
+            pass
+        except storj.exception.StorjBridgeApiError as e:
+            # Emit Storj Bridge Exception
+            self.emit(QtCore.SIGNAL("showStorjBridgeException"),
+                      "Error while resolving file metadata %s" % e)
+        except Exception as e:
+            # Emit unhandled Exception
+            self.emit(QtCore.SIGNAL("showUnhandledException"),
+                      "Unhandled error while resolving file metadata %s" % e)
+
+    def get_file_pointers_count(self, bucket_id, file_id):
+        file_frame = self.get_file_frame_id(bucket_id, file_id)
+        frame_data = self.storj_engine.storj_client.frame_get(file_frame.id)
+        return len(frame_data.shards)
 
     #### Begin file download finish function ####
     # Wait for signal to do shards joining and encryption
@@ -511,9 +581,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.shards_already_downloaded = 0
 
         self.destination_file_path = \
-            self.ui_single_file_download.file_save_path.text().decode('utf-8')
+            str(self.ui_single_file_download.file_save_path.text()).decode('utf-8')
         self.tmp_path = \
-            self.ui_single_file_download.tmp_dir.text().decode('utf-8')
+            str(self.ui_single_file_download.tmp_dir.text()).decode('utf-8')
 
         if self.tmp_path == "":
             if platform == "linux" or platform == "linux2":
@@ -574,6 +644,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 i = 0
                 # Max self.all_shards_count downloads and 4 attempts
                 while i < 4 and i < self.all_shards_count:
+                    print "TEST i = %s" % i
                     self.is_upload_active = True
                     tries_get_file_pointers = 0
                     while self.max_retries_get_file_pointers > tries_get_file_pointers:
@@ -639,71 +710,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 # Emit Storj Bridge Exception
                 self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))
             i = 0
-
-    def createNewDownloadInitThread(self, bucket_id, file_id):
-        """
-        Interface for callers
-        """
-        self.ui_single_file_download.overall_progress.setValue(0)
-        self.initialize_download_queue_table()
-        self.download_begin(bucket_id, file_id)
-
-    def createNewInitializationThread(self, bucket_id, file_id):
-        file_name_resolve_thread = threading.Thread(
-            target=self.set_file_metadata,
-            args=(bucket_id, file_id))
-        file_name_resolve_thread.start()
-
-    def get_file_frame_id(self, bucket_id, file_id):
-        try:
-            file_metadata = self.storj_engine.storj_client.file_metadata(
-                bucket_id, file_id)
-            self.file_frame = file_metadata.frame
-        except storj.exception.StorjBridgeApiError as e:
-            # Emit Storj Bridge Exception
-            self.emit(QtCore.SIGNAL("showStorjBridgeException"),
-                      "Error while resolving file frame ID. %s" % e)
-        except Exception as e:
-            # Emit unhandled Exception
-            self.emit(QtCore.SIGNAL("showUnhandledException"),
-                      "Unhandled error while resolving file frame ID. %s" % e)
-        else:
-            return self.file_frame
-
-    def set_file_metadata(self, bucket_id, file_id):
-        try:
-            self.emit(QtCore.SIGNAL("setCurrentState"),
-                      "Getting file metadata...")
-            file_metadata = self.storj_engine.storj_client.file_metadata(
-                bucket_id, file_id)
-            self.ui_single_file_download.file_name.setText(
-                str(file_metadata.filename.replace(
-                    "[DECRYPTED]", "")).decode('utf-8'))
-
-            tools = Tools()
-            self.ui_single_file_download.file_id.setText(file_id)
-
-            self.ui_single_file_download.file_save_path.setText(
-                os.path.join(
-                    tools.get_home_user_directory().decode('utf-8'),
-                    file_metadata.filename.replace(
-                        '[DECRYPTED]', '')).decode('utf-8'))
-
-            self.filename_from_bridge = file_metadata.filename.decode('utf-8')
-
-            self.resolved_file_metadata = True
-            self.emit(QtCore.SIGNAL('setCurrentState'),
-                      'Waiting for user action...')
-        except UnicodeDecodeError:
-            pass
-        except storj.exception.StorjBridgeApiError as e:
-            # Emit Storj Bridge Exception
-            self.emit(QtCore.SIGNAL("showStorjBridgeException"),
-                      "Error while resolving file metadata %s" % e)
-        except Exception as e:
-            # Emit unhandled Exception
-            self.emit(QtCore.SIGNAL("showUnhandledException"),
-                      "Unhandled error while resolving file metadata %s" % e)
+            # self.finish_download(self.filename_from_bridge)
+            self.finish_download(os.path.split(
+                str(self.ui_single_file_download.file_save_path.text(
+                ))[1]).decode('utf-8'))
 
     def update_shard_download_progess(self, row_position_index, value):
         self.download_queue_progressbar_list[row_position_index].setValue(value)
@@ -725,15 +735,11 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.ui_single_file_download.tmp_dir.setText(
             str(self.selected_tmp_dir).decode("utf-8"))
 
-    def get_file_pointers_count(self, bucket_id, file_id):
-        file_frame = self.get_file_frame_id(bucket_id, file_id)
-        frame_data = self.storj_engine.storj_client.frame_get(file_frame.id)
-        return len(frame_data.shards)
-
     def select_file_save_path(self):
         file_save_path = QtGui.QFileDialog.getSaveFileName(
             self, 'Save file to...',
-            self.ui_single_file_download.file_save_path.text().decode('utf-8'))
+            str(self.ui_single_file_download.file_save_path.text()).decode(
+                'utf-8'))
         self.ui_single_file_download.file_save_path.setText(file_save_path)
 
     def calculate_final_hmac(self):
@@ -865,7 +871,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             if int(self.all_shards_count) <= int(self.shards_already_downloaded):
                 # Send signal to begin file shards join and decryption
                 # after all shards are downloaded
-                self.emit(QtCore.SIGNAL("finishDownload"))
+                # self.emit(QtCore.SIGNAL("finishDownload"))
+                print "TEST: ORA DEVE FINIRE"
             return
 
     def createNewDownloadThread(self, url, filelocation, options_chain, rowposition, shard_index):
@@ -874,6 +881,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             args=(url, filelocation, options_chain, rowposition, shard_index))
         download_thread.start()
         logger.debug('%s position' % options_chain["rowposition"])
+        # download_thread.join()
+        print "TEST: finito thread"
 
     def shard_download(self, pointer, file_save_path, options_array):
         logger.debug('Beginning download proccess...')
