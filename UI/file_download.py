@@ -210,6 +210,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                                                                QtGui.QTableWidgetItem(str(row_data["shard_index"])))
 
         self.download_queue_progressbar_list[self.download_queue_table_row_count].setValue(0)
+
+        self.ui_single_file_download.shard_queue_table.scrollToBottom()
         # print "dodawanie wiersza 2"
 
     def _add_shard_to_table(self, pointers_content, shard, chapters):
