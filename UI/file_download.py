@@ -560,12 +560,14 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                         time.sleep(1)
                         try:
                             if tries_get_file_pointers > 1:
-                                self.emit(QtCore.SIGNAL("setCurrentState"),
-                                          "Resolving pointer for shard " +
-                                          str(i) + ". Retry " +
-                                          str(tries_get_file_pointers) + "...")
+                                self.emit(
+                                    QtCore.SIGNAL("setCurrentState"),
+                                    "Resolving pointer for shard %s. \
+                                        Retry %s ..." % (
+                                        i, tries_get_file_pointers))
                             else:
-                                self.emit(QtCore.SIGNAL("setCurrentState"), "Resolving pointer for shard " + str(i))
+                                self.emit(QtCore.SIGNAL("setCurrentState"),
+                                          "Resolving pointer for shard %s" % i)
                             options_array = {}
                             options_array["tmp_path"] = self.tmp_path
                             options_array["progressbars_enabled"] = "1"
@@ -578,10 +580,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                                     file_id,
                                     limit="1",
                                     skip=str(i))
-                            print str(shard_pointer) + "wskaznik"
-                            # if shard_pointer[0]["parity"] == False:
-                            #     print "Shard parity error!"
-                            #     break
                             options_array["shard_index"] = shard_pointer[0]["index"]
 
                             options_array["file_size_shard_%s" % i] = shard_pointer[0]["size"]
