@@ -384,11 +384,12 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             logger.debug('Decrypting file...')
             print "plik wyjsciowy" + str(self.destination_file_path)
             file_crypto_tools = FileCrypto()
+            # Begin file decryption
             file_crypto_tools.decrypt_file(
                 "AES",
                 str(self.destination_file_path) + ".encrypted",
                 str(self.destination_file_path),
-                str(self.user_password))  # begin file decryption
+                str(self.user_password))
 
         logger.debug("pobrano")
         logger.debug('Downloading completed successfully!')
@@ -458,20 +459,27 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 options_array["progressbars_enabled"] = "1"
                 options_array["file_size_is_given"] = "1"
                 options_array["shards_count"] = str(self.all_shards_count)
-                shard_pointer = self.storj_engine.storj_client.file_pointers(str(self.bucket_id), self.file_id,
-                                                                             limit="1",
-                                                                             skip=str(shard_index))
+                shard_pointer = \
+                    self.storj_engine.storj_client.file_pointers(
+                        self.bucket_id,
+                        self.file_id,
+                        limit="1",
+                        skip=str(shard_index))
                 print shard_pointer[0]
                 options_array["shard_index"] = shard_pointer[0]["index"]
 
-                options_array["file_size_shard_" + str(shard_index)] = shard_pointer[0]["size"]
-                self.emit(QtCore.SIGNAL("beginShardDownloadProccess"), shard_pointer[0],
-                          self.destination_file_path, options_array)
+                options_array["file_size_shard_%s" % shard_index] = \
+                    shard_pointer[0]["size"]
+                self.emit(QtCore.SIGNAL("beginShardDownloadProccess"),
+                          shard_pointer[0],
+                          self.destination_file_path,
+                          options_array)
             except storj.exception.StorjBridgeApiError as e:
+                # Emit Storj Bridge Exception
                 logger.debug('"title": "Bridge error"')
                 logger.debug('"description": "Error while resolving file pointers \
                                                          to download file"')
-                self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))  # emit Storj Bridge Exception
+                self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))
                 continue
             except Exception:
                 continue
@@ -494,11 +502,14 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.overwrite_question_closed = False
         self.validation = {}
 
-        self.all_shards_count = self.get_file_pointers_count(bucket_id, file_id)
+        self.all_shards_count = self.get_file_pointers_count(
+            bucket_id, file_id)
         self.shards_already_downloaded = 0
 
-        self.destination_file_path = str(self.ui_single_file_download.file_save_path.text()).decode('utf-8')
-        self.tmp_path = self.ui_single_file_download.tmp_dir.text().decode('utf-8')
+        self.destination_file_path = \
+            self.ui_single_file_download.file_save_path.text().decode('utf-8')
+        self.tmp_path = \
+            self.ui_single_file_download.tmp_dir.text().decode('utf-8')
 
         if self.tmp_path == "":
             if platform == "linux" or platform == "linux2":
@@ -586,9 +597,11 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                                     file_id,
                                     limit="1",
                                     skip=str(i))
-                            options_array["shard_index"] = shard_pointer[0]["index"]
+                            options_array["shard_index"] = \
+                                shard_pointer[0]["index"]
 
-                            options_array["file_size_shard_%s" % i] = shard_pointer[0]["size"]
+                            options_array["file_size_shard_%s" % i] = \
+                                shard_pointer[0]["size"]
                             '''
                             self.emit(QtCore.SIGNAL("beginShardDownloadProccess"),
                                       shard_pointer[0],
@@ -624,28 +637,32 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             i = 0
 
     def createNewDownloadInitThread(self, bucket_id, file_id):
+        """
+        Interface for callers
+        """
         self.ui_single_file_download.overall_progress.setValue(0)
         self.initialize_download_queue_table()
-        # file_name_resolve_thread = threading.Thread(target=self.download_begin, args=(bucket_id, file_id))
-        # file_name_resolve_thread.start()
         self.download_begin(bucket_id, file_id)
 
     def createNewInitializationThread(self, bucket_id, file_id):
-        file_name_resolve_thread = threading.Thread(target=self.set_file_metadata, args=(bucket_id, file_id))
+        file_name_resolve_thread = threading.Thread(
+            target=self.set_file_metadata,
+            args=(bucket_id, file_id))
         file_name_resolve_thread.start()
 
     def get_file_frame_id(self, bucket_id, file_id):
         try:
-            file_metadata = self.storj_engine.storj_client.file_metadata(str(bucket_id),
-                                                                         str(file_id))
+            file_metadata = self.storj_engine.storj_client.file_metadata(
+                bucket_id, file_id)
             self.file_frame = file_metadata.frame
-
         except storj.exception.StorjBridgeApiError as e:
+            # Emit Storj Bridge Exception
             self.emit(QtCore.SIGNAL("showStorjBridgeException"),
-                      "Error while resolving file frame ID. " + str(e))  # emit Storj Bridge Exception
+                      "Error while resolving file frame ID. %s" % e)
         except Exception as e:
+            # Emit unhandled Exception
             self.emit(QtCore.SIGNAL("showUnhandledException"),
-                      "Unhandled error while resolving file frame ID. " + str(e))  # emit unhandled Exception
+                      "Unhandled error while resolving file frame ID. %s" % e)
         else:
             return self.file_frame
 
@@ -691,15 +708,18 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
     def increment_shards_download_progress_counters(self):
         # self.shards_already_downloaded += 1
         self.ui_single_file_download.downloaded_shards.setText(
-            html_format_begin + str(self.shards_already_downloaded) + html_format_end)
+            "%s%s%s" % (html_format_begin,
+                        str(self.shards_already_downloaded),
+                        html_format_end))
 
     def set_current_status(self, current_status):
         self.ui_single_file_download.current_state.setText(str(current_status))
 
     def select_tmp_directory(self):
-        self.selected_tmp_dir = QtGui.QFileDialog.getExistingDirectory(None, 'Select a folder:', '',
-                                                                       QtGui.QFileDialog.ShowDirsOnly)
-        self.ui_single_file_download.tmp_dir.setText(str(self.selected_tmp_dir).decode("utf-8"))
+        self.selected_tmp_dir = QtGui.QFileDialog.getExistingDirectory(
+            None, 'Select a folder:', '', QtGui.QFileDialog.ShowDirsOnly)
+        self.ui_single_file_download.tmp_dir.setText(
+            str(self.selected_tmp_dir).decode("utf-8"))
 
     def get_file_pointers_count(self, bucket_id, file_id):
         file_frame = self.get_file_frame_id(bucket_id, file_id)
@@ -707,8 +727,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         return len(frame_data.shards)
 
     def select_file_save_path(self):
-        file_save_path = QtGui.QFileDialog.getSaveFileName(self, 'Save file to...', str(self.ui_single_file_download.file_save_path.text()).decode('utf-8'))
-        self.ui_single_file_download.file_save_path.setText(str(file_save_path))
+        file_save_path = QtGui.QFileDialog.getSaveFileName(
+            self, 'Save file to...',
+            self.ui_single_file_download.file_save_path.text().decode('utf-8'))
+        self.ui_single_file_download.file_save_path.setText(file_save_path)
 
     def calculate_final_hmac(self):
         return 1
