@@ -271,21 +271,23 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         return rowcount
 
     def show_download_finished_message(self):
-        self.ui_single_file_download.start_download_bt.setStyleSheet(("QPushButton:hover{\n"
-                                                                      "  background-color: #83bf20;\n"
-                                                                      "  border-color: #83bf20;\n"
-                                                                      "}\n"
-                                                                      "QPushButton:active {\n"
-                                                                      "  background-color: #93cc36;\n"
-                                                                      "  border-color: #93cc36;\n"
-                                                                      "}\n"
-                                                                      "QPushButton{\n"
-                                                                      "  background-color: #88c425;\n"
-                                                                      "    border: 1px solid #88c425;\n"
-                                                                      "    color: #fff;\n"
-                                                                      "    border-radius: 7px;\n"
-                                                                      "}"))
-        QMessageBox.information(self, "Success!", "File downloaded successfully!")
+        self.ui_single_file_download.start_download_bt.setStyleSheet(
+            ("QPushButton:hover{\n"
+             "  background-color: #83bf20;\n"
+             "  border-color: #83bf20;\n"
+             "}\n"
+             "QPushButton:active {\n"
+             "  background-color: #93cc36;\n"
+             "  border-color: #93cc36;\n"
+             "}\n"
+             "QPushButton{\n"
+             "  background-color: #88c425;\n"
+             "    border: 1px solid #88c425;\n"
+             "    color: #fff;\n"
+             "    border-radius: 7px;\n"
+             "}"))
+        QMessageBox.information(self, "Success!",
+                                "File downloaded successfully!")
 
     """
     def open_logs_window(self):
@@ -526,22 +528,22 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 # emit signal to select new file path
                 self.emit(QtCore.SIGNAL("selectFileDestinationPath"))
 
-
         if self.validation["file_path"]:
-            self.ui_single_file_download.start_download_bt.setStyleSheet(("QPushButton:hover{\n"
-                                                                          "  background-color: #8C8A87;\n"
-                                                                          "  border-color: #8C8A87;\n"
-                                                                          "}\n"
-                                                                          "QPushButton:active {\n"
-                                                                          "  background-color: #8C8A87;\n"
-                                                                          "  border-color: #8C8A87;\n"
-                                                                          "}\n"
-                                                                          "QPushButton{\n"
-                                                                          "  background-color: #8C8A87;\n"
-                                                                          "    border: 1px solid #8C8A87;\n"
-                                                                          "    color: #fff;\n"
-                                                                          "    border-radius: 7px;\n"
-                                                                          "}"))
+            self.ui_single_file_download.start_download_bt.setStyleSheet(
+                ("QPushButton:hover{\n"
+                 "  background-color: #8C8A87;\n"
+                 "  border-color: #8C8A87;\n"
+                 "}\n"
+                 "QPushButton:active {\n"
+                 "  background-color: #8C8A87;\n"
+                 "  border-color: #8C8A87;\n"
+                 "}\n"
+                 "QPushButton{\n"
+                 "  background-color: #8C8A87;\n"
+                 "    border: 1px solid #8C8A87;\n"
+                 "    color: #fff;\n"
+                 "    border-radius: 7px;\n"
+                 "}"))
 
             self.emit(QtCore.SIGNAL("updateShardCounters"))
 
