@@ -17,9 +17,7 @@ from qt_interfaces.file_download_new import Ui_SingleFileDownload
 from crypto.file_crypto_tools import FileCrypto
 from engine import StorjEngine
 import storj
-# import storj.exception
 import threading
-import storj.exception as stjex
 
 # from logs_backend import LogsUI
 # from logs_backend import LogHandler, logger
@@ -424,7 +422,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                     self.emit(QtCore.SIGNAL("beginShardDownloadProccess"),
                               shard_pointer[0],
                               self.destination_file_path, options_array)
-                except stjex.StorjBridgeApiError as e:
+                except storj.exception.StorjBridgeApiError as e:
                     logger.debug('"title": "Bridge error"')
                     logger.debug('Error while resolving file pointers \
                                  to download file with ID: ' +
@@ -463,7 +461,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 options_array["file_size_shard_" + str(shard_index)] = shard_pointer[0]["size"]
                 self.emit(QtCore.SIGNAL("beginShardDownloadProccess"), shard_pointer[0],
                           self.destination_file_path, options_array)
-            except stjex.StorjBridgeApiError as e:
+            except storj.exception.StorjBridgeApiError as e:
                 logger.debug('"title": "Bridge error"')
                 logger.debug('"description": "Error while resolving file pointers \
                                                          to download file"')
@@ -590,7 +588,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                             options_array["file_size_shard_" + str(i)] = shard_pointer[0]["size"]
                             self.emit(QtCore.SIGNAL("beginShardDownloadProccess"), shard_pointer[0],
                                       self.destination_file_path, options_array)
-                        except stjex.StorjBridgeApiError as e:
+                        except storj.exception.StorjBridgeApiError as e:
                             logger.debug('Bridge error')
                             logger.debug('Error while resolving file pointers \
                                 to download file with ID: ' +
@@ -784,10 +782,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 logger.debug(str(rowposition) + "rowposition started")
                 print str(r.status_code) + "statushttp"
                 if r.status_code != 200 and r.status_code != 304:
-                    raise stjex.StorjFarmerError()
+                    raise storj.exception.StorjFarmerError()
                 downloaded = True
 
-            except stjex.StorjFarmerError as e:
+            except storj.exception.StorjFarmerError as e:
                 self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
                           "First try failed. Retrying... (" + str(farmer_tries) + ")")  # update shard download state
                 continue
