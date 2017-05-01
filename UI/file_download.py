@@ -715,14 +715,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         downloaded = False
         farmer_tries = 0
 
-        # logger.warning('"log_event_type": "debug"')
-        #logger.debug('Downloading"')
-        logger.debug('Downloading shard at index ' +
-                     str(shard_index) + " from farmer: " +
-                     str(url))
-        # logger.warning(str({"log_event_type": "debug", "title": "Downloading",
-        #                    "description": "Downloading shard at index " + str(shard_index) + " from farmer: " + str(
-        #                        url)}))
+        logger.debug('Downloading shard at index %s from farmer. %s' % (
+            shard_index, url))
 
         tries_download_from_same_farmer = 0
         while self.max_retries_download_from_same_farmer > tries_download_from_same_farmer:
@@ -735,7 +729,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                           "Downloading...")  # update shard downloading state
                 if options_chain["handle_progressbars"] != "1":
                     r = requests.get(url)
-                    # requests.
+                    # requests
                     with open(local_filename, 'wb') as f:
                         for chunk in r.iter_content(chunk_size=1024):
                             if chunk:  # filter out keep-alive new chunks
@@ -762,47 +756,47 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                     for chunk in r.iter_content(32 * 1024):
                         i += 1
                         f.write(chunk)
-                        # logger.debug(str(i) + " " + str(t1))
-                        # logger.debug(round(float(i) / float(t1), 1))
-                        # logger.debug(str(int(round((100.0 * i) / t1))) + " %")
                         if int(round((100.0 * i) / t1)) > 100:
                             percent_downloaded = 100
                         else:
                             percent_downloaded = int(round((100.0 * i) / t1))
-                        self.emit(QtCore.SIGNAL("updateShardDownloadProgress"), int(rowposition),
-                                  percent_downloaded)  # update progress bar in upload queue table
-                        self.shard_download_percent_list[shard_index] = percent_downloaded
+                        # Update progress bar in upload queue table
+                        self.emit(
+                            QtCore.SIGNAL("updateShardDownloadProgress"),
+                            int(rowposition),
+                            percent_downloaded)
+                        self.shard_download_percent_list[shard_index] = \
+                            percent_downloaded
                         self.emit(QtCore.SIGNAL("refreshOverallDownloadProgress"),
-                                  0.1)  # update progress bar in upload queue table
+                                  0.1)  # Update progress bar in upload queue table
                         # logger.debug(str(rowposition) + "pozycja")
                         # logger.debug(str(rowposition) + "pozycja")
                         # progress_bar.setValue(percent_downloaded)
 
                     f.close()
-                logger.debug(str(rowposition) + "rowposition started")
-                print str(r.status_code) + "statushttp"
+                logger.debug('%s rowposition started' % rowposition)
+                print '%s statushttp' % r.status_code
                 if r.status_code != 200 and r.status_code != 304:
                     raise storj.exception.StorjFarmerError()
                 downloaded = True
 
             except storj.exception.StorjFarmerError as e:
-                self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
-                          "First try failed. Retrying... (" + str(farmer_tries) + ")")  # update shard download state
+                # Update shard download state
+                self.emit(QtCore.SIGNAL("updateDownloadTaskState"),
+                          rowposition,
+                          'First try failed. Retrying... (%s)' % farmer_tries)
                 continue
 
             except Exception as e:
                 logger.error(e)
-                # logger.warning('"log_event_type": "warning"')
                 logger.debug('Unhandled error while transfering data to farmer')
                 logger.debug('Error occured while downloading\
-                             shard at index ' + str(shard_index) +
-                             ". Retrying... (" + str(farmer_tries) + ")")
-                # logger.warning(str({"log_event_type": "warning", "title": "Unhandled error",
-                #                     "description": "Error occured while downloading shard at index " + str(
-                #                         shard_index) + ". Retrying... (" + str(farmer_tries) + ")"}))
-
-                self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
-                          "First try failed. Retrying... (" + str(farmer_tries) + ")")  # update shard download state
+                             shard at index %s. Retrying ...(%s)' %
+                             (shard_index, farmer_tries))
+                # Update shard download state
+                self.emit(QtCore.SIGNAL("updateDownloadTaskState"),
+                          rowposition,
+                          'First try failed. Retrying... (%s)' % farmer_tries)
                 continue
             else:
                 downloaded = True
@@ -811,50 +805,46 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         if not downloaded:
             self.current_active_connections -= 1
             self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
-            self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
-                      "Error while downloading from this farmer. Getting another farmer pointer...")  # update shard download state
+            # Update shard download state
+            self.emit(QtCore.SIGNAL("updateDownloadTaskState"),
+                      rowposition,
+                      "Error while downloading from this farmer. \
+                      Getting another farmer pointer...")
             time.sleep(1)
+            # Retry download with new download pointer
             self.emit(QtCore.SIGNAL("retryWithNewDownloadPointer"),
-                      shard_index)  # retry download with new download pointer
+                      shard_index)
 
         else:
             self.emit(QtCore.SIGNAL("getNextSetOfPointers"))
             self.current_active_connections -= 1
             self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
-            # logger.warning(str({"log_event_type": "success", "title": "Shard downloaded", "description": "Shard at index " + str(shard_index) + " downloaded successfully."}))
-            # logger.warning('"log_event_type": "success"')
             logger.debug('Shard downloaded')
             logger.debug('Shard at index ' +
                          str(shard_index) +
                          " downloaded successfully.")
             self.shards_already_downloaded += 1
+            # Update already downloaded shards count
             self.emit(
-                QtCore.SIGNAL("incrementShardsDownloadProgressCounters"))  # update already downloaded shards count
-            self.emit(QtCore.SIGNAL("updateShardCounters"))  # update already downloaded shards count
-            self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
-                      "Downloaded!")  # update shard download state
+                QtCore.SIGNAL("incrementShardsDownloadProgressCounters"))
+            # Update already downloaded shards count
+            self.emit(QtCore.SIGNAL("updateShardCounters"))
+            # Update shard download state
+            self.emit(QtCore.SIGNAL("updateDownloadTaskState"),
+                      rowposition,
+                      "Downloaded!")
             if int(self.all_shards_count) <= int(self.shards_already_downloaded):
-                self.emit(QtCore.SIGNAL(
-                    "finishDownload"))  # send signal to begin file shards joind and decryption after all shards are downloaded
-                # print "sygnal konca pobierania" + str(self.all_shards_count) + " " + str(self.shards_already_downloaded)
-
+                # Send signal to begin file shards join and decryption
+                # after all shards are downloaded
+                self.emit(QtCore.SIGNAL("finishDownload"))
             return
 
     def createNewDownloadThread(self, url, filelocation, options_chain, rowposition, shard_index):
-        # self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
-        # self.download_thread.start()
-        # self.download_thread.connect(self.download_thread, SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
-        # self.download_thread.tick.connect(progress_bars_list.setValue)
-
-        # Refactor to QtTrhead
-        download_thread = threading.Thread(target=self.create_download_connection,
-                                           args=(url, filelocation, options_chain, rowposition,
-                                                 shard_index))
+        download_thread = threading.Thread(
+            target=self.create_download_connection,
+            args=(url, filelocation, options_chain, rowposition, shard_index))
         download_thread.start()
-        logger.debug(str(options_chain["rowposition"]) + "position")
-
-    def test1(self, value1, value2):
-        logger.debug(str(value1) + " aaa " + str(value2))
+        logger.debug('%s position' % options_chain["rowposition"])
 
     def shard_download(self, pointer, file_save_path, options_array):
         logger.debug('Beginning download proccess...')
