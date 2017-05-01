@@ -550,18 +550,11 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             self.emit(QtCore.SIGNAL("updateShardCounters"))
 
             try:
-                # logger.warning("log_event_type": "debug")
-                # logger.debug('"title": "File pointers"')
                 logger.debug('Resolving file pointers to download\
                                      file with ID: ' +
                              str(file_id) + "...")
-                # logger.warning(str({"log_event_type": "debug", "title": "File pointers",
-                #                     "description": "Resolving file pointers to download file with ID: " + str(
-                #                         file_id) + "..."}))
-                # get_file_pointers_count(self, bucket_id, file_id)
-
                 i = 0
-                # while i < self.all_shards_count:
+                # Max self.all_shards_count downloads and 4 attempts
                 while i < 4 and i < self.all_shards_count:
                     self.is_upload_active = True
                     tries_get_file_pointers = 0
@@ -570,29 +563,37 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                         time.sleep(1)
                         try:
                             if tries_get_file_pointers > 1:
-                                self.emit(QtCore.SIGNAL("setCurrentState"), "Resolving pointer for shard " + str(i) + ". Retry " + str(tries_get_file_pointers) + "...")
+                                self.emit(QtCore.SIGNAL("setCurrentState"),
+                                          "Resolving pointer for shard " +
+                                          str(i) + ". Retry " +
+                                          str(tries_get_file_pointers) + "...")
                             else:
                                 self.emit(QtCore.SIGNAL("setCurrentState"), "Resolving pointer for shard " + str(i))
                             options_array = {}
                             options_array["tmp_path"] = self.tmp_path
                             options_array["progressbars_enabled"] = "1"
                             options_array["file_size_is_given"] = "1"
-                            options_array["shards_count"] = str(self.all_shards_count)
-                            shard_pointer = self.storj_engine.storj_client.file_pointers(
-                                str(bucket_id), file_id, limit="1", skip=str(i))
-                            #print str(shard_pointer) + "wskaznik"
+                            options_array["shards_count"] = \
+                                str(self.all_shards_count)
+                            shard_pointer = \
+                                self.storj_engine.storj_client.file_pointers(
+                                    str(bucket_id),
+                                    file_id,
+                                    limit="1",
+                                    skip=str(i))
+                            # print str(shard_pointer) + "wskaznik"
                             # if shard_pointer[0]["parity"] == False:
-                            #   print "Shard parity error!"
-                            #  break
+                            #     print "Shard parity error!"
+                            #     break
                             options_array["shard_index"] = shard_pointer[0]["index"]
 
                             options_array["file_size_shard_" + str(i)] = shard_pointer[0]["size"]
                             self.emit(QtCore.SIGNAL("beginShardDownloadProccess"), shard_pointer[0],
                                       self.destination_file_path, options_array)
                         except stjex.StorjBridgeApiError as e:
-                            logger.debug('"title": "Bridge error"')
-                            logger.debug('"description": "Error while resolving file pointers \
-                                                             to download file with ID: "' +
+                            logger.debug('Bridge error')
+                            logger.debug('Error while resolving file pointers \
+                                to download file with ID: ' +
                                          str(file_id) + "...")
                             # Emit Storj Bridge Exception
                             self.emit(QtCore.SIGNAL("showStorjBridgeException"),
@@ -605,36 +606,16 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                             break
 
                     self.already_started_shard_downloads_count += 1
-
                     i += 1
-
-
             except storj.exception.StorjBridgeApiError as e:
                 self.is_upload_active = False
-                # logger.warning("log_event_type": "error")
-                logger.debug('"title": "Bridge error"')
-                logger.debug('"description": "Error while resolving file pointers \
-                                     to download file with ID: "' +
+                logger.debug('Bridge error')
+                logger.debug('Error while resolving file pointers \
+                                     to download file with ID: ' +
                              str(file_id) + "...")
-                # logger.warning(str({"log_event_type": "error", "title": "Bridge error",
-                #                     "description": "Error while resolving file pointers to download file with ID: " + str(
-                #                         file_id) + "..."}))
-                self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))  # emit Storj Bridge Exception
-                # except Exception as e:
-                # logger.warning('"log_event_type": "error"')
-                #   logger.debug('"title": "Unhandled error"'),
-                #  logger.debug('"description": "Unhandled error while resolving file\
-                #             pointers to download file with ID: "' +
-                #            str(file_id) + "...")
-                # logger.warning(str({"log_event_type": "error", "title": "Unhandled error",
-                #                     "description": "Unhandled error while resolving file pointers to download file with ID: " + str(
-                #                         file_id) + "..."}))
-                #  self.emit(QtCore.SIGNAL("showUnhandledException"), str(e))  # emit unhandled Exception
-                #  logger.error(e)
-
+                # Emit Storj Bridge Exception
+                self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))
             i = 0
-            # model = QStandardItemModel(1, 1)  # initialize model for inserting to table
-
 
     def createNewDownloadInitThread(self, bucket_id, file_id):
         self.ui_single_file_download.overall_progress.setValue(0)
