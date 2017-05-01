@@ -222,28 +222,34 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # print "inijalizacja tabeli"
 
     def add_row_download_queue_table(self, row_data):
+        """
+        Add a row to the download queue table
+        """
         self.download_queue_progressbar_list.append(QtGui.QProgressBar())
-
-        self.download_queue_table_row_count = self.ui_single_file_download.shard_queue_table.rowCount()
-
-        self.ui_single_file_download.shard_queue_table.setRowCount(self.download_queue_table_row_count + 1)
-
-        self.ui_single_file_download.shard_queue_table.setCellWidget(self.download_queue_table_row_count, 0,
-                                                                     self.download_queue_progressbar_list[
-                                                                         self.download_queue_table_row_count])
-        self.ui_single_file_download.shard_queue_table.setItem(self.download_queue_table_row_count, 1,
-                                                               QtGui.QTableWidgetItem(row_data["hash"]))
-        self.ui_single_file_download.shard_queue_table.setItem(self.download_queue_table_row_count, 2,
-                                                               QtGui.QTableWidgetItem(
-                                                                   str(row_data["farmer_address"]) + ":" + str(
-                                                                       row_data["farmer_port"])))
-        self.ui_single_file_download.shard_queue_table.setItem(self.download_queue_table_row_count, 3,
-                                                               QtGui.QTableWidgetItem(str(row_data["state"])))
-        self.ui_single_file_download.shard_queue_table.setItem(self.download_queue_table_row_count, 4,
-                                                               QtGui.QTableWidgetItem(str(row_data["shard_index"])))
-
-        self.download_queue_progressbar_list[self.download_queue_table_row_count].setValue(0)
-        # print "dodawanie wiersza 2"
+        self.download_queue_table_row_count = \
+            self.ui_single_file_download.shard_queue_table.rowCount()
+        self.ui_single_file_download.shard_queue_table.setRowCount(
+            self.download_queue_table_row_count + 1)
+        self.ui_single_file_download.shard_queue_table.setCellWidget(
+            self.download_queue_table_row_count, 0,
+            self.download_queue_progressbar_list[
+                self.download_queue_table_row_count])
+        self.ui_single_file_download.shard_queue_table.setItem(
+            self.download_queue_table_row_count, 1,
+            QtGui.QTableWidgetItem(row_data["hash"]))
+        self.ui_single_file_download.shard_queue_table.setItem(
+            self.download_queue_table_row_count, 2,
+            QtGui.QTableWidgetItem(
+                row_data["farmer_address"] + ":" +
+                str(row_data["farmer_port"])))
+        self.ui_single_file_download.shard_queue_table.setItem(
+            self.download_queue_table_row_count, 3,
+            QtGui.QTableWidgetItem(str(row_data["state"])))
+        self.ui_single_file_download.shard_queue_table.setItem(
+            self.download_queue_table_row_count, 4,
+            QtGui.QTableWidgetItem(str(row_data["shard_index"])))
+        self.download_queue_progressbar_list[
+            self.download_queue_table_row_count].setValue(0)
 
     def _add_shard_to_table(self, pointers_content, shard, chapters):
         """
@@ -257,21 +263,15 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         tablerowdata["state"] = "Downloading..."
         tablerowdata["shard_index"] = str(chapters)
 
-        # logger.warning('"log_event_type": "debug"')
-        #logger.debug('"title": "Contract negotiated"')
-
         logger.debug('Resolved pointer for download \
                      : ' +
                      str(pointers_content["farmer"]["address"]) + ":" +
                      str(pointers_content["farmer"]["port"]))
-        # logger.warning(str({"log_event_type": "debug", "title": "Contract negotiated",
-        #                     "description": "Storage contract negotiated with: " + str(frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"]["port"]))}))
-
-        self.emit(QtCore.SIGNAL("addRowToDownloadQueueTable"), tablerowdata)  # add row to table
+        # Add row to table
+        self.emit(QtCore.SIGNAL("addRowToDownloadQueueTable"), tablerowdata)
 
         rowcount = self.ui_single_file_download.shard_queue_table.rowCount()
         # print "dodawanie wiersza"
-
         return rowcount
 
     def show_download_finished_message(self):
@@ -314,13 +314,16 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             QMessageBox.critical(self, "Bridge error", str(exception_content))
 
     def update_download_task_state(self, row_position, state):
-        self.ui_single_file_download.shard_queue_table.setItem(int(row_position), 3, QtGui.QTableWidgetItem(str(state)))
+        self.ui_single_file_download.shard_queue_table.setItem(
+            int(row_position), 3, QtGui.QTableWidgetItem(str(state)))
 
     def show_error_not_selected_file(self):
-        QMessageBox.about(self, "Error", "Please select destination file save path!")
+        QMessageBox.about(self, "Error",
+                          "Please select destination file save path!")
 
     def show_error_invalid_file_path(self):
-        QMessageBox.about(self, "Error", "Destination file save path seems to be invalid!")
+        QMessageBox.about(self, "Error",
+                          "Destination file save path seems to be invalid!")
 
     def show_error_invalid_temporary_path(self):
         QMessageBox.about(self, "Error", "Temporary path seems to be invalid!")
@@ -329,19 +332,22 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         total_percent_to_download = self.all_shards_count * 100
         total_percent_downloaded = sum(self.shard_download_percent_list) * 100
 
-        actual_percent_downloaded = total_percent_downloaded / total_percent_to_download
+        actual_percent_downloaded = total_percent_downloaded / \
+            total_percent_to_download
 
-        total_percent = (base_percent * 100) + (0.90 * actual_percent_downloaded)
+        total_percent = (base_percent * 100) + \
+            (0.90 * actual_percent_downloaded)
 
         logger.info(str(actual_percent_downloaded) + str(base_percent) +
                     "total_percent_downloaded")
 
-        # actual_upload_progressbar_value = self.ui_single_file_upload.overall_progress.value()
-
-        self.ui_single_file_download.overall_progress.setValue(int(total_percent))
+        self.ui_single_file_download.overall_progress.setValue(
+            int(total_percent))
 
     def create_download_finish_thread(self, file_name):
-        download_finish_thread = threading.Thread(target=self.finish_download(file_name=file_name), args=())
+        download_finish_thread = threading.Thread(
+            target=self.finish_download(file_name=file_name),
+            args=())
         download_finish_thread.start()
 
     #### Begin file download finish function ####
@@ -354,13 +360,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         else:
             fileisencrypted = True
 
-
             # Join shards
         sharing_tools = ShardingTools()
         self.emit(QtCore.SIGNAL("setCurrentState"), "Joining shards...")
-        # logger.warning(str({"log_event_type": "debug", "title": "Sharding", "description": "Joining shards..."}))
-        # logger.warning('"log_event_type": "debug"')
-        #logger.debug('"title": "Sharding"')
         logger.debug('Joining shards...')
 
         if fileisencrypted:
@@ -375,22 +377,19 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             # decrypt file
             self.emit(QtCore.SIGNAL("setCurrentState"), "Decrypting file...")
 
-            # logger.warning(str({"log_event_type": "debug", "title": "Decryption", "description": "Decrypting file..."}))
-            # logger.warning('"log_event_type": "debug"')
-            #logger.debug('"title": "Decryption"')
             logger.debug('Decrypting file...')
             print "plik wyjsciowy" + str(self.destination_file_path)
             file_crypto_tools = FileCrypto()
-            file_crypto_tools.decrypt_file("AES", str(self.destination_file_path) + ".encrypted",
-                                           str(self.destination_file_path),
-                                           str(self.user_password))  # begin file decryption
+            file_crypto_tools.decrypt_file(
+                "AES",
+                str(self.destination_file_path) + ".encrypted",
+                str(self.destination_file_path),
+                str(self.user_password))  # begin file decryption
 
         logger.debug("pobrano")
-        # logger.warning(str({"log_event_type": "success", "title": "Finished", "description": "Downloading completed successfully!"}))
-        # logger.warning('"log_event_type": "success"')
-        #logger.debug('"title": "Finished"')
         logger.debug('Downloading completed successfully!')
-        self.emit(QtCore.SIGNAL("setCurrentState"), "Downloading completed successfully!")
+        self.emit(QtCore.SIGNAL("setCurrentState"),
+                  "Downloading completed successfully!")
         self.is_upload_active = False
         self.emit(QtCore.SIGNAL("showFileDownloadedSuccessfully"))
 
@@ -411,21 +410,27 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                     options_array["progressbars_enabled"] = "1"
                     options_array["file_size_is_given"] = "1"
                     options_array["shards_count"] = str(self.all_shards_count)
-                    shard_pointer = self.storj_engine.storj_client.file_pointers(str(self.bucket_id), self.file_id,
-                                                                                 limit="1",
-                                                                                 skip=str(i))
+                    shard_pointer = \
+                        self.storj_engine.storj_client.file_pointers(
+                            str(self.bucket_id), self.file_id,
+                            limit="1",
+                            skip=str(i))
+
                     print shard_pointer[0]
                     options_array["shard_index"] = shard_pointer[0]["index"]
 
-                    options_array["file_size_shard_" + str(i)] = shard_pointer[0]["size"]
-                    self.emit(QtCore.SIGNAL("beginShardDownloadProccess"), shard_pointer[0],
+                    options_array["file_size_shard_" + str(i)] = \
+                        shard_pointer[0]["size"]
+                    self.emit(QtCore.SIGNAL("beginShardDownloadProccess"),
+                              shard_pointer[0],
                               self.destination_file_path, options_array)
                 except stjex.StorjBridgeApiError as e:
                     logger.debug('"title": "Bridge error"')
                     logger.debug('Error while resolving file pointers \
-                                                         to download file with ID: ' +
+                                 to download file with ID: ' +
                                  str(self.file_id) + "...")
-                    self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))  # emit Storj Bridge Exception
+                    # Emit Storj Bridge Exception
+                    self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))
                     continue
                 except Exception:
                     continue
@@ -505,14 +510,14 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         file_name = os.path.split(self.destination_file_path)[1]
 
         if self.destination_file_path == "":
+            # show error missing destination path
             self.validation["file_path"] = False
-            self.emit(QtCore.SIGNAL("showDestinationPathNotSelectedMsg"))  # show error missing destination path
+            self.emit(QtCore.SIGNAL("showDestinationPathNotSelectedMsg"))
             logger.error("missing destination file path")
         else:
             self.validation["file_path"] = True
 
         if os.path.isfile(self.destination_file_path):
-
             self.emit(QtCore.SIGNAL("askFileOverwrite"), str(file_name))
 
             while not self.overwrite_question_closed:
@@ -573,9 +578,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                             options_array["progressbars_enabled"] = "1"
                             options_array["file_size_is_given"] = "1"
                             options_array["shards_count"] = str(self.all_shards_count)
-                            shard_pointer = self.storj_engine.storj_client.file_pointers(str(bucket_id), file_id,
-                                                                                         limit="1",
-                                                                                         skip=str(i))
+                            shard_pointer = self.storj_engine.storj_client.file_pointers(
+                                str(bucket_id), file_id, limit="1", skip=str(i))
                             #print str(shard_pointer) + "wskaznik"
                             # if shard_pointer[0]["parity"] == False:
                             #   print "Shard parity error!"
@@ -590,7 +594,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                             logger.debug('"description": "Error while resolving file pointers \
                                                              to download file with ID: "' +
                                          str(file_id) + "...")
-                            self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))  # emit Storj Bridge Exception
+                            # Emit Storj Bridge Exception
+                            self.emit(QtCore.SIGNAL("showStorjBridgeException"),
+                                      str(e))
                             continue
                         except Exception as e:
                             continue
