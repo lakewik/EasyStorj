@@ -452,8 +452,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.overwrite_question_closed = False
         self.validation = {}
 
-        self.all_shards_count = self.get_file_pointers_count(bucket_id, file_id)
-        self.shards_already_downloaded = 0
 
         self.destination_file_path = str(self.ui_single_file_download.file_save_path.text()).decode('utf-8')
         self.tmp_path = str(self.ui_single_file_download.tmp_dir.text()).decode('utf-8')
@@ -467,7 +465,13 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 self.tmp_path = "/tmp/"
             elif platform == "win32":
                 # Windows
-                self.tmp_path = "C:\\Windows\\temp\\"
+                if USE_USER_ENV_PATH_FOR_TEMP:
+                    self.tmp_path = str(self.tools.get_home_user_directory()).decode(
+                        "utf-8") + "\\" + "AppData\\Local\\Temp\\"
+                else:
+                    self.tmp_path = "C:\\Windows\\temp\\"
+
+            self.ui_single_file_download.tmp_dir.setText(str(self.tmp_path))
 
         file_name = os.path.split(self.destination_file_path)[1]
 
@@ -483,6 +487,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             self.emit(QtCore.SIGNAL("askFileOverwrite"), str(file_name))
 
             while not self.overwrite_question_closed:
+                time.sleep(0.1)
                 pass
 
             if self.overwrite_question_result == QtGui.QMessageBox.Yes:
@@ -494,6 +499,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
 
         if self.validation["file_path"]:
+            self.all_shards_count = self.get_file_pointers_count(bucket_id, file_id)
+            self.shards_already_downloaded = 0
+
             self.ui_single_file_download.start_download_bt.setStyleSheet(("QPushButton:hover{\n"
                                                                           "  background-color: #8C8A87;\n"
                                                                           "  border-color: #8C8A87;\n"
@@ -715,6 +723,13 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
                 self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
                           "Downloading...")  # update shard downloading state
+
+                if tries_download_from_same_farmer > 1:
+                    self.emit(QtCore.SIGNAL("setCurrentState"), "Downloading shard " + str(shard_index) +
+                              ". Retry " + str(tries_download_from_same_farmer))
+                else:
+                    self.emit(QtCore.SIGNAL("setCurrentState"), "Downloading shard " + str(shard_index))
+
                 if options_chain["handle_progressbars"] != "1":
                     r = requests.get(url)
                     # requests.
@@ -770,6 +785,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             except stjex.StorjFarmerError as e:
                 self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
                           "First try failed. Retrying... (" + str(farmer_tries) + ")")  # update shard download state
+                self.emit(QtCore.SIGNAL("setCurrentState"), "Error while downloading shard " + str(shard_index))
                 continue
 
             except Exception as e:
@@ -785,6 +801,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
                 self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
                           "First try failed. Retrying... (" + str(farmer_tries) + ")")  # update shard download state
+                self.emit(QtCore.SIGNAL("setCurrentState"), "Error while downloading shard " + str(shard_index))
                 continue
             else:
                 downloaded = True
@@ -795,6 +812,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
             self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
                       "Error while downloading from this farmer. Getting another farmer pointer...")  # update shard download state
+            self.emit(QtCore.SIGNAL("setCurrentState"), "Resolving another pointer for shard " + str(shard_index))
             time.sleep(1)
             self.emit(QtCore.SIGNAL("retryWithNewDownloadPointer"),
                       shard_index)  # retry download with new download pointer
