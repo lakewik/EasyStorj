@@ -28,6 +28,7 @@ from utilities.account_manager import AccountManager
 import time
 from resources.constants import USE_USER_ENV_PATH_FOR_TEMP
 # from resources.custom_qt_components import YesNoCheckboxDialog
+from multiprocessing import Pool
 
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
@@ -583,22 +584,25 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                             options_array["shard_index"] = shard_pointer[0]["index"]
 
                             options_array["file_size_shard_%s" % i] = shard_pointer[0]["size"]
+                            '''
                             self.emit(QtCore.SIGNAL("beginShardDownloadProccess"),
                                       shard_pointer[0],
                                       self.destination_file_path,
                                       options_array)
+                            '''
+                            self.shard_download(shard_pointer[0],
+                                                self.destination_file_path,
+                                                options_array)
                         except storj.exception.StorjBridgeApiError as e:
                             logger.debug('Bridge error')
                             logger.debug('Error while resolving file pointers \
-                                to download file with ID: ' +
-                                         str(file_id) + "...")
+                                to download file with ID :%s ...' % file_id)
                             # Emit Storj Bridge Exception
                             self.emit(QtCore.SIGNAL("showStorjBridgeException"),
                                       str(e))
                             continue
                         except Exception as e:
                             continue
-
                         else:
                             break
 
@@ -642,44 +646,38 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
     def set_file_metadata(self, bucket_id, file_id):
         try:
-            self.emit(QtCore.SIGNAL("setCurrentState"), "Getting file metadata...")
-            file_metadata = self.storj_engine.storj_client.file_metadata(str(bucket_id),
-                                                                         str(file_id))
+            self.emit(QtCore.SIGNAL("setCurrentState"),
+                      "Getting file metadata...")
+            file_metadata = self.storj_engine.storj_client.file_metadata(
+                bucket_id, file_id)
             self.ui_single_file_download.file_name.setText(
-                str(file_metadata.filename.replace("[DECRYPTED]", "")).decode('utf-8'))
+                str(file_metadata.filename.replace(
+                    "[DECRYPTED]", "")).decode('utf-8'))
 
             tools = Tools()
-            # self.ui_single_file_download.file_size.setText(
-            #   html_format_begin + str(tools.human_size(int(file_metadata.size))) + html_format_end)
-            self.ui_single_file_download.file_id.setText(str(file_id))
+            self.ui_single_file_download.file_id.setText(file_id)
 
-            if platform == "linux" or platform == "linux2":
-                # linux
-                self.ui_single_file_download.file_save_path.setText(
-                    str(tools.get_home_user_directory() + "/" + str(file_metadata.filename.replace("[DECRYPTED]", ""))).decode('utf-8'))
-            elif platform == "darwin":
-                # OS X
-                self.ui_single_file_download.file_save_path.setText(
-                    str(tools.get_home_user_directory() + "/" + str(file_metadata.filename.replace("[DECRYPTED]", ""))).decode('utf-8'))
-            elif platform == "win32":
-                self.ui_single_file_download.file_save_path.setText(
-                    str(tools.get_home_user_directory()).decode("utf-8") + "\\" + str(
-                        file_metadata.filename.replace("[DECRYPTED]", "")).decode('utf-8'))
+            self.ui_single_file_download.file_save_path.setText(
+                os.path.join(
+                    tools.get_home_user_directory().decode('utf-8'),
+                    file_metadata.filename.replace(
+                        '[DECRYPTED]', '')).decode('utf-8'))
 
-            self.filename_from_bridge = str(file_metadata.filename).decode('utf-8')
+            self.filename_from_bridge = file_metadata.filename.decode('utf-8')
 
             self.resolved_file_metadata = True
-            self.emit(QtCore.SIGNAL("setCurrentState"), "Waiting for user action...")
-
+            self.emit(QtCore.SIGNAL('setCurrentState'),
+                      'Waiting for user action...')
         except UnicodeDecodeError:
             pass
-
         except storj.exception.StorjBridgeApiError as e:
+            # Emit Storj Bridge Exception
             self.emit(QtCore.SIGNAL("showStorjBridgeException"),
-                      "Error while resolving file metadata. " + str(e))  # emit Storj Bridge Exception
+                      "Error while resolving file metadata %s" % e)
         except Exception as e:
+            # Emit unhandled Exception
             self.emit(QtCore.SIGNAL("showUnhandledException"),
-                      "Unhandled error while resolving file metadata. " + str(e))  # emit unhandled Exception
+                      "Unhandled error while resolving file metadata %s" % e)
 
     def update_shard_download_progess(self, row_position_index, value):
         self.download_queue_progressbar_list[row_position_index].setValue(value)
@@ -867,7 +865,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             shards_count = int(options_array["shards_count"])
 
             shard_size_array = []
-            print "PRIMA DI TEST"
             shard_size_array.append(
                 int(options_array["file_size_shard_%s" %
                     options_array["shard_index"]]))
