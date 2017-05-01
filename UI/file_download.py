@@ -583,8 +583,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                             options_array["shard_index"] = shard_pointer[0]["index"]
 
                             options_array["file_size_shard_%s" % i] = shard_pointer[0]["size"]
-                            self.emit(QtCore.SIGNAL("beginShardDownloadProccess"), shard_pointer[0],
-                                      self.destination_file_path, options_array)
+                            self.emit(QtCore.SIGNAL("beginShardDownloadProccess"),
+                                      shard_pointer[0],
+                                      self.destination_file_path,
+                                      options_array)
                         except storj.exception.StorjBridgeApiError as e:
                             logger.debug('Bridge error')
                             logger.debug('Error while resolving file pointers \
