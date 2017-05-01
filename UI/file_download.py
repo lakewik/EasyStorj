@@ -364,18 +364,23 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         else:
             fileisencrypted = True
 
-            # Join shards
+        # Join shards
         sharing_tools = ShardingTools()
         self.emit(QtCore.SIGNAL("setCurrentState"), "Joining shards...")
         logger.debug('Joining shards...')
 
         if fileisencrypted:
-            sharing_tools.join_shards(self.tmp_path + "/" + str(file_name), "-",
-                                      self.destination_file_path + ".encrypted")
+            sharing_tools.join_shards(
+                os.path.join(self.tmp_path, file_name),
+                '-',
+                '%s.encrypted' % self.destination_file_path)
         else:
-            sharing_tools.join_shards(self.tmp_path + "/" + str(file_name), "-", self.destination_file_path)
+            sharing_tools.join_shards(
+                os.path.join(self.tmp_path, file_name),
+                '-',
+                self.destination_file_path)
 
-        logger.debug(self.tmp_path + "/" + str(file_name) + ".encrypted")
+        logger.debug("%s.encrypted" % os.path.join(self.tmp_path, file_name))
 
         if fileisencrypted:
             # decrypt file
@@ -397,7 +402,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                   "Downloading completed successfully!")
         self.is_upload_active = False
         self.emit(QtCore.SIGNAL("showFileDownloadedSuccessfully"))
-
         return True
 
     def request_and_download_next_set_of_pointers(self):
