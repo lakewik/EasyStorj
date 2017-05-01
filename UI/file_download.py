@@ -199,7 +199,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
     def update_shards_counters(self):
         self.ui_single_file_download.downloaded_shards.setText(
-            str(self.shards_already_downloaded) + "/" + str(self.all_shards_count))
+            "%s/%s" % (self.shards_already_downloaded, self.all_shards_count))
 
     def initialize_download_queue_table(self):
         # initialize variables
@@ -549,8 +549,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
             try:
                 logger.debug('Resolving file pointers to download\
-                                     file with ID: ' +
-                             str(file_id) + "...")
+                    file with ID %s: ...' % file_id)
                 i = 0
                 # Max self.all_shards_count downloads and 4 attempts
                 while i < 4 and i < self.all_shards_count:
@@ -858,21 +857,15 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         logger.debug(str(value1) + " aaa " + str(value2))
 
     def shard_download(self, pointer, file_save_path, options_array):
-        # logger.warning(str({"log_event_type": "debug", "title": "Downloading", "description": "Beginning download proccess..."}))
-        # logger.warning('"log_event_type": "debug"')
-        #logger.debug('"title": "Downloading"')
         logger.debug('Beginning download proccess...')
         options_chain = {}
-        # self.storj_engine.storj_client.logger.info('file_pointers(%s, %s)', bucket_id, file_id)
         file_name = os.path.split(file_save_path)[1]
-
-        ##### End file download finish point #####
 
         try:
             # check ability to write files to selected directories
-            if self.tools.isWritable(os.path.split(file_save_path)[0]) != True:
+            if not self.tools.isWritable(os.path.split(file_save_path)[0]):
                 raise IOError("13")
-            if self.tools.isWritable(self.tmp_path) != True:
+            if not self.tools.isWritable(self.tmp_path):
                 raise IOError("13")
 
             try:
