@@ -29,9 +29,11 @@ from resources.html_strings import html_format_begin, html_format_end
 from utilities.account_manager import AccountManager
 import time
 from resources.constants import USE_USER_ENV_PATH_FOR_TEMP
-#from resources.custom_qt_components import YesNoCheckboxDialog
+# from resources.custom_qt_components import YesNoCheckboxDialog
+
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
+
     def __init__(self, parent=None, bucketid=None, fileid=None):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_download = Ui_SingleFileDownload()
@@ -60,49 +62,77 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.user_password = self.account_manager.get_user_password()
 
         ########3
+        # open file select dialog
+        QtCore.QObject.connect(self.ui_single_file_download.file_path_select_bt,
+                               QtCore.SIGNAL("clicked()"),
+                               self.select_file_save_path)
+        # open tmp directory select dialog
+        QtCore.QObject.connect(self.ui_single_file_download.tmp_dir_bt,
+                               QtCore.SIGNAL("clicked()"),
+                               self.select_tmp_directory)
+        # open tmp directory select dialog
+        QtCore.QObject.connect(self.ui_single_file_download.cancel_bt,
+                               QtCore.SIGNAL("clicked()"),
+                               self.handle_cancel_action)
+        # begin file downloading process
+        QtCore.QObject.connect(self.ui_single_file_download.start_download_bt,
+                               QtCore.SIGNAL("clicked()"),
+                               lambda: self.createNewDownloadInitThread(
+                                   bucketid,
+                                   fileid))
 
-        QtCore.QObject.connect(self.ui_single_file_download.file_path_select_bt, QtCore.SIGNAL("clicked()"),
-                               self.select_file_save_path)  # open file select dialog
-        QtCore.QObject.connect(self.ui_single_file_download.tmp_dir_bt, QtCore.SIGNAL("clicked()"),
-                               self.select_tmp_directory)  # open tmp directory select dialog
-
-        QtCore.QObject.connect(self.ui_single_file_download.cancel_bt, QtCore.SIGNAL("clicked()"),
-                               self.handle_cancel_action)  # open tmp directory select dialog
-        QtCore.QObject.connect(self.ui_single_file_download.start_download_bt, QtCore.SIGNAL("clicked()"),
-                               lambda: self.createNewDownloadInitThread(bucketid,
-                                                                        fileid))  # begin file downloading process
-
-        # print fileid + " id pliku"
-        # QtCore.QObject.connect(self.ui_single_file_download.open_log_bt, QtCore.SIGNAL("clicked()"),
+        # QtCore.QObject.connect(self.ui_single_file_download.open_log_bt,
+        #                        QtCore.SIGNAL("clicked()"),
         #                        self.open_logs_window)  # open logs window
 
-        self.connect(self, QtCore.SIGNAL("incrementShardsDownloadProgressCounters"),
+        self.connect(self,
+                     QtCore.SIGNAL("incrementShardsDownloadProgressCounters"),
                      self.increment_shards_download_progress_counters)
-        self.connect(self, QtCore.SIGNAL("updateShardDownloadProgress"), self.update_shard_download_progess)
-        self.connect(self, QtCore.SIGNAL("beginShardDownloadProccess"), self.shard_download)
-        self.connect(self, QtCore.SIGNAL("refreshOverallDownloadProgress"), self.refresh_overall_download_progress)
-        self.connect(self, QtCore.SIGNAL("showDestinationFileNotSelectedError"), self.show_error_not_selected_file)
-        self.connect(self, QtCore.SIGNAL("showInvalidDestinationPathError"), self.show_error_invalid_file_path)
-        self.connect(self, QtCore.SIGNAL("showInvalidTemporaryDownloadPathError"),
+        self.connect(self, QtCore.SIGNAL("updateShardDownloadProgress"),
+                     self.update_shard_download_progess)
+        self.connect(self, QtCore.SIGNAL("beginShardDownloadProccess"),
+                     self.shard_download)
+        self.connect(self, QtCore.SIGNAL("refreshOverallDownloadProgress"),
+                     self.refresh_overall_download_progress)
+        self.connect(self,
+                     QtCore.SIGNAL("showDestinationFileNotSelectedError"),
+                     self.show_error_not_selected_file)
+        self.connect(self, QtCore.SIGNAL("showInvalidDestinationPathError"),
+                     self.show_error_invalid_file_path)
+        self.connect(self,
+                     QtCore.SIGNAL("showInvalidTemporaryDownloadPathError"),
                      self.show_error_invalid_temporary_path)
-        self.connect(self, QtCore.SIGNAL("updateDownloadTaskState"), self.update_download_task_state)
-        self.connect(self, QtCore.SIGNAL("showStorjBridgeException"), self.show_storj_bridge_exception)
-        self.connect(self, QtCore.SIGNAL("showUnhandledException"), self.show_unhandled_exception)
-        self.connect(self, QtCore.SIGNAL("showFileDownloadedSuccessfully"), self.show_download_finished_message)
-        self.connect(self, QtCore.SIGNAL("showException"), self.show_unhandled_exception)
-        self.connect(self, QtCore.SIGNAL("addRowToDownloadQueueTable"), self.add_row_download_queue_table)
-        self.connect(self, QtCore.SIGNAL("getNextSetOfPointers"), self.request_and_download_next_set_of_pointers)
-        self.connect(self, QtCore.SIGNAL("setCurrentState"), self.set_current_status)
-        self.connect(self, QtCore.SIGNAL("updateShardCounters"), self.update_shards_counters)
-        self.connect(self, QtCore.SIGNAL("retryWithNewDownloadPointer"), self.retry_download_with_new_pointer)
-        self.connect(self, QtCore.SIGNAL("showDestinationPathNotSelectedMsg"), self.show_error_invalid_file_path)
-        self.connect(self, QtCore.SIGNAL("selectFileDestinationPath"), self.select_file_save_path)
-        self.connect(self, QtCore.SIGNAL("askFileOverwrite"), self.ask_overwrite)
-        self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'), self.set_current_active_connections)
-
-
-        self.connect(self, QtCore.SIGNAL("finishDownload"), lambda: self.create_download_finish_thread(
-            str(os.path.split(str(self.ui_single_file_download.file_save_path.text()))[1]).decode('utf-8')))
+        self.connect(self, QtCore.SIGNAL("updateDownloadTaskState"),
+                     self.update_download_task_state)
+        self.connect(self, QtCore.SIGNAL("showStorjBridgeException"),
+                     self.show_storj_bridge_exception)
+        self.connect(self, QtCore.SIGNAL("showUnhandledException"),
+                     self.show_unhandled_exception)
+        self.connect(self, QtCore.SIGNAL("showFileDownloadedSuccessfully"),
+                     self.show_download_finished_message)
+        self.connect(self, QtCore.SIGNAL("showException"),
+                     self.show_unhandled_exception)
+        self.connect(self, QtCore.SIGNAL("addRowToDownloadQueueTable"),
+                     self.add_row_download_queue_table)
+        self.connect(self, QtCore.SIGNAL("getNextSetOfPointers"),
+                     self.request_and_download_next_set_of_pointers)
+        self.connect(self, QtCore.SIGNAL("setCurrentState"),
+                     self.set_current_status)
+        self.connect(self, QtCore.SIGNAL("updateShardCounters"),
+                     self.update_shards_counters)
+        self.connect(self, QtCore.SIGNAL("retryWithNewDownloadPointer"),
+                     self.retry_download_with_new_pointer)
+        self.connect(self, QtCore.SIGNAL("showDestinationPathNotSelectedMsg"),
+                     self.show_error_invalid_file_path)
+        self.connect(self, QtCore.SIGNAL("selectFileDestinationPath"),
+                     self.select_file_save_path)
+        self.connect(self, QtCore.SIGNAL("askFileOverwrite"),
+                     self.ask_overwrite)
+        self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'),
+                     self.set_current_active_connections)
+        self.connect(self, QtCore.SIGNAL("finishDownload"),
+                     lambda: self.create_download_finish_thread(
+                         str(os.path.split(str(self.ui_single_file_download.file_save_path.text()))[1]).decode('utf-8')))
 
         self.overwrite_question_result = None
         self.overwrite_question_closed = False
@@ -157,9 +187,12 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
     def handle_cancel_action(self):
         if self.is_upload_active:
-            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Question",
-                                       "Are you sure that you want cancel download and close this window?",
-                                       (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
+            msgBox = QtGui.QMessageBox(
+                QtGui.QMessageBox.Question,
+                "Question",
+                "Are you sure that you want cancel download and close \
+                    this window?",
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Yes:
                 self.close()
