@@ -98,6 +98,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("showDestinationPathNotSelectedMsg"), self.show_error_invalid_file_path)
         self.connect(self, QtCore.SIGNAL("selectFileDestinationPath"), self.select_file_save_path)
         self.connect(self, QtCore.SIGNAL("askFileOverwrite"), self.ask_overwrite)
+        self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'), self.set_current_active_connections)
+
 
         self.connect(self, QtCore.SIGNAL("finishDownload"), lambda: self.create_download_finish_thread(
             str(os.path.split(str(self.ui_single_file_download.file_save_path.text()))[1]).decode('utf-8')))
@@ -146,6 +148,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         self.already_started_shard_downloads_count = 0
         self.all_shards_count = 0
+
+    def set_current_active_connections(self):
+        self.ui_single_file_download.current_active_connections.setText(str(self.current_active_connections))
 
     def show_destination_path_not_selected_msg(self):
         return 1
@@ -538,7 +543,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                             shard_pointer = self.storj_engine.storj_client.file_pointers(str(bucket_id), file_id,
                                                                                          limit="1",
                                                                                          skip=str(i))
-                            print str(shard_pointer) + "wskaznik"
+                            #print str(shard_pointer) + "wskaznik"
                             # if shard_pointer[0]["parity"] == False:
                             #   print "Shard parity error!"
                             #  break
@@ -590,9 +595,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
             i = 0
             # model = QStandardItemModel(1, 1)  # initialize model for inserting to table
-
-
-
 
 
     def createNewDownloadInitThread(self, bucket_id, file_id):
@@ -710,6 +712,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             farmer_tries += 1
             try:
                 self.current_active_connections += 1
+                self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
                 self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
                           "Downloading...")  # update shard downloading state
                 if options_chain["handle_progressbars"] != "1":
@@ -789,6 +792,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         if not downloaded:
             self.current_active_connections -= 1
+            self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
             self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
                       "Error while downloading from this farmer. Getting another farmer pointer...")  # update shard download state
             time.sleep(1)
@@ -798,6 +802,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         else:
             self.emit(QtCore.SIGNAL("getNextSetOfPointers"))
             self.current_active_connections -= 1
+            self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
             # logger.warning(str({"log_event_type": "success", "title": "Shard downloaded", "description": "Shard at index " + str(shard_index) + " downloaded successfully."}))
             # logger.warning('"log_event_type": "success"')
             logger.debug('Shard downloaded')
