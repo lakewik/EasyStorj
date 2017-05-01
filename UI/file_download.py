@@ -497,13 +497,13 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         if self.tmp_path == "":
             if platform == "linux" or platform == "linux2":
                 # linux
-                self.tmp_path = "/tmp/"
+                self.tmp_path = "/tmp"
             elif platform == "darwin":
                 # OS X
-                self.tmp_path = "/tmp/"
+                self.tmp_path = "/tmp"
             elif platform == "win32":
                 # Windows
-                self.tmp_path = "C:\\Windows\\temp\\"
+                self.tmp_path = "C:\\Windows\\temp"
 
         file_name = os.path.split(self.destination_file_path)[1]
 
@@ -578,13 +578,13 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                                     file_id,
                                     limit="1",
                                     skip=str(i))
-                            # print str(shard_pointer) + "wskaznik"
+                            print str(shard_pointer) + "wskaznik"
                             # if shard_pointer[0]["parity"] == False:
                             #     print "Shard parity error!"
                             #     break
                             options_array["shard_index"] = shard_pointer[0]["index"]
 
-                            options_array["file_size_shard_" + str(i)] = shard_pointer[0]["size"]
+                            options_array["file_size_shard_%s" % i] = shard_pointer[0]["size"]
                             self.emit(QtCore.SIGNAL("beginShardDownloadProccess"), shard_pointer[0],
                                       self.destination_file_path, options_array)
                         except storj.exception.StorjBridgeApiError as e:
@@ -867,9 +867,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             shards_count = int(options_array["shards_count"])
 
             shard_size_array = []
-            shard_size_array.append("%s%s" % (
-                options_array["file_size_shard_"],
-                options_array["shard_index"]))
+            print "PRIMA DI TEST"
+            shard_size_array.append(
+                int(options_array["file_size_shard_%s" %
+                    options_array["shard_index"]]))
             logger.debug(shard_size_array)
 
             part = options_array["shard_index"]
