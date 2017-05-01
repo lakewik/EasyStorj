@@ -50,7 +50,7 @@ class RegisterUI(QtGui.QMainWindow):
                             QtGui.QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
                 else:
                     QtGui.QMessageBox.about(self, "Warning",
-                                            "Your e-mail seems to be invalid! Please chec e-mail and try again")
+                                            "Your e-mail seems to be invalid! Please check e-mail and try again")
             else:
                 QtGui.QMessageBox.about(self, "Warning",
                                         "Given passwords are different! Please check and try again!")
