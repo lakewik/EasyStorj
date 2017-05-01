@@ -7,10 +7,6 @@ from sys import platform
 import requests
 from PyQt4 import QtCore, QtGui
 
-from PyQt4.QtGui import QMessageBox
-from PyQt4.QtGui import QProgressBar
-from PyQt4.QtGui import QTableWidgetItem
-
 from utilities.sharder import ShardingTools
 from utilities.tools import Tools
 from qt_interfaces.file_download_new import Ui_SingleFileDownload
@@ -295,8 +291,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
              "    color: #fff;\n"
              "    border-radius: 7px;\n"
              "}"))
-        QMessageBox.information(self, "Success!",
-                                "File downloaded successfully!")
+        QtGui.QMessageBox.information(self, "Success!",
+                                      "File downloaded successfully!")
 
     """
     def open_logs_window(self):
@@ -305,35 +301,37 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
     """
 
     def show_unhandled_exception(self, exception_content):
-        QMessageBox.critical(self, "Unhandled error", str(exception_content))
+        QtGui.QMessageBox.critical(self, "Unhandled error", str(exception_content))
 
     def show_storj_bridge_exception(self, exception_content):
         try:
             j = json.loads(str(exception_content))
             if j.get("error") == "Failed to get retrieval token":
-                QMessageBox.critical(self, "Bridge error",
-                                     str(j["error"]) +
-                                     ". Please wait and try again.")
+                QtGui.QMessageBox.critical(
+                    self,
+                    'Bridge error',
+                    "%s. Please wait and try again." % j['error'])
             else:
-                QMessageBox.critical(self, "Bridge error", str(j["error"]))
+                QtGui.QMessageBox.critical(self, "Bridge error", str(j["error"]))
 
         except:
-            QMessageBox.critical(self, "Bridge error", str(exception_content))
+            QtGui.QMessageBox.critical(self, "Bridge error", str(exception_content))
 
     def update_download_task_state(self, row_position, state):
         self.ui_single_file_download.shard_queue_table.setItem(
             int(row_position), 3, QtGui.QTableWidgetItem(str(state)))
 
     def show_error_not_selected_file(self):
-        QMessageBox.about(self, "Error",
-                          "Please select destination file save path!")
+        QtGui.QMessageBox.about(self, "Error",
+                                "Please select destination file save path!")
 
     def show_error_invalid_file_path(self):
-        QMessageBox.about(self, "Error",
-                          "Destination file save path seems to be invalid!")
+        QtGui.QMessageBox.about(
+            self, "Error", "Destination file save path seems to be invalid!")
 
     def show_error_invalid_temporary_path(self):
-        QMessageBox.about(self, "Error", "Temporary path seems to be invalid!")
+        QtGui.QMessageBox.about(self, "Error",
+                                "Temporary path seems to be invalid!")
 
     def refresh_overall_download_progress(self, base_percent):
         total_percent_to_download = self.all_shards_count * 100
@@ -422,10 +420,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             self.emit(QtCore.SIGNAL("showUnhandledException"),
                       "Unhandled error while resolving file metadata %s" % e)
 
-    #### Begin file download finish function ####
     # Wait for signal to do shards joining and encryption
     def finish_download(self, file_name):
-        print "finish download for " + file_name
+        logger.debug('Finish download for %s' % file_name)
         fileisencrypted = False
         if "[DECRYPTED]" in self.filename_from_bridge:
             fileisencrypted = False
