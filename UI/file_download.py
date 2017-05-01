@@ -36,7 +36,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_download = Ui_SingleFileDownload()
         self.ui_single_file_download.setupUi(self)
-        # QtCore.QObject.connect(self.ui_single_file_download., QtCore.SIGNAL("clicked()"), self.save_config) # open bucket manager
         self.storj_engine = StorjEngine()  # init StorjEngine
         self.filename_from_bridge = ""
         self.tools = Tools()
@@ -75,6 +74,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # begin file downloading process
         QtCore.QObject.connect(self.ui_single_file_download.start_download_bt,
                                QtCore.SIGNAL("clicked()"),
+                               # self.download_begin(bucketid, fileid))
                                lambda: self.createNewDownloadInitThread(
                                    bucketid,
                                    fileid))
@@ -216,8 +216,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.ui_single_file_download.shard_queue_table.resizeRowsToContents()
 
         self.ui_single_file_download.shard_queue_table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-
-        # print "inijalizacja tabeli"
 
     def add_row_download_queue_table(self, row_data):
         """
@@ -618,8 +616,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
     def createNewDownloadInitThread(self, bucket_id, file_id):
         self.ui_single_file_download.overall_progress.setValue(0)
         self.initialize_download_queue_table()
-        file_name_resolve_thread = threading.Thread(target=self.download_begin, args=(bucket_id, file_id))
-        file_name_resolve_thread.start()
+        # file_name_resolve_thread = threading.Thread(target=self.download_begin, args=(bucket_id, file_id))
+        # file_name_resolve_thread.start()
+        self.download_begin(bucket_id, file_id)
 
     def createNewInitializationThread(self, bucket_id, file_id):
         file_name_resolve_thread = threading.Thread(target=self.set_file_metadata, args=(bucket_id, file_id))
