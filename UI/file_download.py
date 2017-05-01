@@ -31,6 +31,11 @@ from resources.constants import USE_USER_ENV_PATH_FOR_TEMP
 from multiprocessing import Pool
 
 
+def foo(args):
+    self, pointer, shard_index = args
+    self.shard_download(pointer, shard_index)
+
+
 class SingleFileDownloadUI(QtGui.QMainWindow):
 
     def __init__(self, parent=None, bucketid=None, fileid=None):
@@ -149,25 +154,25 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.max_retries_get_file_pointers = 30
 
         # set default paths
-        temp_dir = ""
-        if platform == "linux" or platform == "linux2":
+        temp_dir = ''
+        if platform == 'linux' or platform == 'linux2':
             # linux
-            temp_dir = "/tmp/"
-        elif platform == "darwin":
+            temp_dir = '/tmp'
+        elif platform == 'darwin':
             # OS X
-            temp_dir = "/tmp/"
-        elif platform == "win32":
+            temp_dir = '/tmp'
+        elif platform == 'win32':
             # Windows
             if USE_USER_ENV_PATH_FOR_TEMP:
-                temp_dir = str(self.tools.get_home_user_directory()).decode("utf-8") + "\\" + "AppData\\Local\\Temp\\"
+                temp_dir = os.path.join(
+                    self.get_home_user_directory().decode('utf-8'),
+                    'AppData\\Local\\Temp')
             else:
-                temp_dir = "C:\\Windows\\temp\\"
+                temp_dir = 'C:\\Windows\\temp'
 
-
-        self.ui_single_file_download.tmp_dir.setText(str(temp_dir))
+        self.ui_single_file_download.tmp_dir.setText(temp_dir)
 
         # set config variables
-
         self.combine_tmpdir_name_with_token = False
 
         # set overall progress to 0
@@ -493,7 +498,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.shards_already_downloaded = 0
 
         self.destination_file_path = str(self.ui_single_file_download.file_save_path.text()).decode('utf-8')
-        self.tmp_path = str(self.ui_single_file_download.tmp_dir.text()).decode('utf-8')
+        self.tmp_path = self.ui_single_file_download.tmp_dir.text().decode('utf-8')
 
         if self.tmp_path == "":
             if platform == "linux" or platform == "linux2":
