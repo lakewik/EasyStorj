@@ -868,82 +868,68 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             if not self.tools.isWritable(self.tmp_path):
                 raise IOError("13")
 
-            try:
-                if options_array["progressbars_enabled"] == "1":
-                    options_chain["handle_progressbars"] = "1"
+            if options_array["progressbars_enabled"] == "1":
+                options_chain["handle_progressbars"] = "1"
 
-                if options_array["file_size_is_given"] == "1":
-                    options_chain["file_size_is_given"] = "1"
+            if options_array["file_size_is_given"] == "1":
+                options_chain["file_size_is_given"] = "1"
 
-                shards_count = int(options_array["shards_count"])
+            shards_count = int(options_array["shards_count"])
 
-                shard_size_array = []
-                shard_size_array.append(int(options_array["file_size_shard_" + str(options_array["shard_index"])]))
-                logger.debug(shard_size_array)
+            shard_size_array = []
+            shard_size_array.append(int(options_array["file_size_shard_" + str(options_array["shard_index"])]))
+            logger.debug(shard_size_array)
 
-                part = options_array["shard_index"]
+            part = options_array["shard_index"]
 
-                self.tmp_path = options_array["tmp_path"]
+            self.tmp_path = options_array["tmp_path"]
 
-                self.emit(QtCore.SIGNAL("setCurrentState"), "Starting download threads...")
-                self.emit(QtCore.SIGNAL("setCurrentState"), "Started download shard at index " + str(part) + "...")
+            self.emit(QtCore.SIGNAL("setCurrentState"), "Starting download threads...")
+            self.emit(QtCore.SIGNAL("setCurrentState"), "Started download shard at index " + str(part) + "...")
 
-                options_chain["rowposition"] = part
-                self.shard_download_percent_list.append(0)
+            options_chain["rowposition"] = part
+            self.shard_download_percent_list.append(0)
 
-                rowposition = self._add_shard_to_table(pointer,
-                                                       0,
-                                                       part)  # Add a row to the table
+            rowposition = self._add_shard_to_table(pointer,
+                                                   0,
+                                                   part)  # Add a row to the table
 
-                logger.debug(pointer)
-                options_chain["shard_file_size"] = shard_size_array[0]
-                url = "http://" + pointer.get('farmer')['address'] + \
-                      ":" + \
-                      str(pointer.get('farmer')['port']) + \
-                      "/shards/" + pointer["hash"] + \
-                      "?token=" + pointer["token"]
-                logger.debug(url)
+            logger.debug(pointer)
+            options_chain["shard_file_size"] = shard_size_array[0]
+            url = "http://" + pointer.get('farmer')['address'] + \
+                  ":" + \
+                  str(pointer.get('farmer')['port']) + \
+                  "/shards/" + pointer["hash"] + \
+                  "?token=" + pointer["token"]
+            logger.debug(url)
 
-                if self.combine_tmpdir_name_with_token:
-                    self.createNewDownloadThread(url, self.tmp_path + "/" +
-                                                 str(pointer["token"]) +
-                                                 "/" +
-                                                 str(file_name) +
-                                                 "-" + str(part),
-                                                 options_chain,
-                                                 rowposition-1, part)
-                else:
-                    self.createNewDownloadThread(url, self.tmp_path + "/" + str(file_name) + "-" + str(part),
-                                                 options_chain, rowposition-1, part)
+            if self.combine_tmpdir_name_with_token:
+                self.createNewDownloadThread(url, self.tmp_path + "/" +
+                                             str(pointer["token"]) +
+                                             "/" +
+                                             str(file_name) +
+                                             "-" + str(part),
+                                             options_chain,
+                                             rowposition-1, part)
+            else:
+                self.createNewDownloadThread(url, self.tmp_path + "/" + str(file_name) + "-" + str(part),
+                                             options_chain, rowposition-1, part)
 
-                logger.debug(self.tmp_path + "/" + str(file_name) + "-" +
-                             str(part))
-                part = part + 1
-
-
-            except Exception as e:
-                logger.error(e)
-                # logger.warning('"log_event_type": "warning"')
-                logger.debug('Unhandled error' + str(e))
-                # except Exception as e:
-                #   self.emit(QtCore.SIGNAL("showStorjBridgeException"),
-                #            "Unhandled error while resolving file pointers for download. " + str(
-                #               e))  # emit unhandled Exception
+            logger.debug(self.tmp_path + "/" + str(file_name) + "-" +
+                         str(part))
+            part = part + 1
 
         except IOError as e:
             print " perm error " + str(e)
             if str(e) == str(13):
-                self.emit(QtCore.SIGNAL("showException"),
-                          "Error while saving or reading file or temporary file. Probably this is caused by insufficient permisions. Please check if you have permissions to write or read from selected directories.  ")  # emit Storj Bridge Exception
-
+                # Emit Storj Bridge Exception
+                self.emit(
+                    QtCore.SIGNAL("showException"),
+                    "Error while saving or reading file or temporary file.\
+                        Probably this is caused by insufficient permisions.\
+                        Please check if you have permissions to write or \
+                        read from selected directories.  ")
         except Exception as e:
-            logger.error(e)
-            # logger.warning('"log_event_type": "warning"')
             logger.debug('Unhandled error')
-            # except Exception as e:
-            #   self.emit(QtCore.SIGNAL("showException"),
-            #            "Unhandled exception: " + str(e) )
-
-            #   logger.debug("Unhandled exception " + str(e))
-
+            logger.error(e)
 
