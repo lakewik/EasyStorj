@@ -104,7 +104,7 @@ class Ui_SingleFileDownload(object):
         self.overall_progress.setProperty("value", 0)
         self.overall_progress.setObjectName(_fromUtf8("overall_progress"))
         self.file_save_path = QtGui.QLineEdit(SingleFileDownload)
-        self.file_save_path.setGeometry(QtCore.QRect(170, 82, 391, 31))
+        self.file_save_path.setGeometry(QtCore.QRect(170, 82, 401, 31))
         self.file_save_path.setObjectName(_fromUtf8("file_save_path"))
         self.file_path_select_bt = QtGui.QPushButton(SingleFileDownload)
         self.file_path_select_bt.setGeometry(QtCore.QRect(580, 82, 31, 31))
@@ -183,7 +183,7 @@ class Ui_SingleFileDownload(object):
 "}"))
         self.tmp_dir_bt.setObjectName(_fromUtf8("tmp_dir_bt"))
         self.tmp_dir = QtGui.QLineEdit(SingleFileDownload)
-        self.tmp_dir.setGeometry(QtCore.QRect(170, 120, 391, 31))
+        self.tmp_dir.setGeometry(QtCore.QRect(170, 120, 401, 31))
         self.tmp_dir.setObjectName(_fromUtf8("tmp_dir"))
         self.label_15 = QtGui.QLabel(SingleFileDownload)
         self.label_15.setGeometry(QtCore.QRect(20, 210, 211, 16))
@@ -253,6 +253,28 @@ class Ui_SingleFileDownload(object):
 "text-align: center;\n"
 "}"))
         self.current_state.setObjectName(_fromUtf8("current_state"))
+        self.label_16 = QtGui.QLabel(SingleFileDownload)
+        self.label_16.setGeometry(QtCore.QRect(250, 169, 281, 21))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_16.setFont(font)
+        self.label_16.setObjectName(_fromUtf8("label_16"))
+        self.current_active_connections = QtGui.QLabel(SingleFileDownload)
+        self.current_active_connections.setGeometry(QtCore.QRect(540, 170, 71, 21))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.current_active_connections.setFont(font)
+        self.current_active_connections.setStyleSheet(_fromUtf8("QLabel{\n"
+"color: #2683ff;\n"
+"}\n"
+""))
+        self.current_active_connections.setObjectName(_fromUtf8("current_active_connections"))
 
         self.retranslateUi(SingleFileDownload)
         QtCore.QMetaObject.connectSlotsByName(SingleFileDownload)
@@ -280,4 +302,6 @@ class Ui_SingleFileDownload(object):
         self.label_9.setText(_translate("SingleFileDownload", "<html><head/><body><p><span style=\" color:#555555;\">FILE ID:</span></p></body></html>", None))
         self.file_id.setText(_translate("SingleFileDownload", "<html><head/><body><p><span style=\" color:#2683ff;\">SOME_FILE_ID</span></p></body></html>", None))
         self.current_state.setText(_translate("SingleFileDownload", "<html><head/><body><p><span style=\" color:#555555;\">WAITING TO START DOWNLOAD</span></p></body></html>", None))
+        self.label_16.setText(_translate("SingleFileDownload", "<html><head/><body><p>CURRENT ACTIVE CONNECTIONS:</p></body></html>", None))
+        self.current_active_connections.setText(_translate("SingleFileDownload", "<html><head/><body><p><span style=\" color:#2683ff;\">0</span></p></body></html>", None))
 
