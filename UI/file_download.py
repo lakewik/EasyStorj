@@ -877,22 +877,27 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             shards_count = int(options_array["shards_count"])
 
             shard_size_array = []
-            shard_size_array.append(int(options_array["file_size_shard_" + str(options_array["shard_index"])]))
+            shard_size_array.append("%s%s" % (
+                options_array["file_size_shard_"],
+                options_array["shard_index"]))
             logger.debug(shard_size_array)
 
             part = options_array["shard_index"]
 
             self.tmp_path = options_array["tmp_path"]
 
-            self.emit(QtCore.SIGNAL("setCurrentState"), "Starting download threads...")
-            self.emit(QtCore.SIGNAL("setCurrentState"), "Started download shard at index " + str(part) + "...")
+            self.emit(QtCore.SIGNAL("setCurrentState"),
+                      "Starting download threads...")
+            self.emit(QtCore.SIGNAL("setCurrentState"),
+                      "Started download shard at index %s..." % part)
 
             options_chain["rowposition"] = part
             self.shard_download_percent_list.append(0)
 
+            # Add a row to the table
             rowposition = self._add_shard_to_table(pointer,
                                                    0,
-                                                   part)  # Add a row to the table
+                                                   part)
 
             logger.debug(pointer)
             options_chain["shard_file_size"] = shard_size_array[0]
@@ -904,19 +909,26 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             logger.debug(url)
 
             if self.combine_tmpdir_name_with_token:
-                self.createNewDownloadThread(url, self.tmp_path + "/" +
-                                             str(pointer["token"]) +
-                                             "/" +
-                                             str(file_name) +
-                                             "-" + str(part),
-                                             options_chain,
-                                             rowposition-1, part)
+                self.createNewDownloadThread(
+                    url,
+                    "%s-%s" % (
+                        os.path.join(self.tmp_path,
+                                     pointer['token'],
+                                     file_name),
+                        part),
+                    options_chain,
+                    rowposition - 1,
+                    part)
             else:
-                self.createNewDownloadThread(url, self.tmp_path + "/" + str(file_name) + "-" + str(part),
-                                             options_chain, rowposition-1, part)
+                self.createNewDownloadThread(
+                    url,
+                    "%s-%s" % (os.path.join(self.tmp_path, file_name), part),
+                    options_chain,
+                    rowposition - 1,
+                    part)
 
-            logger.debug(self.tmp_path + "/" + str(file_name) + "-" +
-                         str(part))
+            logger.debug("%s-%s" % (os.path.join(self.tmp_path, file_name),
+                         part))
             part = part + 1
 
         except IOError as e:
