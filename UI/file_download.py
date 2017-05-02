@@ -606,7 +606,9 @@ to download  with ID :%s ...' % file_id)
             # self.shard_download(pointer, file_save_path, options_array)
             threads = [threading.Thread(
                 target=self.shard_download,
-                args=(p, self.destination_file_path, options_array)) for p in shard_pointer]
+                args=(p,
+                      self.destination_file_path,
+                      options_array)) for p in shard_pointer]
             print("-" * 30)
             print(threads)
             print("-" * 30)
@@ -794,16 +796,10 @@ to download  with ID :%s ...' % file_id)
 
             shards_count = int(options_array["shards_count"])
 
-            shard_size_array = []
-            shard_size_array.append(
-                # int(options_array['file_size_shard_%s' %
-                #     options_array['shard_index']]))
-                int(pointer['size']))
-            logger.debug(shard_size_array)
+            logger.debug('Shard size: %s' % pointer['size'])
 
-            # part = options_array['shard_index']
             part = pointer['index']
-            print "TEST:::::::::::::::::::: %s" % part
+            logger.debug('Shard index %s' % part)
 
             self.tmp_path = options_array["tmp_path"]
 
@@ -815,19 +811,20 @@ to download  with ID :%s ...' % file_id)
             options_chain["rowposition"] = part
             self.shard_download_percent_list.append(0)
 
+            # logger.debug(pointer)
+            options_chain["shard_file_size"] = int(pointer['size'])
+            # Generate download URL
+            url = 'http://%s:%s/shards/%s?token=%s' % (
+                pointer.get('farmer')['address'],
+                str(pointer.get('farmer')['port']),
+                pointer["hash"],
+                pointer["token"])
+            logger.debug(url)
+
             # Add a row to the table
             rowposition = self._add_shard_to_table(pointer,
                                                    0,
                                                    part)
-
-            # logger.debug(pointer)
-            options_chain["shard_file_size"] = shard_size_array[0]
-            url = "http://" + pointer.get('farmer')['address'] + \
-                  ":" + \
-                  str(pointer.get('farmer')['port']) + \
-                  "/shards/" + pointer["hash"] + \
-                  "?token=" + pointer["token"]
-            logger.debug(url)
 
             print "TEST: download shard number %s with row number %s" % (part, rowposition)
             if self.combine_tmpdir_name_with_token:
@@ -849,8 +846,7 @@ to download  with ID :%s ...' % file_id)
                     rowposition - 1,
                     part)
 
-            logger.debug('%s-%s' % (os.path.join(self.tmp_path, file_name),
-                         part))
+            logger.debug('%s-%s' % (os.path.join(self.tmp_path, file_name), part))
             part = part + 1
 
         except IOError as e:
