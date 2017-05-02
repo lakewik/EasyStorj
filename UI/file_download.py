@@ -441,7 +441,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             num_of_shards="1",
             shard_index=str(shard_index))
         pointer = pointers[0]
-        self.set_current_active_connections += 1
         options_array = {}
         options_array["tmp_path"] = self.tmp_path
         options_array["progressbars_enabled"] = "1"
@@ -722,7 +721,7 @@ to download  with ID :%s ...' % file_id)
 Getting another farmer pointer...")
             time.sleep(1)
             # Retry download with new download pointer
-            print "retry with new downoad pointer"
+            logger.debug("Retry with new downoad pointer")
             self.emit(QtCore.SIGNAL("retryWithNewDownloadPointer"),
                       shard_index)
 
