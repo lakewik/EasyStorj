@@ -55,7 +55,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         self.user_password = self.account_manager.get_user_password()
 
-        # open file select dialog
+        # Open file select dialog
         QtCore.QObject.connect(self.ui_single_file_download.file_path_select_bt,
                                QtCore.SIGNAL("clicked()"),
                                self.select_file_save_path)
@@ -116,14 +116,17 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'),
                      self.set_current_active_connections)
         self.connect(self, QtCore.SIGNAL("finishDownload"),
-                     lambda: self.finish_download(
-                         str(os.path.split(str(self.ui_single_file_download.file_save_path.text()))[1]).decode('utf-8')))
+                     lambda: self.finish_download(str(os.path.split(
+                         str(self.ui_single_file_download.file_save_path.
+                             text()))[1]).decode('utf-8')))
 
         self.overwrite_question_result = None
         self.overwrite_question_closed = False
 
-        self.ui_single_file_download.current_state.setText("Waiting for user action...")
-        self.ui_single_file_download.downloaded_shards.setText("Waiting for user...")
+        self.ui_single_file_download.current_state.\
+            setText("Waiting for user action...")
+        self.ui_single_file_download.downloaded_shards.\
+            setText("Waiting for user...")
         self.shards_already_downloaded = 0
 
         self.createNewInitializationThread(bucketid, fileid)
@@ -165,7 +168,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.all_shards_count = 0
 
     def set_current_active_connections(self):
-        self.ui_single_file_download.current_active_connections.setText(str(self.current_active_connections))
+        self.ui_single_file_download.current_active_connections.setText(
+            str(self.current_active_connections))
 
     def show_destination_path_not_selected_msg(self):
         return 1
@@ -176,7 +180,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                 QtGui.QMessageBox.Question,
                 "Question",
                 "Are you sure that you want cancel download and close \
-                    this window?",
+this window?",
                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Yes:
@@ -194,15 +198,21 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.downloaded_shards_count = 0
         self.download_queue_progressbar_list = []
 
-        self.download_queue_table_header = ['Progress', 'Hash', 'Farmer', 'State', 'Shard index']
+        self.download_queue_table_header = ['Progress',
+                                            'Hash',
+                                            'Farmer',
+                                            'State',
+                                            'Shard index']
         self.ui_single_file_download.shard_queue_table.setColumnCount(5)
         self.ui_single_file_download.shard_queue_table.setRowCount(0)
         horHeaders = self.download_queue_table_header
-        self.ui_single_file_download.shard_queue_table.setHorizontalHeaderLabels(horHeaders)
+        self.ui_single_file_download.shard_queue_table.\
+            setHorizontalHeaderLabels(horHeaders)
         self.ui_single_file_download.shard_queue_table.resizeColumnsToContents()
         self.ui_single_file_download.shard_queue_table.resizeRowsToContents()
 
-        self.ui_single_file_download.shard_queue_table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        self.ui_single_file_download.shard_queue_table.horizontalHeader().\
+            setResizeMode(QtGui.QHeaderView.Stretch)
 
     def add_row_download_queue_table(self, row_data):
         """
@@ -275,7 +285,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                                       "File downloaded successfully!")
 
     def show_unhandled_exception(self, exception_content):
-        QtGui.QMessageBox.critical(self, "Unhandled error", str(exception_content))
+        QtGui.QMessageBox.critical(self, "Unhandled error",
+                                   str(exception_content))
 
     def show_storj_bridge_exception(self, exception_content):
         try:
@@ -286,10 +297,11 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                     'Bridge error',
                     "%s. Please wait and try again." % j['error'])
             else:
-                QtGui.QMessageBox.critical(self, "Bridge error", str(j["error"]))
-
+                QtGui.QMessageBox.critical(self, "Bridge error",
+                                           str(j["error"]))
         except:
-            QtGui.QMessageBox.critical(self, "Bridge error", str(exception_content))
+            QtGui.QMessageBox.critical(self, "Bridge error",
+                                       str(exception_content))
 
     def update_download_task_state(self, row_position, state):
         self.ui_single_file_download.shard_queue_table.setItem(
@@ -316,9 +328,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         total_percent = (base_percent * 100) + \
             (0.90 * actual_percent_downloaded)
-
-        # logger.info("%s %s total_percent_downloaded" %
-        #     actual_percent_downloaded, base_percent)
 
         self.ui_single_file_download.overall_progress.setValue(
             int(total_percent))
@@ -461,7 +470,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         msgBox = QtGui.QMessageBox(
             QtGui.QMessageBox.Question,
             'Question',
-            'File %s already exist! Do you want to overwrite?' % str(file_name).decode('utf-8'),
+            'File %s already exist! Do you want to overwrite?' %
+            str(file_name).decode('utf-8'),
             (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
 
         self.overwrite_question_result = msgBox.exec_()
@@ -472,13 +482,14 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         frame_data = self.storj_engine.storj_client.frame_get(file_frame.id)
         return len(frame_data.shards)
 
-    def get_shard_pointers(self, bucket_id, file_id, num_of_shards="1", shard_index="0"):
+    def get_shard_pointers(self, bucket_id, file_id, num_of_shards="1",
+                           shard_index="0"):
         pointers = self.storj_engine.storj_client.file_pointers(
             bucket_id,
             file_id,
             limit=num_of_shards,
             skip=shard_index)
-        #return pointers
+        # return pointers
         queue.put(pointers)
 
     def download_begin(self, bucket_id, file_id):
@@ -490,7 +501,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.shards_already_downloaded = 0
 
         self.destination_file_path = \
-            str(self.ui_single_file_download.file_save_path.text()).decode('utf-8')
+            str(self.ui_single_file_download.file_save_path.text()).\
+            decode('utf-8')
         self.tmp_path = \
             str(self.ui_single_file_download.tmp_dir.text()).decode('utf-8')
 
@@ -618,7 +630,8 @@ to download  with ID :%s ...' % file_id)
                     t.join()
 
     def update_shard_download_progess(self, row_position_index, value):
-        self.download_queue_progressbar_list[row_position_index].setValue(value)
+        self.download_queue_progressbar_list[row_position_index].\
+            setValue(value)
         return 1
 
     def increment_shards_download_progress_counters(self):
@@ -647,7 +660,8 @@ to download  with ID :%s ...' % file_id)
     def calculate_final_hmac(self):
         return 1
 
-    def create_download_connection(self, url, path_to_save, options_chain, rowposition, shard_index):
+    def create_download_connection(self, url, path_to_save, options_chain,
+                                   rowposition, shard_index):
         local_filename = str(path_to_save).decode('utf-8')
         downloaded = False
         farmer_tries = 0
@@ -656,14 +670,15 @@ to download  with ID :%s ...' % file_id)
             shard_index, url))
 
         tries_download_from_same_farmer = 0
-        while self.max_retries_download_from_same_farmer > tries_download_from_same_farmer:
+        while self.max_retries_download_from_same_farmer > \
+                tries_download_from_same_farmer:
             tries_download_from_same_farmer += 1
             farmer_tries += 1
-            print str(rowposition) + " pozycja"
             try:
                 self.current_active_connections += 1
                 self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
-                self.emit(QtCore.SIGNAL("updateDownloadTaskState"), rowposition,
+                self.emit(QtCore.SIGNAL("updateDownloadTaskState"),
+                          rowposition,
                           "Downloading...")  # update shard downloading state
                 if options_chain["handle_progressbars"] != "1":
                     r = requests.get(url)
@@ -706,8 +721,9 @@ to download  with ID :%s ...' % file_id)
                         self.shard_download_percent_list[shard_index] = \
                             percent_downloaded
                         # Update progress bar in upload queue table
-                        self.emit(QtCore.SIGNAL("refreshOverallDownloadProgress"),
-                                  0.1)
+                        self.emit(QtCore.SIGNAL(
+                            "refreshOverallDownloadProgress"),
+                            0.1)
 
                     f.close()
                 logger.debug('%s rowposition started' % rowposition)
@@ -769,7 +785,8 @@ Getting another farmer pointer...")
             self.emit(QtCore.SIGNAL("updateDownloadTaskState"),
                       rowposition,
                       "Downloaded!")
-            if int(self.all_shards_count) <= int(self.shards_already_downloaded):
+            if int(self.all_shards_count) <= \
+                    int(self.shards_already_downloaded):
                 # Send signal to begin file shards join and decryption
                 # after all shards are downloaded
                 self.emit(QtCore.SIGNAL("finishDownload"))
@@ -824,9 +841,8 @@ Getting another farmer pointer...")
             rowposition = self._add_shard_to_table(pointer,
                                                    part)
 
-            print str(rowposition) + " pozycja2"
-            print "TEST: download shard number %s with row number %s" % (
-                part, self.rowposition2 - 1)
+            logger.debug("Download shard number %s with row number %s" % (
+                part, self.rowposition2 - 1))
 
             if self.combine_tmpdir_name_with_token:
                 self.create_download_connection(
@@ -847,7 +863,8 @@ Getting another farmer pointer...")
                     self.rowposition2 - 1,
                     part)
 
-            logger.debug('%s-%s' % (os.path.join(self.tmp_path, file_name), part))
+            logger.debug('%s-%s' % (os.path.join(self.tmp_path, file_name),
+                         part))
 
         except IOError as e:
             logger.error('Perm error %s' % e)
@@ -861,3 +878,4 @@ have permissions to write or read from selected directories.')
         except Exception as e:
             logger.debug('Unhandled error')
             logger.error(e)
+
