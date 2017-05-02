@@ -329,7 +329,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         """
         self.ui_single_file_download.overall_progress.setValue(0)
         self.initialize_download_queue_table()
-        self.download_begin(bucket_id, file_id)
+        threading.Thread(target=self.download_begin,
+                         args=(bucket_id, file_id)).start()
 
     def createNewInitializationThread(self, bucket_id, file_id):
         file_name_resolve_thread = threading.Thread(
