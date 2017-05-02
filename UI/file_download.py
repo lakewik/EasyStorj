@@ -24,7 +24,6 @@ from utilities.account_manager import AccountManager
 import time
 from resources.constants import USE_USER_ENV_PATH_FOR_TEMP
 # from resources.custom_qt_components import YesNoCheckboxDialog
-from multiprocessing import Pool
 
 
 # def foo(args):
@@ -418,7 +417,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
     # Wait for signal to do shards joining and encryption
     def finish_download(self, file_name):
-        logger.debug('>>>>>>>>>>>> Finish download for %s' % file_name)
+        logger.debug('Finish download for %s' % file_name)
         fileisencrypted = False
         if "[DECRYPTED]" in self.filename_from_bridge:
             fileisencrypted = False
@@ -691,16 +690,6 @@ to download  with ID :%s ...' % file_id)
                 else:
                     break
 
-            print "MAP foo"
-            # mp = Pool()
-            # mp.map(foo, [(self, p, self.destination_file_path,
-            #               options_array) for p in shard_pointer])
-            #for p in shard_pointer:
-            #    foo(args=(self, p, self.destination_file_path,
-            #        options_array))
-
-
-            # TODO qui?
             threads = [threading.Thread(
                 target=foo,
                 args=(self,
@@ -711,30 +700,12 @@ to download  with ID :%s ...' % file_id)
             print(threads)
             print("-" * 30)
             for t in threads:
+                self.already_started_shard_downloads_count += 1
                 t.start()
             print("TEST: start all")
-
-            self.already_started_shard_downloads_count += 1
-            # except storj.exception.StorjBridgeApiError as e:
-            #     self.is_upload_active = False
-            #     logger.debug('Bridge error')
-            #     logger.debug('Error while resolving file pointers \
-            #                          to download file with ID: ' +
-            #                  str(file_id) + "...")
-            #     # Emit Storj Bridge Exception
-            #     self.emit(QtCore.SIGNAL("showStorjBridgeException"), str(e))
-
-
-            #for t in threads:
-            #    t.join()
-            #print("TEST: finish all")
-
-
-
-            # self.finish_download(os.path.split(
-            #     str(self.ui_single_file_download.file_save_path.text(
-            #     )[1]).decode('utf-8')))
-            # self.finish_download(os.path.join(self.tmp_path, file_name))
+            # for t in threads:
+            #     t.join()
+            # print("TEST: finish all")
 
     def update_shard_download_progess(self, row_position_index, value):
         self.download_queue_progressbar_list[row_position_index].setValue(value)
@@ -893,17 +864,7 @@ to download  with ID :%s ...' % file_id)
                 # Send signal to begin file shards join and decryption
                 # after all shards are downloaded
                 self.emit(QtCore.SIGNAL("finishDownload"))
-                print "TEST: ORA DEVE FINIRE"
             return
-
-    def createNewDownloadThread(self, url, filelocation, options_chain, rowposition, shard_index):
-        download_thread = threading.Thread(
-            target=self.create_download_connection,
-            args=(url, filelocation, options_chain, rowposition, shard_index))
-        download_thread.start()
-        logger.debug('%s position' % options_chain["rowposition"])
-        # download_thread.join()
-        print "TEST: finito thread"
 
     def shard_download(self, pointer, file_save_path, options_array):
         logger.debug('Beginning download proccess...')
@@ -961,8 +922,7 @@ to download  with ID :%s ...' % file_id)
             logger.debug(url)
 
             if self.combine_tmpdir_name_with_token:
-                # self.create_download_connection(
-                self.createNewDownloadThread(
+                self.create_download_connection(
                     url,
                     "%s-%s" % (
                         os.path.join(self.tmp_path,
@@ -973,22 +933,12 @@ to download  with ID :%s ...' % file_id)
                     rowposition - 1,
                     part)
             else:
-                # TODO
                 self.create_download_connection(
-                    #self.createNewDownloadThread(
                     url,
                     '%s-%s' % (os.path.join(self.tmp_path, file_name), part),
                     options_chain,
                     rowposition - 1,
                     part)
-                '''
-                self.createNewDownloadThread(
-                    url,
-                    '%s-%s' % (os.path.join(self.tmp_path, file_name), part),
-                    options_chain,
-                    rowposition - 1,
-                    part)
-                '''
 
             logger.debug('%s-%s' % (os.path.join(self.tmp_path, file_name),
                          part))
