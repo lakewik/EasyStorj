@@ -80,7 +80,7 @@ class ShardingTools():
         # Based on <http://code.activestate.com/recipes/224800-simple-file-splittercombiner-module/>
         import re
 
-        logger.info('Creating file', destination_file_path)
+        logger.info('Creating file %s' % destination_file_path)
 
         bname = str((os.path.split(destination_file_path))[1]).decode('utf-8')
         bname_input = str((os.path.split(shards_filepath))[1]).decode('utf-8')
@@ -101,18 +101,18 @@ class ShardingTools():
 
         chunkfiles = []
         for f in os.listdir(str(input_directory).decode('utf-8')):
-            logger.debug(f)
+            # logger.debug(f)
             if chunkre.match(f):
                 chunkfiles.append(f)
 
-        logger.info('Number of chunks', len(chunkfiles))
+        logger.info('Number of chunks %s' % len(chunkfiles))
         chunkfiles.sort(self.sort_index)
         logger.info(chunkfiles)
         data = ''
         for f in chunkfiles:
 
             try:
-                logger.info('Appending chunk',
+                logger.info('Appending chunk %s' %
                             os.path.join(str(input_directory), f))
                 data += open(str(str(input_directory) + "/" + str(f)).decode('utf-8'), 'rb').read()
                 logger.info(str(input_directory) + "/" + str(f) +
@@ -129,7 +129,7 @@ class ShardingTools():
         except (OSError, IOError, EOFError) as e:
             raise ShardingException(str(e))
 
-        logger.info('Wrote file', bname)
+        logger.info('Wrote file %s' % bname)
         return 1
 
 
