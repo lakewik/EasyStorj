@@ -515,7 +515,11 @@ this window?",
                 self.tmp_path = "/tmp"
             elif platform == "win32":
                 # Windows
-                self.tmp_path = "C:\\Windows\\temp"
+                if USE_USER_ENV_PATH_FOR_TEMP:
+                    self.tmp_path = str(self.tools.get_home_user_directory()).decode(
+                        "utf-8") + "\\" + "AppData\\Local\\Temp"
+                else:
+                    self.tmp_path = "C:\\Windows\\temp"
 
         file_name = os.path.split(self.destination_file_path)[1]
 
@@ -531,6 +535,7 @@ this window?",
             self.emit(QtCore.SIGNAL("askFileOverwrite"), str(file_name))
 
             while not self.overwrite_question_closed:
+                time.sleep(0.1)
                 pass
 
             if self.overwrite_question_result == QtGui.QMessageBox.Yes:
@@ -680,6 +685,13 @@ to download  with ID :%s ...' % file_id)
                 self.emit(QtCore.SIGNAL("updateDownloadTaskState"),
                           rowposition,
                           "Downloading...")  # update shard downloading state
+
+                if tries_download_from_same_farmer > 1:
+                    self.emit(QtCore.SIGNAL("setCurrentState"), "Downloading shard " + str(shard_index) +
+                              ". Retry " + str(tries_download_from_same_farmer))
+                else:
+                    self.emit(QtCore.SIGNAL("setCurrentState"), "Downloading shard " + str(shard_index))
+
                 if options_chain["handle_progressbars"] != "1":
                     r = requests.get(url)
                     # requests
@@ -738,13 +750,11 @@ to download  with ID :%s ...' % file_id)
                           rowposition,
                           'First try failed. Retrying... (%s)' % farmer_tries)
                 continue
-
             except Exception as e:
                 logger.error(e)
                 logger.debug('Unhandled error while transfering data to farmer')
                 logger.debug('Error occured while downloading\
-                             shard at index %s. Retrying ...(%s)' %
-                             (shard_index, farmer_tries))
+shard at index %s. Retrying ...(%s)' % (shard_index, farmer_tries))
                 # Update shard download state
                 self.emit(QtCore.SIGNAL("updateDownloadTaskState"),
                           rowposition,

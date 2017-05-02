@@ -3,6 +3,7 @@ import threading
 from PyQt4 import QtCore, QtGui
 from qt_interfaces.file_mirrors_ui_new import Ui_FileMirrorsList
 import storj.exception as sjexc
+from resources.constants import MIRRORS_TREE_SORTING_ENABLED
 
 from engine import StorjEngine
 from node_details import NodeDetailsUI
@@ -12,6 +13,19 @@ from node_details import NodeDetailsUI
 from resources.html_strings import html_format_begin, html_format_end
 from utilities.log_manager import logger
 
+class StoppableThread(threading.Thread):
+    """Thread class with a stop() method. The thread itself has to check
+    regularly for the stopped() condition."""
+
+    def __init__(self, *args, **kwargs):
+        super(StoppableThread, self).__init__(*args, **kwargs)
+        self._stop = threading.Event()
+
+    def stop(self):
+        self._stop.set()
+
+    def stopped(self):
+        return self._stop.isSet()
 
 # Mirrors section
 class FileMirrorsListUI(QtGui.QMainWindow):
@@ -32,6 +46,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL("showUnhandledException"), self.show_unhandled_exception)
         self.connect(self, QtCore.SIGNAL("changeLoadingGif"), self.change_loading_gif)
 
+        self.mirror_list_initialization_thread = None
 
         # self.connect(self.file_mirrors_list_ui.established_mirrors_tree, QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"), self.open_mirror_details_window)
 
@@ -52,6 +67,13 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         logger.info(self.fileid)
         self.storj_engine = StorjEngine()  # init StorjEngine
         self.createNewMirrorListInitializationThread()
+
+    def closeEvent(self, event):
+        # do stuff
+        self.mirror_list_initialization_thread.stop()
+        print "Mirrors get proccess stopped!"
+        event.accept()  # let the window close
+
 
     def change_loading_gif(self, is_visible):
         if is_visible:
@@ -103,9 +125,12 @@ class FileMirrorsListUI(QtGui.QMainWindow):
             QtGui.QMessageBox.about(self, "Warning", "Please select farmer node from list")
             logger.error("Unhandled error")
 
+
+
     def createNewMirrorListInitializationThread(self):
-        mirror_list_initialization_thread = threading.Thread(target=self.initialize_mirrors_tree, args=())
-        mirror_list_initialization_thread.start()
+        #self.mirror_list_initialization_thread = threading.Thread(target=self.initialize_mirrors_tree, args=())
+        self.mirror_list_initialization_thread = StoppableThread(target=self.initialize_mirrors_tree)
+        self.mirror_list_initialization_thread.start()
 
     def initialize_mirrors_tree(self):
 
@@ -117,7 +142,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         #self.file_mirrors_list_ui.loading_label_mirrors_established.setStyleSheet('color: red')  # set loading color
         #self.file_mirrors_list_ui.loading_label_mirrors_available.setStyleSheet('color: red')  # set loading color
 
-        self.mirror_tree_view_header = ['Shard Hash / Address', 'User agent', 'Last seed', 'Node ID']
+        self.mirror_tree_view_header = ['Shard Hash / Address', 'User agent', 'Last seen', 'Node ID']
 
         ######################### set the model for established mirrors ##################################
         self.established_mirrors_model = QtGui.QStandardItemModel()
@@ -130,6 +155,9 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         self.established_mirrors_tree_view.setUniformRowHeights(True)
 
         self.file_mirrors_list_ui.available_mirrors_tree.setModel(self.established_mirrors_model)
+
+        if MIRRORS_TREE_SORTING_ENABLED:
+            self.file_mirrors_list_ui.established_mirrors_tree.setSortingEnabled(True)
 
         divider = 0
         group = 1
@@ -148,7 +176,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
 
                     child1 = QtGui.QStandardItem(str(mirror["contact"]["address"] + ":" + str(mirror["contact"]["port"])))
                     child2 = QtGui.QStandardItem(str(mirror["contact"]["userAgent"]))
-                    child3 = QtGui.QStandardItem(str(mirror["contact"]["lastSeen"]))
+                    child3 = QtGui.QStandardItem(str(mirror["contact"]["lastSeen"]).replace('Z', "").replace('T', " "))
                     child4 = QtGui.QStandardItem(str(mirror["contact"]["nodeID"]))
                     parent1.appendRow([child1, child2, child3, child4])
 
@@ -172,7 +200,8 @@ class FileMirrorsListUI(QtGui.QMainWindow):
             self.available_mirrors_tree_view.setUniformRowHeights(True)
 
             self.file_mirrors_list_ui.available_mirrors_tree.setModel(self.available_mirrors_model)
-
+            if MIRRORS_TREE_SORTING_ENABLED:
+                self.file_mirrors_list_ui.available_mirrors_tree.setSortingEnabled(True)
             divider = 0
             self.available_mirrors_count_for_file = 0
             recent_shard_hash_2 = ""
@@ -187,7 +216,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
 
                     child1 = QtGui.QStandardItem(str(mirror_2["contact"]["address"] + ":" + str(mirror_2["contact"]["port"])))
                     child2 = QtGui.QStandardItem(str(mirror_2["contact"]["userAgent"]))
-                    child3 = QtGui.QStandardItem(str(mirror_2["contact"]["lastSeen"]))
+                    child3 = QtGui.QStandardItem(str(mirror_2["contact"]["lastSeen"]).replace('Z', "").replace('T', " "))
                     child4 = QtGui.QStandardItem(str(mirror_2["contact"]["nodeID"]))
                     parent2.appendRow([child1, child2, child3, child4])
 

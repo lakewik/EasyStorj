@@ -10,6 +10,9 @@ import mimetypes
 import threading
 import time
 
+import multiprocessing
+
+
 import requests
 import storj
 import storj.model
@@ -26,7 +29,7 @@ from utilities.tools import Tools
 
 from resources.html_strings import html_format_begin, html_format_end
 from resources.constants import MAX_RETRIES_UPLOAD_TO_SAME_FARMER, \
-    MAX_RETRIES_NEGOTIATE_CONTRACT
+    MAX_RETRIES_NEGOTIATE_CONTRACT, AUTO_SCROLL_UPLOAD_DOWNLOAD_QUEUE, BUCKETS_LIST_SORTING_ENABLED
 from resources.internal_backend_config_variables import APPLY_SELECTED_BUCKET_TO_UPLOADER
 
 class SingleFileUploadUI(QtGui.QMainWindow):
@@ -105,6 +108,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('updateShardUploadCounters'), self.update_shards_counters)
         self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'), self.set_current_active_connections)
         self.connect(self, QtCore.SIGNAL('setShardSize'), self.set_shard_size)
+        self.connect(self, QtCore.SIGNAL('createShardUploadThread'), self.createNewShardUploadThread)
         #self.connect(self, QtCore.SIGNAL('handleCancelAction'), self.ha)
 
         # resolve buckets and put to buckets combobox
@@ -117,14 +121,24 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # self.emit(QtCore.SIGNAL("addRowToUploadQueueTable"), "important", "information")
         # self.emit(QtCore.SIGNAL("incrementShardsProgressCounters"))
 
-        self.max_retries_upload_to_same_farmer = MAX_RETRIES_UPLOAD_TO_SAME_FARMER
-        self.max_retries_negotiate_contract = MAX_RETRIES_NEGOTIATE_CONTRACT
+        #self.max_retries_upload_to_same_farmer = MAX_RETRIES_UPLOAD_TO_SAME_FARMER
+        #self.max_retries_negotiate_contract = MAX_RETRIES_NEGOTIATE_CONTRACT
 
         # self.initialize_shard_queue_table(file_pointers)
 
         self.shard_upload_percent_list = []
 
         self.ui_single_file_upload.overall_progress.setValue(0)
+
+    def shardUploadInitThread(self, shard, chapters, frame, file_name):
+        shard_upload_init_thread = threading.Thread(
+            target=self.createNewShardUploadThread(
+                shard=shard,
+                chapters=chapters,
+                frame=frame,
+                file_name=file_name
+            ), args=())
+        shard_upload_init_thread.start()
 
     def set_shard_size(self, shard_size):
         self.ui_single_file_upload.shardsize.setText(str(self.tools.human_size(int(shard_size))))
@@ -218,13 +232,18 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.buckets_list = []
         self.bucket_id_list = []
+        self.bucket_id_name_2D_list = []
         self.storj_engine = StorjEngine()
         try:
             for bucket in self.storj_engine.storj_client.bucket_list():
-                self.__logger.debug('Found bucket: %s', bucket.name)
-                # append buckets to list
-                self.buckets_list.append(str(bucket.name).decode('utf8'))
-                self.bucket_id_list.append(bucket.id)
+                self.bucket_id_name_2D_list.append([str(bucket.id), str(bucket.name).decode('utf8')])  # append buckets to list
+
+            if BUCKETS_LIST_SORTING_ENABLED:
+                self.bucket_id_name_2D_list = sorted(self.bucket_id_name_2D_list, key=lambda x: x[1], reverse=False)
+
+            for arr_data in self.bucket_id_name_2D_list:
+                self.buckets_list.append(arr_data[1])
+                self.bucket_id_list.append(arr_data[0])
         except storj.exception.StorjBridgeApiError as e:
             self.__logger.error(e)
             QMessageBox.about(
@@ -268,6 +287,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.upload_queue_table_row_count, 5, QtGui.QTableWidgetItem(
                 str(row_data['shard_index'])))
 
+        if AUTO_SCROLL_UPLOAD_DOWNLOAD_QUEUE:
+            self.ui_single_file_upload.shard_queue_table_widget.scrollToBottom()
+
         self.upload_queue_progressbar_list[self.upload_queue_table_row_count].setValue(0)
 
         self.__logger.info(row_data)
@@ -292,6 +314,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         # Refactor to QtTrhead
 
+
+        #upload_thread = multiprocessing.Process(target=self.file_upload_begin, args=())
         upload_thread = threading.Thread(target=self.file_upload_begin, args=())
         upload_thread.start()
 
@@ -317,14 +341,24 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
     def createNewShardUploadThread(self, shard, chapters, frame, file_name):
         # another worker thread for single shard uploading and it will retry if download fail
-        upload_thread = threading.Thread(
-            target=self.upload_shard(
+
+        pool = multiprocessing.Pool()
+
+        print "starting thread for shard"
+
+        #upload_thread = threading.Thread(
+        #upload_thread = multiprocessing.Process(
+        upload_thread = pool.apply_async(
+            self.upload_shard(
                 shard=shard,
                 chapters=chapters,
                 frame=frame,
                 file_name_ready_to_shard_upload=file_name
             ), args=())
-        upload_thread.start()
+        pool.close()
+        pool.join()
+        #upload_thread.start()
+        print "zakonczono"
 
     def _add_shard_to_table(self, frame_content, shard, chapters):
         """
@@ -500,6 +534,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         success_shard_upload = True
 
                     except storj.exception.StorjFarmerError as e:
+                        print str(e)
                         self.__logger.error(e)
                         self.current_active_connections -= 1
                         self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
@@ -511,6 +546,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         continue
 
                     except Exception as e:
+                        print str(e)
                         self.__logger.error(e)
                         self.current_active_connections -= 1
                         self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
@@ -584,10 +620,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
 
             except storj.exception.StorjBridgeApiError as e:
+                print str(e)
                 self.__logger.error(e)
 
                 # upload failed due to Storj Bridge failure
-                self.__logger.error('Exception raised while trying to negitiate contract')
+                self.__logger.error('Exception raised while trying to negotiate contract')
                 # self.__logger.warning('"log_event_type": "error"')
                 self.__logger.error('"title": "Bridge exception"')
                 self.__logger.error('"description": "Exception raised while trying \
@@ -600,6 +637,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 continue
 
             except Exception as e:
+                print str(e)
                 self.__logger.error(e)
 
                 # now send Exchange Report
@@ -717,6 +755,30 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.dashboard_instance.createNewFileListUpdateThread()
 
     def file_upload_begin(self):
+
+        def _createNewShardUploadThread(shard, chapters, frame, file_name):
+            # another worker thread for single shard uploading and it will retry if download fail
+
+            pool = multiprocessing.Pool()
+
+            print "starting thread for shard"
+
+            # upload_thread = threading.Thread(
+            # upload_thread = multiprocessing.Process(
+            upload_thread = pool.apply_async(
+                self.upload_shard(
+                    shard=shard,
+                    chapters=chapters,
+                    frame=frame,
+                    file_name_ready_to_shard_upload=file_name
+                ), args=())
+            pool.close()
+            pool.join()
+            # upload_thread.start()
+            print "zakonczono"
+
+        self.connect(self, QtCore.SIGNAL('_createShardUploadThread'), _createNewShardUploadThread)
+
         self.ui_single_file_upload.overall_progress.setValue(0)
         # upload finish function #
 
@@ -935,13 +997,19 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             chapters = 0
 
-
             for shard in shards_manager.shards:
                 self.emit(QtCore.SIGNAL("setShardSize"), int(shard.size))
 
                 self.shard_upload_percent_list.append(0)
+                #self.emit(QtCore.SIGNAL("createShardUploadThread"), shard, chapters, frame, file_name_ready_to_shard_upload)
+                #self.emit(QtCore.SIGNAL("_createShardUploadThread"), shard, chapters, frame, file_name_ready_to_shard_upload)
                 self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
+                #self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
+                print "wysylanie sharda..."
                 chapters += 1
+                time.sleep(1)
+
+
 
                 # delete encrypted file TODO
 
