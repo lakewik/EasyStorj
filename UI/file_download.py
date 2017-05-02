@@ -446,6 +446,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         options_array["progressbars_enabled"] = "1"
         options_array["file_size_is_given"] = "1"
         options_array["shards_count"] = str(self.all_shards_count)
+        self.rowposition2 += 1
         self.shard_download(pointer, self.destination_file_path, options_array)
 
     def ask_overwrite(self, file_name):
