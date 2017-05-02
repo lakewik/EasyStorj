@@ -429,14 +429,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.emit(QtCore.SIGNAL("setCurrentState"), "Joining shards...")
         logger.debug('Joining shards...')
 
-        print "TEST"
-        print file_name
-        print type(file_name)
         if fileisencrypted:
-            print "TEST join shards"
-            print "file name " + file_name
-            print "tmp path " + self.tmp_path
-            print "final path: " + os.path.join(self.tmp_path, file_name)
             sharing_tools.join_shards(
                 os.path.join(self.tmp_path, file_name),
                 '-',
@@ -454,7 +447,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             self.emit(QtCore.SIGNAL("setCurrentState"), "Decrypting file...")
 
             logger.debug('Decrypting file...')
-            print "plik wyjsciowy" + str(self.destination_file_path)
+            print 'output file ' + str(self.destination_file_path)
             file_crypto_tools = FileCrypto()
             # Begin file decryption
             file_crypto_tools.decrypt_file(
@@ -690,12 +683,16 @@ to download  with ID :%s ...' % file_id)
                 else:
                     break
 
+            # threads = [threading.Thread(
+            #     target=foo,
+            #     args=(self,
+            #           p,
+            #           self.destination_file_path,
+            #           options_array)) for p in shard_pointer]
+            # self.shard_download(pointer, file_save_path, options_array)
             threads = [threading.Thread(
-                target=foo,
-                args=(self,
-                      p,
-                      self.destination_file_path,
-                      options_array)) for p in shard_pointer]
+                target=self.shard_download,
+                args=(p, self.destination_file_path, options_array)) for p in shard_pointer]
             print("-" * 30)
             print(threads)
             print("-" * 30)
@@ -921,6 +918,7 @@ to download  with ID :%s ...' % file_id)
                   "?token=" + pointer["token"]
             logger.debug(url)
 
+            print "TEST: download shard number %s with row number %s" % (part, rowposition)
             if self.combine_tmpdir_name_with_token:
                 self.create_download_connection(
                     url,
