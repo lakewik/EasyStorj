@@ -10,6 +10,9 @@ import mimetypes
 import threading
 import time
 
+import multiprocessing
+
+
 import requests
 import storj
 import storj.model
@@ -306,6 +309,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         # Refactor to QtTrhead
 
+
+        #upload_thread = multiprocessing.Process(target=self.file_upload_begin, args=())
         upload_thread = threading.Thread(target=self.file_upload_begin, args=())
         upload_thread.start()
 
@@ -331,7 +336,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
     def createNewShardUploadThread(self, shard, chapters, frame, file_name):
         # another worker thread for single shard uploading and it will retry if download fail
-        upload_thread = threading.Thread(
+
+        #upload_thread = threading.Thread(
+        upload_thread = multiprocessing.Process(
             target=self.upload_shard(
                 shard=shard,
                 chapters=chapters,
@@ -339,6 +346,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 file_name_ready_to_shard_upload=file_name
             ), args=())
         upload_thread.start()
+        print "zakonczono"
 
     def _add_shard_to_table(self, frame_content, shard, chapters):
         """
@@ -958,6 +966,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                 self.shard_upload_percent_list.append(0)
                 #self.emit(QtCore.SIGNAL("createShardUploadThread"), shard, chapters, frame, file_name_ready_to_shard_upload)
+                #self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
                 self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
                 print "wysylanie sharda..."
                 chapters += 1
