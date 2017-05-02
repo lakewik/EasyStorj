@@ -3,6 +3,7 @@ import threading
 from PyQt4 import QtCore, QtGui
 from qt_interfaces.file_mirrors_ui_new import Ui_FileMirrorsList
 import storj.exception as sjexc
+from resources.constants import MIRRORS_TREE_SORTING_ENABLED
 
 from engine import StorjEngine
 from node_details import NodeDetailsUI
@@ -155,6 +156,9 @@ class FileMirrorsListUI(QtGui.QMainWindow):
 
         self.file_mirrors_list_ui.available_mirrors_tree.setModel(self.established_mirrors_model)
 
+        if MIRRORS_TREE_SORTING_ENABLED:
+            self.file_mirrors_list_ui.established_mirrors_tree.setSortingEnabled(True)
+
         divider = 0
         group = 1
         self.established_mirrors_count_for_file = 0
@@ -196,7 +200,8 @@ class FileMirrorsListUI(QtGui.QMainWindow):
             self.available_mirrors_tree_view.setUniformRowHeights(True)
 
             self.file_mirrors_list_ui.available_mirrors_tree.setModel(self.available_mirrors_model)
-
+            if MIRRORS_TREE_SORTING_ENABLED:
+                self.file_mirrors_list_ui.available_mirrors_tree.setSortingEnabled(True)
             divider = 0
             self.available_mirrors_count_for_file = 0
             recent_shard_hash_2 = ""
