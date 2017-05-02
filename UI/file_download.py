@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-# import logging
 import os
 from sys import platform
 import requests
@@ -15,15 +14,12 @@ from engine import StorjEngine
 import storj
 import threading
 
-# from logs_backend import LogsUI
-# from logs_backend import LogHandler, logger
 from utilities.log_manager import logger
 
 from resources.html_strings import html_format_begin, html_format_end
 from utilities.account_manager import AccountManager
 import time
 from resources.constants import USE_USER_ENV_PATH_FOR_TEMP
-# from resources.custom_qt_components import YesNoCheckboxDialog
 
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
@@ -75,17 +71,11 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                                    bucketid,
                                    fileid))
 
-        # QtCore.QObject.connect(self.ui_single_file_download.open_log_bt,
-        #                        QtCore.SIGNAL("clicked()"),
-        #                        self.open_logs_window)  # open logs window
-
         self.connect(self,
                      QtCore.SIGNAL("incrementShardsDownloadProgressCounters"),
                      self.increment_shards_download_progress_counters)
         self.connect(self, QtCore.SIGNAL("updateShardDownloadProgress"),
                      self.update_shard_download_progess)
-        self.connect(self, QtCore.SIGNAL("beginShardDownloadProccess"),
-                     self.shard_download)
         self.connect(self, QtCore.SIGNAL("refreshOverallDownloadProgress"),
                      self.refresh_overall_download_progress)
         self.connect(self,
@@ -241,7 +231,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.download_queue_progressbar_list[
             self.download_queue_table_row_count].setValue(0)
 
-    def _add_shard_to_table(self, pointers_content, shard, chapters):
+    def _add_shard_to_table(self, pointers_content, chapters):
         """
         Add a row to the shard table and return the row number
         """
@@ -280,12 +270,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
              "}"))
         QtGui.QMessageBox.information(self, "Success!",
                                       "File downloaded successfully!")
-
-    """
-    def open_logs_window(self):
-        self.logs_window = LogsUI(self)
-        self.logs_window.show()
-    """
 
     def show_unhandled_exception(self, exception_content):
         QtGui.QMessageBox.critical(self, "Unhandled error", str(exception_content))
@@ -800,9 +784,7 @@ to download  with ID :%s ...' % file_id)
             logger.debug(url)
 
             # Add a row to the table
-
             rowposition = self._add_shard_to_table(pointer,
-                                                   0,
                                                    part)
 
             print str(rowposition) + " pozycja2"
