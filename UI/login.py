@@ -21,7 +21,9 @@ class LoginUI(QtGui.QMainWindow):
         # Account manager
         self.login_ui.password.setEchoMode(QtGui.QLineEdit.Password)
 
-        QtCore.QObject.connect(self.login_ui.login_bt, QtCore.SIGNAL('clicked()'), self.login)  # take login action
+        QtCore.QObject.connect(self.login_ui.login_bt,
+                               QtCore.SIGNAL('clicked()'),
+                               self.login)  # take login action
 
     def login(self):
         # take login action
@@ -37,18 +39,24 @@ class LoginUI(QtGui.QMainWindow):
             success = True
         except storj.exception.StorjBridgeApiError as e:
             j = json.loads(str(e))
-            print j
+            logger.debug(j)
             if j[0]['error'] == 'Invalid email or password':
-                QtGui.QMessageBox.about(self, 'Warning',
-                                        'Invalid email or password - access denied. '
-                                        'Please check your credentials and try again!')
+                QtGui.QMessageBox.about(
+                    self, 'Warning',
+                    'Invalid email or password - access denied. '
+                    'Please check your credentials and try again!')
             else:
-                QtGui.QMessageBox.about(self, 'Unhandled exception', 'Exception: ' + str(e))
+                QtGui.QMessageBox.about(self, 'Unhandled exception',
+                                        'Exception: %s' % e)
 
         if success:
-            self.account_manager = AccountManager(self.email, self.password)  # init account manager
-            self.account_manager.save_account_credentials()  # save login credentials and state
-            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Success', 'Successfully loged in!',
+            # Init account manager
+            self.account_manager = AccountManager(self.email, self.password)
+            # Save login credentials and state
+            self.account_manager.save_account_credentials()
+            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information,
+                                       'Success',
+                                       'Successfully loged in!',
                                        QtGui.QMessageBox.Ok)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
@@ -56,4 +64,5 @@ class LoginUI(QtGui.QMainWindow):
                 self.main_ui_window = MainUI(self)
                 self.main_ui_window.show()
                 self.close()
-                #initial_window.hide()
+                # initial_window.hide()
+
