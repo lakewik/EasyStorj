@@ -52,7 +52,7 @@ class MainUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.file_manager_ui.file_delete_bt, QtCore.SIGNAL('clicked()'),
                                self.delete_selected_file)  # delete selected file
 
-        self.connect(self, QtCore.SIGNAL("changeLoadingGif"), self.change_loading_gif)
+        self.connect(self, QtCore.SIGNAL('changeLoadingGif'), self.change_loading_gif)
 
 
         self.file_manager_ui.settings_bt.mousePressEvent = self.open_settings_window
@@ -85,7 +85,7 @@ class MainUI(QtGui.QMainWindow):
             self.file_manager_ui.refresh_bt.setMovie(movie)
             movie.start()
         else:
-            self.file_manager_ui.refresh_bt.setPixmap(QtGui.QPixmap((":/resources/refresh.png")))
+            self.file_manager_ui.refresh_bt.setPixmap(QtGui.QPixmap((':/resources/refresh.png')))
 
 
     def open_bucket_editing_window(self, action):
@@ -202,7 +202,7 @@ class MainUI(QtGui.QMainWindow):
         file_list_header_labels = ['File name', 'File size', 'File ID']
 
         if DISPLAY_FILE_CREATION_DATE_IN_MAIN:
-            file_list_header_labels.append("Creation date")
+            file_list_header_labels.append('Creation date')
 
         model.setHorizontalHeaderLabels(file_list_header_labels)
 
@@ -212,9 +212,9 @@ class MainUI(QtGui.QMainWindow):
         i = 0
 
         try:
-            self.emit(QtCore.SIGNAL("changeLoadingGif"), True)
+            self.emit(QtCore.SIGNAL('changeLoadingGif'), True)
             for self.file_details in self.storj_engine.storj_client.bucket_files(str(self.current_selected_bucket_id)):
-                item = QtGui.QStandardItem(str(self.file_details['filename'].replace('[DECRYPTED]', "")).decode('utf8'))
+                item = QtGui.QStandardItem(str(self.file_details['filename'].replace('[DECRYPTED]', '')).decode('utf8'))
                 model.setItem(i, 0, item)  # row, column, item (StandardItem)
 
                 file_size_str = self.tools.human_size(int(self.file_details['size']))  # get human readable file size
@@ -222,7 +222,7 @@ class MainUI(QtGui.QMainWindow):
                 item = QtGui.QStandardItem(str(file_size_str))
                 model.setItem(i, 1, item)  # row, column, item (QQtGui.StandardItem)
 
-                # item = QtGui.QStandardItem(str(self.file_details["mimetype"]))
+                # item = QtGui.QStandardItem(str(self.file_details['mimetype']))
                 # model.setItem(i, 2, item)  # row, column, item (QStandardItem)
 
                 item = QtGui.QStandardItem(str(self.file_details['id']))
@@ -231,7 +231,7 @@ class MainUI(QtGui.QMainWindow):
                 #print self.file_details
 
                 if DISPLAY_FILE_CREATION_DATE_IN_MAIN:
-                    item = QtGui.QStandardItem(str(self.file_details['created']).replace('Z', "").replace('T', " "))
+                    item = QtGui.QStandardItem(str(self.file_details['created']).replace('Z', '').replace('T', ' '))
                     model.setItem(i, 3, item)  # row, column, item (QStandardItem)
 
                 i = i + 1
@@ -248,7 +248,7 @@ class MainUI(QtGui.QMainWindow):
             self.file_manager_ui.files_list_tableview.horizontalHeader().sortIndicatorChanged.connect(
                 self.handleSortIndicatorChanged)
             self.file_manager_ui.files_list_tableview.sortByColumn(0, QtCore.Qt.AscendingOrder)
-        self.emit(QtCore.SIGNAL("changeLoadingGif"), False)
+        self.emit(QtCore.SIGNAL('changeLoadingGif'), False)
 
     def handleSortIndicatorChanged(self, index, order):
         if index != 0:
@@ -266,7 +266,7 @@ class MainUI(QtGui.QMainWindow):
         self.bucket_id_name_2D_list = []
         self.storj_engine = StorjEngine()  # init StorjEngine
         i = 0
-        self.emit(QtCore.SIGNAL("changeLoadingGif"), True)
+        self.emit(QtCore.SIGNAL('changeLoadingGif'), True)
         try:
             for bucket in self.storj_engine.storj_client.bucket_list():
                 self.bucket_id_name_2D_list.append([str(bucket.id), str(bucket.name).decode('utf8')])  # append buckets to list
@@ -286,7 +286,7 @@ class MainUI(QtGui.QMainWindow):
 
 
         self.file_manager_ui.bucket_select_combo_box.addItems(self.buckets_list)
-        self.emit(QtCore.SIGNAL("changeLoadingGif"), False)
+        self.emit(QtCore.SIGNAL('changeLoadingGif'), False)
 
     def open_single_file_download_window(self):
         self.current_bucket_index = self.file_manager_ui.bucket_select_combo_box.currentIndex()

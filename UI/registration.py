@@ -20,7 +20,7 @@ class RegisterUI(QtGui.QMainWindow):
         self.register_ui.password.setEchoMode(QtGui.QLineEdit.Password)
         self.register_ui.password_2.setEchoMode(QtGui.QLineEdit.Password)
 
-        QtCore.QObject.connect(self.register_ui.register_bt, QtCore.SIGNAL("clicked()"),
+        QtCore.QObject.connect(self.register_ui.register_bt, QtCore.SIGNAL('clicked()'),
                                self.register)  # validate and register user
 
     def register(self):
@@ -31,42 +31,42 @@ class RegisterUI(QtGui.QMainWindow):
 
         self.tools = Tools()
         success = False
-        if self.email != "" and self.password != "" and self.password_repeat != "":
+        if self.email != '' and self.password != '' and self.password_repeat != '':
             if self.password == self.password_repeat:
                 if (self.tools.check_email(self.email)):
                     # take login action
                     try:
-                        self.storj_client = storj.Client(None, "").user_create(str(self.email).strip(), str(self.password).strip())
+                        self.storj_client = storj.Client(None, '').user_create(str(self.email).strip(), str(self.password).strip())
                         success = True
                     except storj.exception.StorjBridgeApiError as e:
                         j = json.loads(str(e))
-                        if j[0]["error"] == "Email is already registered":
-                            QtGui.QMessageBox.about(self, "Warning",
+                        if j[0]['error'] == 'Email is already registered':
+                            QtGui.QMessageBox.about(self, 'Warning',
                                                     "User with this e-mail is \
                                                     already registered! Please \
                                                     login or try a different \
                                                     e-mail!")
                         else:
-                            QtGui.QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
+                            QtGui.QMessageBox.about(self, 'Unhandled exception', 'Exception: ' + str(e))
                 else:
-                    QtGui.QMessageBox.about(self, "Warning",
-                                            "Your e-mail seems to be invalid! Please check e-mail and try again")
+                    QtGui.QMessageBox.about(self, 'Warning',
+                                            'Your e-mail seems to be invalid! Please check e-mail and try again')
             else:
-                QtGui.QMessageBox.about(self, "Warning",
-                                        "Given passwords are different! Please check and try again!")
+                QtGui.QMessageBox.about(self, 'Warning',
+                                        'Given passwords are different! Please check and try again!')
         else:
-            QtGui.QMessageBox.about(self, "Warning",
-                                    "Please fill out all fields!")
+            QtGui.QMessageBox.about(self, 'Warning',
+                                    'Please fill out all fields!')
 
         if success:
-            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success",
-                                       "Successfully registered in Storj Distributed Storage Network! "
-                                       "Now, you must verify your email by"
-                                       "clicking the link that has been sent to you. "
-                                       "Then you can login", QtGui.QMessageBox.Ok)
-            logger.debug("New user registrated")
-            logger.debug("Email: " + self.email)
-            logger.debug("Password: " + self.password)
+            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Success',
+                                       'Successfully registered in Storj Distributed Storage Network! '
+                                       'Now, you must verify your email by'
+                                       'clicking the link that has been sent to you. '
+                                       'Then you can login', QtGui.QMessageBox.Ok)
+            logger.debug('New user registrated')
+            logger.debug('Email: ' + self.email)
+            logger.debug('Password: ' + self.password)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
                 self.login_window = LoginUI(self)

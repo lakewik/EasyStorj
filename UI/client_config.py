@@ -16,13 +16,13 @@ class ClientConfigurationUI(QtGui.QMainWindow):
 
         self.configuration_manager = Configuration()
 
-        QtCore.QObject.connect(self.client_configuration_ui.apply_bt, QtCore.SIGNAL("clicked()"),
+        QtCore.QObject.connect(self.client_configuration_ui.apply_bt, QtCore.SIGNAL('clicked()'),
                                self.save_settings)  # save settings action
 
-        QtCore.QObject.connect(self.client_configuration_ui.cancel_bt, QtCore.SIGNAL("clicked()"),
+        QtCore.QObject.connect(self.client_configuration_ui.cancel_bt, QtCore.SIGNAL('clicked()'),
                                self.close)  # close form
 
-        QtCore.QObject.connect(self.client_configuration_ui.crypto_keys_location_select_bt, QtCore.SIGNAL("clicked()"),
+        QtCore.QObject.connect(self.client_configuration_ui.crypto_keys_location_select_bt, QtCore.SIGNAL('clicked()'),
                                self.select_crypto_keys_path)  # open path select
 
         self.configuration_manager.paint_config_to_ui(self.client_configuration_ui)
@@ -30,13 +30,13 @@ class ClientConfigurationUI(QtGui.QMainWindow):
 
     def select_crypto_keys_path(self):
         self.client_configuration_ui.crypto_keys_location.setText(str(QtGui.QFileDialog.getSaveFileName(
-          self, 'Save file to...', "storj_client_keyring.sjkr")))
+          self, 'Save file to...', 'storj_client_keyring.sjkr')))
 
     def save_settings(self):
         # validate settings
 
         self.configuration_manager.save_client_configuration(self.client_configuration_ui)  # save configuration
-        QtGui.QMessageBox.about(self, "Success", "Configuration saved successfully!")
+        QtGui.QMessageBox.about(self, 'Success', 'Configuration saved successfully!')
 
 
 

@@ -124,7 +124,7 @@ class BucketEditingUI(QtGui.QMainWindow):
         except Exception as e:
             self.__logger.error(e)
             self.__logger.error('Unhandled exception while deleting bucket %s' % e)
-            # QtGui.QMessageBox.about(self, "Unhandled exception deleting bucket", "Exception: " + str(e))
+            # QtGui.QMessageBox.about(self, 'Unhandled exception deleting bucket', 'Exception: ' + str(e))
             success = False
 
         if success:
