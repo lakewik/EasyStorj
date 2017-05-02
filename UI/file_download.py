@@ -150,7 +150,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             if USE_USER_ENV_PATH_FOR_TEMP:
                 temp_dir = os.path.join(
                     self.get_home_user_directory().decode('utf-8'),
-                    'AppData\\Local\\Temp')
+                    'AppData', 'Local', 'Temp')
             else:
                 temp_dir = 'C:\\Windows\\temp'
 
@@ -232,9 +232,9 @@ this window?",
             QtGui.QTableWidgetItem(row_data['hash']))
         self.ui_single_file_download.shard_queue_table.setItem(
             self.download_queue_table_row_count, 2,
-            QtGui.QTableWidgetItem(
-                row_data['farmer_address'] + ':' +
-                str(row_data['farmer_port'])))
+            QtGui.QTableWidgetItem('%s:%s' % (
+                row_data['farmer_address'],
+                row_data['farmer_port'])))
         self.ui_single_file_download.shard_queue_table.setItem(
             self.download_queue_table_row_count, 3,
             QtGui.QTableWidgetItem(str(row_data['state'])))
@@ -256,9 +256,9 @@ this window?",
         tablerowdata['state'] = 'Downloading...'
         tablerowdata['shard_index'] = str(chapters)
 
-        logger.debug('Resolved pointer for download : ' +
-                     str(pointers_content['farmer']['address']) + ':' +
-                     str(pointers_content['farmer']['port']))
+        logger.debug('Resolved pointer for download: %s:%s' % (
+                     pointers_content['farmer']['address'],
+                     pointers_content['farmer']['port']))
         # Add row to table
         self.emit(QtCore.SIGNAL('addRowToDownloadQueueTable'), tablerowdata)
 
@@ -435,11 +435,10 @@ this window?",
             # Begin file decryption
             file_crypto_tools.decrypt_file(
                 'AES',
-                str(self.destination_file_path) + '.encrypted',
+                '%s.encrypted' % self.destination_file_path,
                 str(self.destination_file_path),
                 str(self.user_password))
 
-        logger.debug('pobrano')
         logger.debug('Downloading completed successfully!')
         self.emit(QtCore.SIGNAL('setCurrentState'),
                   'Downloading completed successfully!')
@@ -516,8 +515,9 @@ this window?",
             elif platform == 'win32':
                 # Windows
                 if USE_USER_ENV_PATH_FOR_TEMP:
-                    self.tmp_path = str(self.tools.get_home_user_directory()).decode(
-                        'utf-8') + '\\' + 'AppData\\Local\\Temp'
+                    self.tmp_path = os.path.join(
+                        str(self.tools.get_home_user_directory()).decode('utf-8'),
+                        'AppData', 'Local', 'Temp')
                 else:
                     self.tmp_path = 'C:\\Windows\\temp'
 
@@ -687,10 +687,13 @@ to download  with ID :%s ...' % file_id)
                           'Downloading...')  # update shard downloading state
 
                 if tries_download_from_same_farmer > 1:
-                    self.emit(QtCore.SIGNAL('setCurrentState'), 'Downloading shard ' + str(shard_index) +
-                              '. Retry ' + str(tries_download_from_same_farmer))
+                    self.emit(QtCore.SIGNAL('setCurrentState'),
+                              'Downloading shard %s. Retry %s' % (
+                                  shard_index,
+                                  tries_download_from_same_farmer))
                 else:
-                    self.emit(QtCore.SIGNAL('setCurrentState'), 'Downloading shard ' + str(shard_index))
+                    self.emit(QtCore.SIGNAL('setCurrentState'),
+                              'Downloading shard %s' % shard_index)
 
                 if options_chain['handle_progressbars'] != '1':
                     r = requests.get(url)
@@ -709,14 +712,13 @@ to download  with ID :%s ...' % file_id)
                     chunk = 1
                     num_bars = file_size / chunk
                     t1 = float(file_size) / float((32 * 1024))
-                    logger.debug(t1)
 
                     if file_size <= (32 * 1024):
                         t1 = 1
 
                     i = 0
-                    logger.debug(file_size)
-                    logger.debug(str(t1) + ' kotek')
+                    logger.debug('File size: %s' % file_size)
+                    logger.debug('Chunks: %s' % t1)
                     f = open(local_filename, 'wb')
                     for chunk in r.iter_content(32 * 1024):
                         i += 1
