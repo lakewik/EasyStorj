@@ -17,10 +17,8 @@ from file_mirror import FileMirrorsListUI
 from file_upload import SingleFileUploadUI
 from utilities.tools import Tools
 
-
-from resources.constants import DISPLAY_FILE_CREATION_DATE_IN_MAIN, FILE_LIST_SORTING_MAIN_ENABLED
+from resources.constants import DISPLAY_FILE_CREATION_DATE_IN_MAIN, FILE_LIST_SORTING_MAIN_ENABLED, BUCKETS_LIST_SORTING_ENABLED
 from resources.custom_qt_interfaces import TableModel
-
 
 
 class ExtendedQLabel(QtGui.QLabel):
@@ -245,7 +243,6 @@ class MainUI(QtGui.QMainWindow):
         self.file_manager_ui.files_list_tableview.clearFocus()
         self.file_manager_ui.files_list_tableview.setModel(model)
         self.file_manager_ui.files_list_tableview.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-
         if FILE_LIST_SORTING_MAIN_ENABLED:
             self.file_manager_ui.files_list_tableview.setSortingEnabled(True)
             self.file_manager_ui.files_list_tableview.horizontalHeader().sortIndicatorChanged.connect(
@@ -258,7 +255,6 @@ class MainUI(QtGui.QMainWindow):
             self.file_manager_ui.files_list_tableview.horizontalHeader().setSortIndicator(
                 0, self.file_manager_ui.files_list_tableview.model().sortOrder())
 
-
     def createNewBucketResolveThread(self):
         download_thread = threading.Thread(target=self.initialize_bucket_select_combobox, args=())
         download_thread.start()
@@ -267,14 +263,23 @@ class MainUI(QtGui.QMainWindow):
         self.file_manager_ui.bucket_select_combo_box.clear()
         self.buckets_list = []
         self.bucket_id_list = []
+        self.bucket_id_name_2D_list = []
         self.storj_engine = StorjEngine()  # init StorjEngine
         i = 0
         self.emit(QtCore.SIGNAL("changeLoadingGif"), True)
         try:
             for bucket in self.storj_engine.storj_client.bucket_list():
-                self.buckets_list.append(str(bucket.name).decode('utf8'))  # append buckets to list
-                self.bucket_id_list.append(str(bucket.id))  # append buckets to list
-                i = i + 1
+                self.bucket_id_name_2D_list.append([str(bucket.id), str(bucket.name).decode('utf8')])  # append buckets to list
+
+                i += 1
+
+            if BUCKETS_LIST_SORTING_ENABLED:
+                self.bucket_id_name_2D_list = sorted(self.bucket_id_name_2D_list, key=lambda x: x[1], reverse=False)
+
+            for arr_data in self.bucket_id_name_2D_list:
+                self.buckets_list.append(arr_data[1])
+                self.bucket_id_list.append(arr_data[0])
+
         except sjexc.StorjBridgeApiError as e:
             self.__logger.error(e)
             QtGui.QMessageBox.about(self, 'Unhandled bucket resolving exception', 'Exception: ' % e)
