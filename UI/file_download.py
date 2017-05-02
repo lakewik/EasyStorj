@@ -435,8 +435,19 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         return True
 
     def retry_download_with_new_pointer(self, shard_index):
-        print "NOT IMPLEMENTED"
-        return 1
+        pointers = self.get_shard_pointers(
+            bucket_id=self.bucket_id,
+            file_id=self.file_id,
+            num_of_shards="1",
+            shard_index=str(shard_index))
+        pointer = pointers[0]
+        self.set_current_active_connections += 1
+        options_array = {}
+        options_array["tmp_path"] = self.tmp_path
+        options_array["progressbars_enabled"] = "1"
+        options_array["file_size_is_given"] = "1"
+        options_array["shards_count"] = str(self.all_shards_count)
+        self.shard_download(pointer, self.destination_file_path, options_array)
 
     def ask_overwrite(self, file_name):
         msgBox = QtGui.QMessageBox(
@@ -708,12 +719,12 @@ to download  with ID :%s ...' % file_id)
             self.emit(QtCore.SIGNAL("updateDownloadTaskState"),
                       rowposition,
                       "Error while downloading from this farmer. \
-                      Getting another farmer pointer...")
+Getting another farmer pointer...")
             time.sleep(1)
             # Retry download with new download pointer
             print "retry with new downoad pointer"
-            # self.emit(QtCore.SIGNAL("retryWithNewDownloadPointer"),
-            #           shard_index)
+            self.emit(QtCore.SIGNAL("retryWithNewDownloadPointer"),
+                      shard_index)
 
         else:
             self.current_active_connections -= 1
