@@ -26,19 +26,6 @@ from resources.constants import USE_USER_ENV_PATH_FOR_TEMP
 # from resources.custom_qt_components import YesNoCheckboxDialog
 
 
-# def foo(args):
-def foo(self, pointer, file_save_path, options_array):
-    print("chiama foo")
-    # self, pointer, file_save_path, options_array = args
-
-    options_array['shard_index'] = pointer['index']
-
-    # options_array['file_size_shard_%s' % pointer['index']] = pointer['size']
-
-    # self.shard_download(pointer, shard_index)
-    self.shard_download(pointer, file_save_path, options_array)
-
-
 class SingleFileDownloadUI(QtGui.QMainWindow):
 
     def __init__(self, parent=None, bucketid=None, fileid=None):
@@ -69,7 +56,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         self.user_password = self.account_manager.get_user_password()
 
-        ########3
         # open file select dialog
         QtCore.QObject.connect(self.ui_single_file_download.file_path_select_bt,
                                QtCore.SIGNAL("clicked()"),
@@ -447,7 +433,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             self.emit(QtCore.SIGNAL("setCurrentState"), "Decrypting file...")
 
             logger.debug('Decrypting file...')
-            print 'output file ' + str(self.destination_file_path)
+            logger.debug('Output file %s' % str(self.destination_file_path))
             file_crypto_tools = FileCrypto()
             # Begin file decryption
             file_crypto_tools.decrypt_file(
@@ -599,29 +585,16 @@ to download  with ID :%s ...' % file_id)
                 else:
                     break
 
-            # threads = [threading.Thread(
-            #     target=foo,
-            #     args=(self,
-            #           p,
-            #           self.destination_file_path,
-            #           options_array)) for p in shard_pointer]
-            # self.shard_download(pointer, file_save_path, options_array)
             threads = [threading.Thread(
                 target=self.shard_download,
                 args=(p,
                       self.destination_file_path,
                       options_array)) for p in shard_pointer]
-            print("-" * 30)
-            print(threads)
-            print("-" * 30)
             for t in threads:
                 self.already_started_shard_downloads_count += 1
                 t.start()
                 self.rowposition2 += 1
                 time.sleep(1)
-            # for t in threads:
-            #     t.join()
-            # print("TEST: finish all")
 
     def update_shard_download_progess(self, row_position_index, value):
         self.download_queue_progressbar_list[row_position_index].setValue(value)
@@ -833,8 +806,9 @@ to download  with ID :%s ...' % file_id)
                                                    part)
 
             print str(rowposition) + " pozycja2"
+            print "TEST: download shard number %s with row number %s" % (
+                part, self.rowposition2 - 1)
 
-            print "TEST: download shard number %s with row number %s" % (part, self.rowposition2-1)
             if self.combine_tmpdir_name_with_token:
                 self.create_download_connection(
                     url,
@@ -844,23 +818,17 @@ to download  with ID :%s ...' % file_id)
                                      file_name),
                         part),
                     options_chain,
-                    # rowposition - 1,
-                    self.rowposition2-1,
+                    self.rowposition2 - 1,
                     part)
             else:
                 self.create_download_connection(
                     url,
                     '%s-%s' % (os.path.join(self.tmp_path, file_name), part),
                     options_chain,
-                    # rowposition - 1,
-                    self.rowposition2-1,
+                    self.rowposition2 - 1,
                     part)
 
-                #self.rowposition2 += 1
-
             logger.debug('%s-%s' % (os.path.join(self.tmp_path, file_name), part))
-            part = part + 1
-
 
         except IOError as e:
             logger.error('Perm error %s' % e)
