@@ -604,13 +604,17 @@ to download  with ID :%s ...' % file_id)
                 args=(p,
                       self.destination_file_path,
                       options_array)) for p in shard_pointer]
-            for t in threads:
-                self.already_started_shard_downloads_count += 1
-                t.start()
-                self.rowposition2 += 1
-                time.sleep(1)
-            for t in threads:
-                t.join()
+            # Group threads by 4
+            threads = [threads[i:i + 4] for i in range(0, len(threads), 4)]
+
+            for t4 in threads:
+                for t in t4:
+                    self.already_started_shard_downloads_count += 1
+                    t.start()
+                    self.rowposition2 += 1
+                    time.sleep(1)
+                for t in t4:
+                    t.join()
 
     def update_shard_download_progess(self, row_position_index, value):
         self.download_queue_progressbar_list[row_position_index].setValue(value)
