@@ -13,6 +13,7 @@ from crypto.file_crypto_tools import FileCrypto
 from engine import StorjEngine
 import storj
 import threading
+import Queue
 
 from utilities.log_manager import logger
 
@@ -20,6 +21,8 @@ from resources.html_strings import html_format_begin, html_format_end
 from utilities.account_manager import AccountManager
 import time
 from resources.constants import USE_USER_ENV_PATH_FOR_TEMP
+
+queue = Queue.Queue()
 
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
@@ -435,11 +438,15 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         return True
 
     def retry_download_with_new_pointer(self, shard_index):
-        pointers = self.get_shard_pointers(
-            bucket_id=self.bucket_id,
-            file_id=self.file_id,
-            num_of_shards="1",
-            shard_index=str(shard_index))
+        tnp = threading.Thread(
+            target=self.get_shard_pointers,
+            args=(self.bucket_id,
+                  self.file_id,
+                  "1",
+                  str(shard_index)))
+        tnp.start()
+        # tnp.join()
+        pointers = queue.get()
         pointer = pointers[0]
         options_array = {}
         options_array["tmp_path"] = self.tmp_path
@@ -470,7 +477,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             file_id,
             limit=num_of_shards,
             skip=shard_index)
-        return pointers
+        #return pointers
+        queue.put(pointers)
 
     def download_begin(self, bucket_id, file_id):
         self.overwrite_question_closed = False
@@ -563,10 +571,21 @@ file with ID %s: ...' % file_id)
                         str(self.all_shards_count)
 
                     # Get all the pointers
-                    shard_pointer = self.get_shard_pointers(
-                        bucket_id=bucket_id,
-                        file_id=file_id,
-                        num_of_shards=str(self.all_shards_count))
+                    # shard_pointer = self.get_shard_pointers(
+                    #     bucket_id=bucket_id,
+                    #     file_id=file_id,
+                    #     num_of_shards=str(self.all_shards_count))
+
+                    thread_pointers = threading.Thread(
+                        target=self.get_shard_pointers,
+                        args=(bucket_id,
+                              file_id,
+                              str(self.all_shards_count)))
+
+                    thread_pointers.start()
+                    # thread_pointers.join()
+                    shard_pointer = queue.get()
+
                 except storj.exception.StorjBridgeApiError as e:
                     logger.debug('Bridge error')
                     logger.debug('Error while resolving file pointers \
@@ -590,6 +609,8 @@ to download  with ID :%s ...' % file_id)
                 t.start()
                 self.rowposition2 += 1
                 time.sleep(1)
+            for t in threads:
+                t.join()
 
     def update_shard_download_progess(self, row_position_index, value):
         self.download_queue_progressbar_list[row_position_index].setValue(value)
