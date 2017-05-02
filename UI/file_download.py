@@ -49,6 +49,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.filename_from_bridge = ""
         self.tools = Tools()
 
+        self.rowposition2 = 0
+
         self.bucket_id = bucketid
         self.file_id = fileid
 
@@ -615,6 +617,8 @@ to download  with ID :%s ...' % file_id)
             for t in threads:
                 self.already_started_shard_downloads_count += 1
                 t.start()
+                self.rowposition2 += 1
+                time.sleep(1)
             # for t in threads:
             #     t.join()
             # print("TEST: finish all")
@@ -661,6 +665,7 @@ to download  with ID :%s ...' % file_id)
         while self.max_retries_download_from_same_farmer > tries_download_from_same_farmer:
             tries_download_from_same_farmer += 1
             farmer_tries += 1
+            print str(rowposition) + " pozycja"
             try:
                 self.current_active_connections += 1
                 self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
@@ -822,11 +827,14 @@ to download  with ID :%s ...' % file_id)
             logger.debug(url)
 
             # Add a row to the table
+
             rowposition = self._add_shard_to_table(pointer,
                                                    0,
                                                    part)
 
-            print "TEST: download shard number %s with row number %s" % (part, rowposition)
+            print str(rowposition) + " pozycja2"
+
+            print "TEST: download shard number %s with row number %s" % (part, self.rowposition2-1)
             if self.combine_tmpdir_name_with_token:
                 self.create_download_connection(
                     url,
@@ -836,18 +844,23 @@ to download  with ID :%s ...' % file_id)
                                      file_name),
                         part),
                     options_chain,
-                    rowposition - 1,
+                    # rowposition - 1,
+                    self.rowposition2-1,
                     part)
             else:
                 self.create_download_connection(
                     url,
                     '%s-%s' % (os.path.join(self.tmp_path, file_name), part),
                     options_chain,
-                    rowposition - 1,
+                    # rowposition - 1,
+                    self.rowposition2-1,
                     part)
+
+                #self.rowposition2 += 1
 
             logger.debug('%s-%s' % (os.path.join(self.tmp_path, file_name), part))
             part = part + 1
+
 
         except IOError as e:
             logger.error('Perm error %s' % e)
@@ -861,4 +874,3 @@ have permissions to write or read from selected directories.')
         except Exception as e:
             logger.debug('Unhandled error')
             logger.error(e)
-
