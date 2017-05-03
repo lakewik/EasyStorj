@@ -361,6 +361,18 @@ class Ui_SingleFileUpload(object):
 "}\n"
 ""))
         self.current_active_connections.setObjectName(_fromUtf8("current_active_connections"))
+        self.label_7 = QtGui.QLabel(SingleFileUpload)
+        self.label_7.setGeometry(QtCore.QRect(390, 10, 411, 31))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_7.setFont(font)
+        self.label_7.setObjectName(_fromUtf8("label_7"))
+        self.connections_onetime = QtGui.QSpinBox(SingleFileUpload)
+        self.connections_onetime.setGeometry(QtCore.QRect(810, 10, 151, 32))
+        self.connections_onetime.setObjectName(_fromUtf8("connections_onetime"))
 
         self.retranslateUi(SingleFileUpload)
         QtCore.QMetaObject.connectSlotsByName(SingleFileUpload)
@@ -398,4 +410,5 @@ class Ui_SingleFileUpload(object):
         self.current_state.setText(_translate("SingleFileUpload", "<html><head/><body><p><span style=\" color:#555555;\">WAITING TO START UPLOAD</span></p></body></html>", None))
         self.label_16.setText(_translate("SingleFileUpload", "<html><head/><body><p><span style=\" color:#555555;\">ACTIVE CONNECTIONS:</span></p></body></html>", None))
         self.current_active_connections.setText(_translate("SingleFileUpload", "<html><head/><body><p align=\"center\"><span style=\" color:#2683ff;\">0</span></p></body></html>", None))
+        self.label_7.setText(_translate("SingleFileUpload", "<html><head/><body><p>CONCURRENCY (MAX ONE-TIME CONNECTIONS):</p></body></html>", None))
 
