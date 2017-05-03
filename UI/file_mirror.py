@@ -1,6 +1,7 @@
 import json
 import threading
 from PyQt4 import QtCore, QtGui
+from six import print_
 from qt_interfaces.file_mirrors_ui_new import Ui_FileMirrorsList
 import storj.exception as sjexc
 from resources.constants import MIRRORS_TREE_SORTING_ENABLED
@@ -71,7 +72,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
     def closeEvent(self, event):
         # do stuff
         self.mirror_list_initialization_thread.stop()
-        print 'Mirrors get proccess stopped!'
+        print_('Mirrors get proccess stopped!')
         event.accept()  # let the window close
 
 

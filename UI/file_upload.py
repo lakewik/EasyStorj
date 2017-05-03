@@ -19,6 +19,7 @@ import storj.model
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QMessageBox
+from six import print_
 
 from crypto.crypto_tools import CryptoTools
 from crypto.file_crypto_tools import FileCrypto
@@ -344,7 +345,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         pool = multiprocessing.Pool()
 
-        print "starting thread for shard"
+        print_("starting thread for shard")
 
         #upload_thread = threading.Thread(
         #upload_thread = multiprocessing.Process(
@@ -358,7 +359,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         pool.close()
         pool.join()
         #upload_thread.start()
-        print "zakonczono"
+        print_("zakonczono")
 
     def _add_shard_to_table(self, frame_content, shard, chapters):
         """
@@ -534,7 +535,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         success_shard_upload = True
 
                     except storj.exception.StorjFarmerError as e:
-                        print str(e)
+                        print_(str(e))
                         self.__logger.error(e)
                         self.current_active_connections -= 1
                         self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
@@ -542,11 +543,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         # upload failed due to Farmer Failure
                         if str(e) == str(storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED):
                             self.__logger.error('The supplied token not accepted')
-                        # print "Exception raised while trying to negitiate contract: " + str(e)
+                        # print_("Exception raised while trying to negitiate contract: " + str(e))
                         continue
 
                     except Exception as e:
-                        print str(e)
+                        print_(str(e))
                         self.__logger.error(e)
                         self.current_active_connections -= 1
                         self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
@@ -620,7 +621,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
 
             except storj.exception.StorjBridgeApiError as e:
-                print str(e)
+                print_(str(e))
                 self.__logger.error(e)
 
                 # upload failed due to Storj Bridge failure
@@ -637,7 +638,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 continue
 
             except Exception as e:
-                print str(e)
+                print_(str(e))
                 self.__logger.error(e)
 
                 # now send Exchange Report
@@ -761,7 +762,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             pool = multiprocessing.Pool()
 
-            print "starting thread for shard"
+            print_("starting thread for shard")
 
             # upload_thread = threading.Thread(
             # upload_thread = multiprocessing.Process(
@@ -775,7 +776,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             pool.close()
             pool.join()
             # upload_thread.start()
-            print "zakonczono"
+            print_("zakonczono")
 
         self.connect(self, QtCore.SIGNAL('_createShardUploadThread'), _createNewShardUploadThread)
 
@@ -1005,7 +1006,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 #self.emit(QtCore.SIGNAL("_createShardUploadThread"), shard, chapters, frame, file_name_ready_to_shard_upload)
                 self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
                 #self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
-                print "wysylanie sharda..."
+                print_("wysylanie sharda...")
                 chapters += 1
                 time.sleep(1)
 
