@@ -1,5 +1,5 @@
 import xml.etree.cElementTree as ET
-from log_manager import logger
+from .log_manager import logger
 
 CONFIG_FILE = "storj_client_config.xml"
 

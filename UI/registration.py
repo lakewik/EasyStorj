@@ -1,10 +1,10 @@
 from PyQt4 import QtCore, QtGui
-from qt_interfaces.register_ui_new import Ui_UI_Register
-from login import LoginUI
-from utilities.tools import Tools
+from .qt_interfaces.register_ui_new import Ui_UI_Register
+from .login import LoginUI
+from .utilities.tools import Tools
 import json
 import storj
-from utilities.log_manager import logger
+from .utilities.log_manager import logger
 
 
 # Register section
