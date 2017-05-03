@@ -17,6 +17,7 @@ from .file_download import SingleFileDownloadUI
 from .file_mirror import FileMirrorsListUI
 from .file_upload import SingleFileUploadUI
 from .utilities.tools import Tools
+from .sync_menu import SyncMenuUI
 
 from .resources.constants import DISPLAY_FILE_CREATION_DATE_IN_MAIN, FILE_LIST_SORTING_MAIN_ENABLED, BUCKETS_LIST_SORTING_ENABLED
 from .resources.custom_qt_interfaces import TableModel
@@ -45,7 +46,10 @@ class MainUI(QtGui.QMainWindow):
                                QtCore.SIGNAL('currentIndexChanged(const QString&)'),
                                self.createNewFileListUpdateThread)  # connect ComboBox change listener
         QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt, QtCore.SIGNAL('clicked()'),
-                               self.open_mirrors_list_window)  # create bucket action
+                               self.open_mirrors_list_window)  # open mirrors list window
+
+        #QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt, QtCore.SIGNAL('clicked()'),
+         #                      self.open_sync_menu)  # open sync menu window
         # create bucket action
         # QtCore.QObject.connect(self.file_manager_ui.quit_bt, QtCore.SIGNAL('clicked()'),  self.close)
         QtCore.QObject.connect(self.file_manager_ui.file_download_bt, QtCore.SIGNAL('clicked()'),
@@ -55,6 +59,44 @@ class MainUI(QtGui.QMainWindow):
 
         self.connect(self, QtCore.SIGNAL('changeLoadingGif'), self.change_loading_gif)
 
+        appStyle = """
+
+        QTableView
+        {
+            alternate-background-color: #1F1F1F;
+            background-color: gray;
+            gridline-color: gray;
+            color: gray;
+        }
+        QTableView::item
+        {
+            color: white;
+        }
+
+        QTableView::item:focus
+        {
+            color: gray;
+            background: #0063cd;
+        }
+        QTableView::item:selected
+        {
+            color: gray;
+            background: #0063cd;
+        }
+
+        QCheckBox::indicator:checked, QCheckBox::indicator:unchecked{
+            color: #b1b1b1;
+            background-color: #323232;
+            border: 1px solid #b1b1b1;
+            border-radius: 1px;
+            width: 7px;
+            height: 7px;
+            margin: 0px 5px 0 5px;
+        }
+
+        """
+
+        #self.file_manager_ui.files_list_tableview.setStyleSheet(appStyle)
 
         self.file_manager_ui.settings_bt.mousePressEvent = self.open_settings_window
         self.file_manager_ui.refresh_bt.mousePressEvent = self.createNewFileListUpdateThread
@@ -79,6 +121,13 @@ class MainUI(QtGui.QMainWindow):
         self.file_manager_ui.account_label.setText(str(user_email))
 
         self.createNewBucketResolveThread()
+
+        #self.file_manager_ui.new_file_upload_bt.mouseReleaseEvent()
+
+
+    def open_sync_menu(self):
+        self.open_sync_menu_window = SyncMenuUI(self)
+        self.open_sync_menu_window.show()
 
     def change_loading_gif(self, is_visible):
         if is_visible:
