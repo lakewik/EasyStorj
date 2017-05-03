@@ -24,6 +24,7 @@ from resources.constants import USE_USER_ENV_PATH_FOR_TEMP
 
 queue = Queue.Queue()
 semaphore = threading.BoundedSemaphore(4)
+row_lock = threading.Lock()
 
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
@@ -35,8 +36,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.storj_engine = StorjEngine()  # init StorjEngine
         self.filename_from_bridge = ''
         self.tools = Tools()
-
-        self.rowposition2 = 0
 
         self.bucket_id = bucketid
         self.file_id = fileid
@@ -463,8 +462,10 @@ this window?",
         options_array['progressbars_enabled'] = '1'
         options_array['file_size_is_given'] = '1'
         options_array['shards_count'] = str(self.all_shards_count)
-        self.rowposition2 += 1
-        self.shard_download(pointer, self.destination_file_path, options_array, shard_index)
+        row_lock.acquire()
+        self.current_line += 1
+        row_lock.release()
+        self.shard_download(pointer, self.destination_file_path, options_array)
 
     def ask_overwrite(self, file_name):
         msgBox = QtGui.QMessageBox(
@@ -618,38 +619,20 @@ to download  with ID :%s ...' % file_id)
                 else:
                     break
 
-            """ FUNZIONANTE MARCO
             threads = [threading.Thread(
                 target=self.shard_download,
                 args=(p,
                       self.destination_file_path,
                       options_array)) for p in shard_pointer]
-            """
-            threads = [threading.Thread(
-                target=self.shard_download,
-                args=(shard_pointer[p],
-                      self.destination_file_path,
-                      options_array,
-                      p + 1)) for p in range(len(shard_pointer))]
-            """
-            # Group threads by 4
-            threads = [threads[i:i + 4] for i in range(0, len(threads), 4)]
-            for t4 in threads:
-                for t in t4:
-                    self.already_started_shard_downloads_count += 1
-                    t.start()
-                    self.rowposition2 += 1
-                    time.sleep(1)
-                for t in t4:
-                    t.join()
-            """
             self.current_line = 0
             for t in threads:
                 self.already_started_shard_downloads_count += 1
+                row_lock.acquire()
                 t.start()
                 self.current_line += 1
-                self.rowposition2 += 1
+                row_lock.release()
                 time.sleep(1)
+
             for t in threads:
                 t.join()
 
@@ -825,8 +808,9 @@ Getting another farmer pointer...")
                 self.emit(QtCore.SIGNAL('finishDownload'))
             return
 
-    def shard_download(self, pointer, file_save_path, options_array, line_number):
+    def shard_download(self, pointer, file_save_path, options_array):
         # MARCO TEST
+        row_lock.acquire()
         semaphore.acquire()
         logger.debug('Beginning download proccess...')
         options_chain = {}
@@ -875,6 +859,9 @@ Getting another farmer pointer...")
             # Add a row to the table
             rowposition = self._add_shard_to_table(pointer,
                                                    part)
+            #row_lock.acquire()
+            line_number = self.current_line
+            row_lock.release()
 
             logger.debug('Download shard number %s with row number %s' % (
                 part, line_number))
@@ -888,7 +875,6 @@ Getting another farmer pointer...")
                                      file_name),
                         part),
                     options_chain,
-                    #self.rowposition2 - 1,
                     line_number - 1,
                     part)
             else:
@@ -896,7 +882,6 @@ Getting another farmer pointer...")
                     url,
                     '%s-%s' % (os.path.join(self.tmp_path, file_name), part),
                     options_chain,
-                    #self.rowposition2 - 1,
                     line_number - 1,
                     part)
 
