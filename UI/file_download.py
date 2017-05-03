@@ -23,6 +23,8 @@ import time
 from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP
 
 queue = Queue.Queue()
+semaphore = threading.BoundedSemaphore(4)
+row_lock = threading.Lock()
 
 
 class SingleFileDownloadUI(QtGui.QMainWindow):
@@ -34,8 +36,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.storj_engine = StorjEngine()  # init StorjEngine
         self.filename_from_bridge = ''
         self.tools = Tools()
-
-        self.rowposition2 = 0
 
         self.bucket_id = bucketid
         self.file_id = fileid
@@ -462,7 +462,9 @@ this window?",
         options_array['progressbars_enabled'] = '1'
         options_array['file_size_is_given'] = '1'
         options_array['shards_count'] = str(self.all_shards_count)
-        self.rowposition2 += 1
+        row_lock.acquire()
+        self.current_line += 1
+        row_lock.release()
         self.shard_download(pointer, self.destination_file_path, options_array)
 
     def ask_overwrite(self, file_name):
@@ -622,17 +624,17 @@ to download  with ID :%s ...' % file_id)
                 args=(p,
                       self.destination_file_path,
                       options_array)) for p in shard_pointer]
-            # Group threads by 4
-            threads = [threads[i:i + 4] for i in range(0, len(threads), 4)]
+            self.current_line = 0
+            for t in threads:
+                self.already_started_shard_downloads_count += 1
+                row_lock.acquire()
+                t.start()
+                self.current_line += 1
+                row_lock.release()
+                time.sleep(1)
 
-            for t4 in threads:
-                for t in t4:
-                    self.already_started_shard_downloads_count += 1
-                    t.start()
-                    self.rowposition2 += 1
-                    time.sleep(1)
-                for t in t4:
-                    t.join()
+            for t in threads:
+                t.join()
 
     def update_shard_download_progess(self, row_position_index, value):
         self.download_queue_progressbar_list[row_position_index].\
@@ -710,7 +712,6 @@ to download  with ID :%s ...' % file_id)
                         file_size = int(r.headers['Content-Length'])
 
                     chunk = 1
-                    num_bars = file_size / chunk
                     t1 = float(file_size) / float((32 * 1024))
 
                     if file_size <= (32 * 1024):
@@ -797,6 +798,8 @@ Getting another farmer pointer...")
             self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
                       rowposition,
                       'Downloaded!')
+            # Release the semaphore when the download is finished
+            semaphore.release()
             if int(self.all_shards_count) <= \
                     int(self.shards_already_downloaded):
                 # Send signal to begin file shards join and decryption
@@ -805,6 +808,10 @@ Getting another farmer pointer...")
             return
 
     def shard_download(self, pointer, file_save_path, options_array):
+        # Acquire lock for row_number
+        row_lock.acquire()
+        # Acquire a semaphore
+        semaphore.acquire()
         logger.debug('Beginning download proccess...')
         options_chain = {}
         file_name = os.path.split(file_save_path)[1]
@@ -821,8 +828,6 @@ Getting another farmer pointer...")
 
             if options_array['file_size_is_given'] == '1':
                 options_chain['file_size_is_given'] = '1'
-
-            shards_count = int(options_array['shards_count'])
 
             logger.debug('Shard size: %s' % pointer['size'])
 
@@ -850,11 +855,13 @@ Getting another farmer pointer...")
             logger.debug(url)
 
             # Add a row to the table
-            rowposition = self._add_shard_to_table(pointer,
-                                                   part)
+            self._add_shard_to_table(pointer, part)
+            line_number = self.current_line
+            # Release the lock for the row_number
+            row_lock.release()
 
             logger.debug('Download shard number %s with row number %s' % (
-                part, self.rowposition2 - 1))
+                part, line_number))
 
             if self.combine_tmpdir_name_with_token:
                 self.create_download_connection(
@@ -865,14 +872,14 @@ Getting another farmer pointer...")
                                      file_name),
                         part),
                     options_chain,
-                    self.rowposition2 - 1,
+                    line_number - 1,
                     part)
             else:
                 self.create_download_connection(
                     url,
                     '%s-%s' % (os.path.join(self.tmp_path, file_name), part),
                     options_chain,
-                    self.rowposition2 - 1,
+                    line_number - 1,
                     part)
 
             logger.debug('%s-%s' % (os.path.join(self.tmp_path, file_name),
