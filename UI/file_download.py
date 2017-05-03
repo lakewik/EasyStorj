@@ -6,21 +6,21 @@ from sys import platform
 import requests
 from PyQt4 import QtCore, QtGui
 
-from utilities.sharder import ShardingTools
-from utilities.tools import Tools
-from qt_interfaces.file_download_new import Ui_SingleFileDownload
-from crypto.file_crypto_tools import FileCrypto
-from engine import StorjEngine
+from .utilities.sharder import ShardingTools
+from .utilities.tools import Tools
+from .qt_interfaces.file_download_new import Ui_SingleFileDownload
+from .crypto.file_crypto_tools import FileCrypto
+from .engine import StorjEngine
 import storj
 import threading
-import Queue
+from six.moves import queue as Queue
 
-from utilities.log_manager import logger
+from .utilities.log_manager import logger
 
-from resources.html_strings import html_format_begin, html_format_end
-from utilities.account_manager import AccountManager
+from .resources.html_strings import html_format_begin, html_format_end
+from .utilities.account_manager import AccountManager
 import time
-from resources.constants import USE_USER_ENV_PATH_FOR_TEMP
+from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP
 
 queue = Queue.Queue()
 

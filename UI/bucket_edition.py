@@ -2,8 +2,8 @@
 
 from PyQt4 import QtCore, QtGui
 
-from engine import StorjEngine
-from qt_interfaces.bucket_editing_ui import Ui_BucketEditing
+from .engine import StorjEngine
+from .qt_interfaces.bucket_editing_ui import Ui_BucketEditing
 import threading
 
 import storj.exception as sjexc

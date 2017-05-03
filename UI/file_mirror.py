@@ -1,17 +1,18 @@
 import json
 import threading
 from PyQt4 import QtCore, QtGui
-from qt_interfaces.file_mirrors_ui_new import Ui_FileMirrorsList
+from six import print_
+from .qt_interfaces.file_mirrors_ui_new import Ui_FileMirrorsList
 import storj.exception as sjexc
-from resources.constants import MIRRORS_TREE_SORTING_ENABLED
+from .resources.constants import MIRRORS_TREE_SORTING_ENABLED
 
-from engine import StorjEngine
-from node_details import NodeDetailsUI
+from .engine import StorjEngine
+from .node_details import NodeDetailsUI
 #from UI.engine import StorjEngine
 #from UI.node_details import NodeDetailsUI
 
-from resources.html_strings import html_format_begin, html_format_end
-from utilities.log_manager import logger
+from .resources.html_strings import html_format_begin, html_format_end
+from .utilities.log_manager import logger
 
 class StoppableThread(threading.Thread):
     """Thread class with a stop() method. The thread itself has to check
@@ -71,7 +72,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
     def closeEvent(self, event):
         # do stuff
         self.mirror_list_initialization_thread.stop()
-        print 'Mirrors get proccess stopped!'
+        print_('Mirrors get proccess stopped!')
         event.accept()  # let the window close
 
 

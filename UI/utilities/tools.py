@@ -1,7 +1,7 @@
 import re
 import os
 import platform
-import pingparser
+from . import pingparser
 from os.path import expanduser
 import tempfile
 import errno
