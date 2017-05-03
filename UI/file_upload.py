@@ -985,7 +985,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             # self.ui_single_file_upload.current_state.setText(
             #   html_format_begin + "Generating shards..." + html_format_end)
             # shards_manager._make_shards()
-            shards_count = shards_manager.num_chunks
+            shards_count = shards_manager.index
             # create file hash
             self.__logger.debug('file_upload() push_token=%s', push_token)
 
