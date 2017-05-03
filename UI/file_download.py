@@ -799,7 +799,7 @@ Getting another farmer pointer...")
             self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
                       rowposition,
                       'Downloaded!')
-            # MARCO TEST
+            # Release the semaphore when the download is finished
             semaphore.release()
             if int(self.all_shards_count) <= \
                     int(self.shards_already_downloaded):
@@ -809,8 +809,9 @@ Getting another farmer pointer...")
             return
 
     def shard_download(self, pointer, file_save_path, options_array):
-        # MARCO TEST
+        # Acquire lock for row_number
         row_lock.acquire()
+        # Acquire a semaphore
         semaphore.acquire()
         logger.debug('Beginning download proccess...')
         options_chain = {}
@@ -859,8 +860,8 @@ Getting another farmer pointer...")
             # Add a row to the table
             rowposition = self._add_shard_to_table(pointer,
                                                    part)
-            #row_lock.acquire()
             line_number = self.current_line
+            # Release the lock for the row_number
             row_lock.release()
 
             logger.debug('Download shard number %s with row number %s' % (
