@@ -712,7 +712,6 @@ to download  with ID :%s ...' % file_id)
                         file_size = int(r.headers['Content-Length'])
 
                     chunk = 1
-                    num_bars = file_size / chunk
                     t1 = float(file_size) / float((32 * 1024))
 
                     if file_size <= (32 * 1024):
@@ -830,8 +829,6 @@ Getting another farmer pointer...")
             if options_array['file_size_is_given'] == '1':
                 options_chain['file_size_is_given'] = '1'
 
-            shards_count = int(options_array['shards_count'])
-
             logger.debug('Shard size: %s' % pointer['size'])
 
             part = pointer['index']
@@ -858,8 +855,7 @@ Getting another farmer pointer...")
             logger.debug(url)
 
             # Add a row to the table
-            rowposition = self._add_shard_to_table(pointer,
-                                                   part)
+            self._add_shard_to_table(pointer, part)
             line_number = self.current_line
             # Release the lock for the row_number
             row_lock.release()
