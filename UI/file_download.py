@@ -20,10 +20,10 @@ from .utilities.log_manager import logger
 from .resources.html_strings import html_format_begin, html_format_end
 from .utilities.account_manager import AccountManager
 import time
-from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP
+from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP, MAX_DOWNLOAD_CONNECTIONS_AT_SAME_TIME
 
 queue = Queue.Queue()
-semaphore = threading.BoundedSemaphore(4)
+#semaphore = threading.BoundedSemaphore(4)
 row_lock = threading.Lock()
 
 
@@ -136,6 +136,10 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # init limit variables
         self.max_retries_download_from_same_farmer = 3
         self.max_retries_get_file_pointers = 30
+
+        self.semaphore = threading.BoundedSemaphore(MAX_DOWNLOAD_CONNECTIONS_AT_SAME_TIME)
+
+        self.ui_single_file_download.connections_onetime.setValue(int(MAX_DOWNLOAD_CONNECTIONS_AT_SAME_TIME))  # user can set it manually default value from constants file
 
         # set default paths
         temp_dir = ''
@@ -446,6 +450,7 @@ this window?",
         self.emit(QtCore.SIGNAL('showFileDownloadedSuccessfully'))
         return True
 
+
     def retry_download_with_new_pointer(self, shard_index):
         tnp = threading.Thread(
             target=self.get_shard_pointers,
@@ -485,15 +490,51 @@ this window?",
 
     def get_shard_pointers(self, bucket_id, file_id, num_of_shards='1',
                            shard_index='0'):
-        pointers = self.storj_engine.storj_client.file_pointers(
-            bucket_id,
-            file_id,
-            limit=num_of_shards,
-            skip=shard_index)
-        # return pointers
-        queue.put(pointers)
+        tries_get_file_pointers = 0
+        success = False
+        while self.max_retries_get_file_pointers > tries_get_file_pointers:
+            tries_get_file_pointers += 1
+            time.sleep(1)
+            if tries_get_file_pointers > 1:
+                self.emit(
+                    QtCore.SIGNAL('setCurrentState'),
+                    'Resolving pointers. Retry %s ...' % (
+                        tries_get_file_pointers))
+            else:
+                self.emit(QtCore.SIGNAL('setCurrentState'),
+                          'Resolving pointer for shards')
+            try:
+                pointers = self.storj_engine.storj_client.file_pointers(
+                    bucket_id,
+                    file_id,
+                    limit=num_of_shards,
+                    skip=shard_index)
+                # return pointers
+                success = True
+                queue.put(pointers)
+                break
+
+            except storj.exception.StorjBridgeApiError as e:
+                logger.debug('Bridge error')
+                logger.debug('Error while resolving file pointers \
+            to download  with ID :%s ...' % file_id)
+                # Emit Storj Bridge Exception
+                self.emit(QtCore.SIGNAL('showStorjBridgeException'),
+                          str(e))
+                continue
+            except Exception as e:
+                print "Exceptiom while resolving file pointers..."
+                continue
+        if success != True:
+            queue.put('error')
+
+
+
 
     def download_begin(self, bucket_id, file_id):
+
+        self.semaphore = threading.BoundedSemaphore(int(self.ui_single_file_download.connections_onetime.value()))
+
         self.overwrite_question_closed = False
         self.validation = {}
 
@@ -570,71 +611,54 @@ this window?",
 file with ID %s: ...' % file_id)
 
             self.is_upload_active = True
-            tries_get_file_pointers = 0
-            while self.max_retries_get_file_pointers > tries_get_file_pointers:
-                tries_get_file_pointers += 1
-                time.sleep(1)
-                try:
-                    if tries_get_file_pointers > 1:
-                        self.emit(
-                            QtCore.SIGNAL('setCurrentState'),
-                            'Resolving pointers. Retry %s ...' % (
-                                tries_get_file_pointers))
-                    else:
-                        self.emit(QtCore.SIGNAL('setCurrentState'),
-                                  'Resolving pointer for shards')
-                    options_array = {}
-                    options_array['tmp_path'] = self.tmp_path
-                    options_array['progressbars_enabled'] = '1'
-                    options_array['file_size_is_given'] = '1'
-                    options_array['shards_count'] = \
-                        str(self.all_shards_count)
 
-                    # Get all the pointers
-                    # shard_pointer = self.get_shard_pointers(
-                    #     bucket_id=bucket_id,
-                    #     file_id=file_id,
-                    #     num_of_shards=str(self.all_shards_count))
+            options_array = {}
+            options_array['tmp_path'] = self.tmp_path
+            options_array['progressbars_enabled'] = '1'
+            options_array['file_size_is_given'] = '1'
+            options_array['shards_count'] = \
+                str(self.all_shards_count)
 
-                    thread_pointers = threading.Thread(
-                        target=self.get_shard_pointers,
-                        args=(bucket_id,
-                              file_id,
-                              str(self.all_shards_count)))
+            # Get all the pointers
+            # shard_pointer = self.get_shard_pointers(
+            #     bucket_id=bucket_id,
+            #     file_id=file_id,
+            #     num_of_shards=str(self.all_shards_count))
 
-                    thread_pointers.start()
-                    # thread_pointers.join()
-                    shard_pointer = queue.get()
+            try:
+                thread_pointers = threading.Thread(
+                    target=self.get_shard_pointers,
+                    args=(bucket_id,
+                          file_id,
+                          str(self.all_shards_count)))
 
-                except storj.exception.StorjBridgeApiError as e:
-                    logger.debug('Bridge error')
-                    logger.debug('Error while resolving file pointers \
-to download  with ID :%s ...' % file_id)
-                    # Emit Storj Bridge Exception
-                    self.emit(QtCore.SIGNAL('showStorjBridgeException'),
-                              str(e))
-                    continue
-                except Exception as e:
-                    continue
-                else:
-                    break
+                thread_pointers.start()
+                # thread_pointers.join()
+                shard_pointer = queue.get()
 
-            threads = [threading.Thread(
-                target=self.shard_download,
-                args=(p,
-                      self.destination_file_path,
-                      options_array)) for p in shard_pointer]
-            self.current_line = 0
-            for t in threads:
-                self.already_started_shard_downloads_count += 1
-                row_lock.acquire()
-                t.start()
-                self.current_line += 1
-                row_lock.release()
-                time.sleep(1)
+                threads = [threading.Thread(
+                    target=self.shard_download,
+                    args=(p,
+                          self.destination_file_path,
+                          options_array)) for p in shard_pointer]
+                self.current_line = 0
+                for t in threads:
+                    self.already_started_shard_downloads_count += 1
+                    row_lock.acquire()
+                    t.start()
+                    self.current_line += 1
+                    row_lock.release()
+                    time.sleep(1)
 
-            for t in threads:
-                t.join()
+                for t in threads:
+                    t.join()
+
+                if shard_pointer == 'error':
+                    raise Exception()
+            except:
+                print 'Error while initializing download proccess...'
+
+
 
     def update_shard_download_progess(self, row_position_index, value):
         self.download_queue_progressbar_list[row_position_index].\
@@ -799,7 +823,7 @@ Getting another farmer pointer...")
                       rowposition,
                       'Downloaded!')
             # Release the semaphore when the download is finished
-            semaphore.release()
+            self.semaphore.release()
             if int(self.all_shards_count) <= \
                     int(self.shards_already_downloaded):
                 # Send signal to begin file shards join and decryption
@@ -811,7 +835,7 @@ Getting another farmer pointer...")
         # Acquire lock for row_number
         row_lock.acquire()
         # Acquire a semaphore
-        semaphore.acquire()
+        self.semaphore.acquire()
         logger.debug('Beginning download proccess...')
         options_chain = {}
         file_name = os.path.split(file_save_path)[1]
@@ -897,4 +921,3 @@ have permissions to write or read from selected directories.')
         except Exception as e:
             logger.debug('Unhandled error')
             logger.error(e)
-
