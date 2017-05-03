@@ -13,7 +13,5 @@ clean:
 	@ rm -rf $(VENV)
 
 $(VENV): requirements.txt
-	virtualenv -p python2 $(VENV)
+	virtualenv --system-site-packages -p python2 $(VENV)
 	$(PIP) install -r $<
-	ln -s /usr/lib/python2.7/dist-packages/PyQt4 $(VENV)/lib/python2.7/site-packages/
-	ln -s /usr/lib/python2.7/dist-packages/sip.*so $(VENV)/lib/python2.7/site-packages/
