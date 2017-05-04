@@ -448,6 +448,19 @@ this window?",
         self.is_upload_active = False
         self.emit(QtCore.SIGNAL('showFileDownloadedSuccessfully'))
 
+        # Remove temp files
+        try:
+            # Remove shards
+            file_shards = map(lambda i: '%s-%s' % (
+                os.path.join(self.tmp_path,
+                             file_name), i),
+                range(self.all_shards_count))
+            map(os.remove, file_shards)
+            # Remove encrypted file
+            os.remove('%s.encrypted' % self.destination_file_path)
+        except OSError as e:
+            logger.error(e)
+
         return True
 
     def retry_download_with_new_pointer(self, shard_index):
