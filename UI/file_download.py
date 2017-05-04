@@ -744,12 +744,12 @@ file with ID %s: ...' % file_id)
             shard_index, url))
 
         tries_download_from_same_farmer = 0
+        self.current_active_connections += 1
         while self.max_retries_download_from_same_farmer > \
                 tries_download_from_same_farmer:
             tries_download_from_same_farmer += 1
             farmer_tries += 1
             try:
-                self.current_active_connections += 1
                 self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
                 self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
                           rowposition,
