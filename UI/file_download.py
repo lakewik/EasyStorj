@@ -105,7 +105,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('updateShardCounters'),
                      self.update_shards_counters)
         self.connect(self, QtCore.SIGNAL('retryWithNewDownloadPointer'),
-                     self.retry_download_with_new_pointer)
+                     lambda: self.retry_download_with_new_pointer)
         self.connect(self, QtCore.SIGNAL('showDestinationPathNotSelectedMsg'),
                      self.show_error_invalid_file_path)
         self.connect(self, QtCore.SIGNAL('selectFileDestinationPath'),
@@ -447,6 +447,7 @@ this window?",
                   'Downloading completed successfully!')
         self.is_upload_active = False
         self.emit(QtCore.SIGNAL('showFileDownloadedSuccessfully'))
+
         return True
 
     def retry_download_with_new_pointer(self, shard_index):
@@ -466,12 +467,14 @@ this window?",
         options_array['file_size_is_given'] = '1'
         options_array['shards_count'] = str(self.all_shards_count)
         row_lock.acquire()
-        self.current_line += 1
+        # TEST
+        # self.current_line += 1
         tsd = threading.Thread(target=self.shard_download,
                                args=(pointer,
                                      self.destination_file_path,
                                      options_array))
         tsd.start()
+        self.current_line += 1
         row_lock.release()
         tsd.join()
         # self.shard_download(pointer, self.destination_file_path, options_array)
