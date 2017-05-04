@@ -23,7 +23,6 @@ import time
 from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP, MAX_DOWNLOAD_CONNECTIONS_AT_SAME_TIME
 
 queue = Queue.Queue()
-#semaphore = threading.BoundedSemaphore(4)
 row_lock = threading.Lock()
 
 
@@ -450,7 +449,6 @@ this window?",
         self.emit(QtCore.SIGNAL('showFileDownloadedSuccessfully'))
         return True
 
-
     def retry_download_with_new_pointer(self, shard_index):
         tnp = threading.Thread(
             target=self.get_shard_pointers,
@@ -469,8 +467,14 @@ this window?",
         options_array['shards_count'] = str(self.all_shards_count)
         row_lock.acquire()
         self.current_line += 1
+        tsd = threading.Thread(target=self.shard_download,
+                               args=(pointer,
+                                     self.destination_file_path,
+                                     options_array))
+        tsd.start()
         row_lock.release()
-        self.shard_download(pointer, self.destination_file_path, options_array)
+        tsd.join()
+        # self.shard_download(pointer, self.destination_file_path, options_array)
 
     def ask_overwrite(self, file_name):
         msgBox = QtGui.QMessageBox(
@@ -523,17 +527,15 @@ this window?",
                           str(e))
                 continue
             except Exception as e:
-                print "Exceptiom while resolving file pointers..."
+                logger.error("Exception while resolving file pointers...")
                 continue
-        if success != True:
+        if success is not True:
             queue.put('error')
-
-
-
 
     def download_begin(self, bucket_id, file_id):
 
-        self.semaphore = threading.BoundedSemaphore(int(self.ui_single_file_download.connections_onetime.value()))
+        self.semaphore = threading.BoundedSemaphore(
+            int(self.ui_single_file_download.connections_onetime.value()))
 
         self.overwrite_question_closed = False
         self.validation = {}
@@ -656,9 +658,7 @@ file with ID %s: ...' % file_id)
                 if shard_pointer == 'error':
                     raise Exception()
             except:
-                print 'Error while initializing download proccess...'
-
-
+                logger.error('Error while initializing download proccess...')
 
     def update_shard_download_progess(self, row_position_index, value):
         self.download_queue_progressbar_list[row_position_index].\
@@ -802,6 +802,7 @@ Getting another farmer pointer...")
             time.sleep(1)
             # Retry download with new download pointer
             logger.debug('Retry with new downoad pointer')
+            self.semaphore.release()
             self.emit(QtCore.SIGNAL('retryWithNewDownloadPointer'),
                       shard_index)
 
