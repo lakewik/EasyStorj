@@ -105,7 +105,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('updateShardCounters'),
                      self.update_shards_counters)
         self.connect(self, QtCore.SIGNAL('retryWithNewDownloadPointer'),
-                     lambda: self.retry_download_with_new_pointer)
+                     self.retry_download_with_new_pointer_thread)
         self.connect(self, QtCore.SIGNAL('showDestinationPathNotSelectedMsg'),
                      self.show_error_invalid_file_path)
         self.connect(self, QtCore.SIGNAL('selectFileDestinationPath'),
@@ -463,7 +463,14 @@ this window?",
 
         return True
 
+    def retry_download_with_new_pointer_thread(self, shard_index):
+        tnp2 = threading.Thread(
+            target=self.retry_download_with_new_pointer,
+            args=(str(shard_index)))
+        tnp2.start()
+
     def retry_download_with_new_pointer(self, shard_index):
+        print "retrying with new pintrer..."
         tnp = threading.Thread(
             target=self.get_shard_pointers,
             args=(self.bucket_id,
@@ -535,7 +542,7 @@ this window?",
                 break
 
             except storj.exception.StorjBridgeApiError as e:
-                logger.debug('Bridge error')
+                logger.debug('Bridge error' + str(e))
                 logger.debug('Error while resolving file pointers \
             to download  with ID :%s ...' % file_id)
                 # Emit Storj Bridge Exception
@@ -785,13 +792,28 @@ file with ID %s: ...' % file_id)
                 logger.debug('%s status http' % r.status_code)
                 if r.status_code != 200 and r.status_code != 304:
                     raise storj.exception.StorjFarmerError()
+
+                # check file size integrity
+                expected_shard_size = file_size
+                downloaded_shard_size = os.stat(local_filename).st_size
+
+                if expected_shard_size != downloaded_shard_size:
+                    file_size_not_integral = True
+                    raise storj.exception.StorjFarmerError()
+
                 downloaded = True
 
             except storj.exception.StorjFarmerError as e:
                 # Update shard download state
-                self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
-                          rowposition,
-                          'First try failed. Retrying... (%s)' % farmer_tries)
+                if file_size_not_integral:
+                    self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
+                              rowposition,
+                              'First try failed. Shard size integrity check failed! Retrying... (%s)' % farmer_tries)
+                else:
+                    self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
+                              rowposition,
+                              'First try failed. Retrying... (%s)' % farmer_tries)
+
                 continue
             except Exception as e:
                 logger.error(e)
