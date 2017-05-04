@@ -21,6 +21,6 @@ class StorjEngine:
             self.storj_client = storj.Client(
                 email=self.email,
                 password=self.password,
-                do_hashing=False)
+                do_hashing=False, timeout=15)
             self.__logger.debug('Login from credentials xml file')
         self.__logger.debug('testlogin, StorjEngine')
