@@ -105,7 +105,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('updateShardCounters'),
                      self.update_shards_counters)
         self.connect(self, QtCore.SIGNAL('retryWithNewDownloadPointer'),
-                     self.retry_download_with_new_pointer_thread)
+                     self.retry_dl_thread)
         self.connect(self, QtCore.SIGNAL('showDestinationPathNotSelectedMsg'),
                      self.show_error_invalid_file_path)
         self.connect(self, QtCore.SIGNAL('selectFileDestinationPath'),
@@ -463,24 +463,44 @@ this window?",
 
         return True
 
-    def retry_download_with_new_pointer_thread(self, shard_index):
-        tnp2 = threading.Thread(
-            target=self.retry_download_with_new_pointer,
-            args=(str(shard_index)))
-        tnp2.start()
+    def retry_dl_thread(self, shard_index, old_ip):
+        dl = threading.Thread(target=self.retry_download_with_new_pointer,
+                              args=(shard_index, old_ip))
+        dl.start()
+        # dl.join()
 
-    def retry_download_with_new_pointer(self, shard_index):
-        print "retrying with new pintrer..."
-        tnp = threading.Thread(
-            target=self.get_shard_pointers,
-            args=(self.bucket_id,
-                  self.file_id,
-                  '1',
-                  str(shard_index)))
-        tnp.start()
-        # tnp.join()
-        pointers = queue.get()
-        pointer = pointers[0]
+    def retry_download_with_new_pointer(self, shard_index, old_ip):
+        MAX_ATTEMPT = 20
+        logger.debug('Look for a farmer different from %s' % old_ip)
+        attempts = 0
+        try:
+            while attempts < MAX_ATTEMPT:
+                attempts += 1
+                logger.debug('attempt %s' % attempts)
+                tnp = threading.Thread(
+                    target=self.get_shard_pointers,
+                    args=(self.bucket_id,
+                          self.file_id,
+                          '1',
+                          str(shard_index)))
+                time.sleep(1)
+                tnp.start()
+                pointers = queue.get()
+                # tnp.join()
+                pointer = pointers[0]
+                logger.debug('Found farmer %s' % pointer.get('farmer')['address'])
+                if pointer.get('farmer')['address'] != old_ip:
+                    break
+            if pointer.get('farmer')['address'] == old_ip:
+                logger.error('This will raise an exception')
+                raise storj.exception.StorjFarmerError('Farmer not found')
+        except storj.exception.StorjFarmerError as err:
+            logger.error(err)
+            exit(0)
+        except Exception as err:
+            logger.error(err)
+            exit(0)
+
         options_array = {}
         options_array['tmp_path'] = self.tmp_path
         options_array['progressbars_enabled'] = '1'
@@ -488,13 +508,13 @@ this window?",
         options_array['shards_count'] = str(self.all_shards_count)
         row_lock.acquire()
         # TEST
-        # self.current_line += 1
+        self.current_line += 1
         tsd = threading.Thread(target=self.shard_download,
                                args=(pointer,
                                      self.destination_file_path,
                                      options_array))
         tsd.start()
-        self.current_line += 1
+        # self.current_line += 1
         row_lock.release()
         tsd.join()
         # self.shard_download(pointer, self.destination_file_path, options_array)
@@ -842,7 +862,7 @@ Getting another farmer pointer...")
             logger.debug('Retry with new downoad pointer')
             self.semaphore.release()
             self.emit(QtCore.SIGNAL('retryWithNewDownloadPointer'),
-                      shard_index)
+                    shard_index, url.split(':')[1].replace('//', ''))
 
         else:
             self.current_active_connections -= 1
