@@ -32,6 +32,7 @@ from resources.constants import MAX_RETRIES_UPLOAD_TO_SAME_FARMER, \
     MAX_RETRIES_NEGOTIATE_CONTRACT, AUTO_SCROLL_UPLOAD_DOWNLOAD_QUEUE, BUCKETS_LIST_SORTING_ENABLED, MAX_UPLOAD_CONNECTIONS_AT_SAME_TIME
 from resources.internal_backend_config_variables import APPLY_SELECTED_BUCKET_TO_UPLOADER
 
+
 class SingleFileUploadUI(QtGui.QMainWindow):
     __logger = logging.getLogger('%s.SingleFileUploadUI' % __name__)
 
@@ -63,6 +64,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
 
         self.tools = Tools()
+
 
         self.storj_engine = StorjEngine()
 
@@ -535,6 +537,12 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         if j.get('result') == 'The supplied token is not accepted':
                             raise storj.exception.StorjFarmerError(
                                 storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
+
+                        if response.status_code != 200 and response.status_code != 304:
+                            raise storj.exception.StorjFarmerError(
+                                77)  # raise general farmer failure
+                        #self.ui_single_file_upload.shard_queue_table_widget.contex
+
                         success_shard_upload = True
 
                     except storj.exception.StorjFarmerError as e:
@@ -970,7 +978,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             # self.ui_single_file_upload.current_state.setText(
             #   html_format_begin + "Generating shards..." + html_format_end)
             # shards_manager._make_shards()
-            shards_count = shards_manager.index # fix because new version of sdk
+            #shards_count = shards_manager.num_chunks # fix because new version of sdk
+            shards_count = self.all_shards_count
             # create file hash
             self.__logger.debug('file_upload() push_token=%s', push_token)
 
