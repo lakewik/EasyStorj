@@ -2,8 +2,10 @@
 
 import json
 import os
+from functools import partial
 from sys import platform
 import requests
+import storj.exception
 from PyQt4 import QtCore, QtGui
 
 from .utilities.sharder import ShardingTools
@@ -26,6 +28,8 @@ queue = Queue.Queue()
 row_lock = threading.Lock()
 
 
+
+
 class SingleFileDownloadUI(QtGui.QMainWindow):
 
     def __init__(self, parent=None, bucketid=None, fileid=None):
@@ -45,6 +49,18 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         # logger.addHandler(self.log_handler)
 
         # self.initialize_shard_queue_table(file_pointers)
+
+        #self.ui_single_file_download.shard_queue_table_widget = TableWidget()
+
+        self.ui_single_file_download.shard_queue_table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+
+        self.ui_single_file_download.shard_queue_table.customContextMenuRequested.connect(
+            partial(self.display_table_context_menu))
+
+
+        #self.connect(self.ui_single_file_download.shard_queue_table, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.receiver)
+
+
 
         self.tools = Tools()
 
@@ -152,7 +168,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             # Windows
             if USE_USER_ENV_PATH_FOR_TEMP:
                 temp_dir = os.path.join(
-                    self.get_home_user_directory().decode('utf-8'),
+                    self.tools.get_home_user_directory().decode('utf-8'),
                     'AppData', 'Local', 'Temp')
             else:
                 temp_dir = 'C:\\Windows\\temp'
@@ -169,6 +185,43 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         self.already_started_shard_downloads_count = 0
         self.all_shards_count = 0
+
+        self.another_farmer_manual_requests = []
+
+        self.rowpositions_in_progress = []
+
+    def display_table_context_menu(self, position):
+        tablemodel = self.ui_single_file_download.shard_queue_table.model()
+        rows = sorted(set(index.row() for index in
+                          self.ui_single_file_download.shard_queue_table.selectedIndexes()))
+        i = 0
+        selected_row = 0
+        for row in rows:
+            index = tablemodel.index(row, 4)  # get shard Index
+            # We suppose data are strings
+            self.current_selected_shard_index = str(tablemodel.data(index).toString())
+            selected_row = row
+            i += 1
+
+        if i == 1 and self.rowpositions_in_progress[selected_row]: # check if checked and if it is in progress
+            menu = QtGui.QMenu()
+            anotherFarmerUseAction = menu.addAction("Try to use another farmer...")
+            action = menu.exec_(self.ui_single_file_download.shard_queue_table.mapToGlobal(position))
+
+            if action == anotherFarmerUseAction:
+
+                msgBox = QtGui.QMessageBox(
+                    QtGui.QMessageBox.Question,
+                    'Question',
+                    'Are you sure that you want to get another pointer for shard at '
+                    'index %s?' % str(self.current_selected_shard_index),
+                    (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
+
+                result = msgBox.exec_()
+
+                if result == QtGui.QMessageBox.Yes:
+                    self.another_farmer_manual_requests[int(self.current_selected_shard_index)] = True
+
 
     def set_current_active_connections(self):
         self.ui_single_file_download.current_active_connections.setText(
@@ -252,6 +305,7 @@ this window?",
         Add a row to the shard table and return the row number
         """
         # Add items to shard queue table view
+        self.rowpositions_in_progress.append(False)
         tablerowdata = {}
         tablerowdata['farmer_address'] = pointers_content['farmer']['address']
         tablerowdata['farmer_port'] = pointers_content['farmer']['port']
@@ -266,6 +320,7 @@ this window?",
         self.emit(QtCore.SIGNAL('addRowToDownloadQueueTable'), tablerowdata)
 
         rowcount = self.ui_single_file_download.shard_queue_table.rowCount()
+
         return rowcount
 
     def show_download_finished_message(self):
@@ -470,7 +525,7 @@ this window?",
         # dl.join()
 
     def retry_download_with_new_pointer(self, shard_index, old_ip):
-        MAX_ATTEMPT = 20
+        MAX_ATTEMPT = 200
         logger.debug('Look for a farmer different from %s' % old_ip)
         attempts = 0
         try:
@@ -689,6 +744,7 @@ file with ID %s: ...' % file_id)
                 self.current_line = 0
                 for t in threads:
                     self.already_started_shard_downloads_count += 1
+                    self.another_farmer_manual_requests.append(False)
                     row_lock.acquire()
                     t.start()
                     self.current_line += 1
@@ -745,11 +801,14 @@ file with ID %s: ...' % file_id)
 
         tries_download_from_same_farmer = 0
         self.current_active_connections += 1
+        cancelled_manually = False
+        file_size_not_integral = False
         while self.max_retries_download_from_same_farmer > \
                 tries_download_from_same_farmer:
             tries_download_from_same_farmer += 1
             farmer_tries += 1
             try:
+                self.rowpositions_in_progress[int(rowposition)] = True
                 self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
                 self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
                           rowposition,
@@ -789,6 +848,15 @@ file with ID %s: ...' % file_id)
                     logger.debug('Chunks: %s' % t1)
                     f = open(local_filename, 'wb')
                     for chunk in r.iter_content(32 * 1024):
+                        if self.another_farmer_manual_requests[int(shard_index)]: # if this is True
+                            self.another_farmer_manual_requests[int(shard_index)] = False
+                            self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
+                                      rowposition,
+                                      "Cancelled by user! Getting another farmer...")
+                            tries_download_from_same_farmer = self.max_retries_download_from_same_farmer # force max retries due to use cancel
+                            cancelled_manually = True
+                            break
+
                         i += 1
                         f.write(chunk)
                         if int(round((100.0 * i) / t1)) > 100:
@@ -811,15 +879,16 @@ file with ID %s: ...' % file_id)
                 logger.debug('%s rowposition started' % rowposition)
                 logger.debug('%s status http' % r.status_code)
                 if r.status_code != 200 and r.status_code != 304:
-                    raise storj.exception.StorjFarmerError()
+                    raise storj.exception.StorjFarmerError(22)
 
                 # check file size integrity
                 expected_shard_size = file_size
                 downloaded_shard_size = os.stat(local_filename).st_size
 
+
                 if expected_shard_size != downloaded_shard_size:
                     file_size_not_integral = True
-                    raise storj.exception.StorjFarmerError()
+                    raise storj.exception.StorjFarmerError(12)
 
                 downloaded = True
 
@@ -850,6 +919,7 @@ shard at index %s. Retrying ...(%s)' % (shard_index, farmer_tries))
                 break
 
         if not downloaded:
+            self.rowpositions_in_progress[int(rowposition)] = False
             self.current_active_connections -= 1
             self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
             # Update shard download state
@@ -857,6 +927,12 @@ shard at index %s. Retrying ...(%s)' % (shard_index, farmer_tries))
                       rowposition,
                       "Error while downloading from this farmer. \
 Getting another farmer pointer...")
+
+            if cancelled_manually:
+                self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
+                          rowposition,
+                          "Cancelled by user! Getting another farmer...")
+
             time.sleep(1)
             # Retry download with new download pointer
             logger.debug('Retry with new downoad pointer')
@@ -865,6 +941,7 @@ Getting another farmer pointer...")
                     shard_index, url.split(':')[1].replace('//', ''))
 
         else:
+            self.rowpositions_in_progress[int(rowposition)] = False
             self.current_active_connections -= 1
             self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
             logger.debug('Shard downloaded')
