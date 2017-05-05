@@ -16,6 +16,7 @@ import multiprocessing
 import requests
 import storj
 import storj.model
+import storj.exception
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QMessageBox
@@ -536,11 +537,12 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         j = json.loads(str(response.content))
                         if j.get('result') == 'The supplied token is not accepted':
                             raise storj.exception.StorjFarmerError(
-                                storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
+                                storj.exception.SuppliedTokenNotAcceptedError)
 
                         if response.status_code != 200 and response.status_code != 304:
                             raise storj.exception.StorjFarmerError(
                                 77)  # raise general farmer failure
+
                         #self.ui_single_file_upload.shard_queue_table_widget.contex
 
                         success_shard_upload = True
