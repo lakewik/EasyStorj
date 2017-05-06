@@ -22,7 +22,10 @@ from .utilities.log_manager import logger
 from .resources.html_strings import html_format_begin, html_format_end
 from .utilities.account_manager import AccountManager
 import time
-from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP, MAX_DOWNLOAD_CONNECTIONS_AT_SAME_TIME
+from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP, MAX_DOWNLOAD_CONNECTIONS_AT_SAME_TIME, \
+    ALLOW_DOWNLOAD_FARMER_POINTER_CANCEL_BY_USER, FARMER_NODES_EXCLUSION_FOR_DOWNLOAD_ENABLED, \
+    MAX_DOWNLOAD_REQUEST_BLOCK_SIZE
+
 
 queue = Queue.Queue()
 row_lock = threading.Lock()
@@ -189,6 +192,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.another_farmer_manual_requests = []
 
         self.rowpositions_in_progress = []
+        self.pointers_exclusions = [[]]
 
     def display_table_context_menu(self, position):
         tablemodel = self.ui_single_file_download.shard_queue_table.model()
@@ -203,7 +207,9 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
             selected_row = row
             i += 1
 
-        if i == 1 and self.rowpositions_in_progress[selected_row]: # check if checked and if it is in progress
+        if ALLOW_DOWNLOAD_FARMER_POINTER_CANCEL_BY_USER and i == 1\
+                and self.rowpositions_in_progress[selected_row]:  # check if checked and if it is in progress
+
             menu = QtGui.QMenu()
             anotherFarmerUseAction = menu.addAction("Try to use another farmer...")
             action = menu.exec_(self.ui_single_file_download.shard_queue_table.mapToGlobal(position))
@@ -305,7 +311,7 @@ this window?",
         Add a row to the shard table and return the row number
         """
         # Add items to shard queue table view
-        self.rowpositions_in_progress.append(False)
+        #self.rowpositions_in_progress.append(False)
         tablerowdata = {}
         tablerowdata['farmer_address'] = pointers_content['farmer']['address']
         tablerowdata['farmer_port'] = pointers_content['farmer']['port']
@@ -606,11 +612,19 @@ this window?",
                 self.emit(QtCore.SIGNAL('setCurrentState'),
                           'Resolving pointer for shards')
             try:
-                pointers = self.storj_engine.storj_client.file_pointers(
-                    bucket_id,
-                    file_id,
-                    limit=num_of_shards,
-                    skip=shard_index)
+                if FARMER_NODES_EXCLUSION_FOR_DOWNLOAD_ENABLED:
+                    pointers = self.storj_engine.storj_client.file_pointers(
+                        bucket_id,
+                        file_id,
+                        limit=num_of_shards,
+                        skip=shard_index,
+                        exclude=self.pointers_exclusions[int(shard_index)])
+                else:
+                    pointers = self.storj_engine.storj_client.file_pointers(
+                        bucket_id,
+                        file_id,
+                        limit=num_of_shards,
+                        skip=shard_index)
                 # return pointers
                 success = True
                 queue.put(pointers)
@@ -742,13 +756,18 @@ file with ID %s: ...' % file_id)
                           self.destination_file_path,
                           options_array)) for p in shard_pointer]
                 self.current_line = 0
+                s_index = 0
+                self.pointers_exclusions = [[] for i3 in range(len(threads))]
                 for t in threads:
+                    #self.pointers_exclusions.append([s_index])
                     self.already_started_shard_downloads_count += 1
                     self.another_farmer_manual_requests.append(False)
                     row_lock.acquire()
                     t.start()
                     self.current_line += 1
                     row_lock.release()
+                    s_index += 1
+                    print self.pointers_exclusions
                     time.sleep(1)
 
                 for t in threads:
@@ -792,6 +811,7 @@ file with ID %s: ...' % file_id)
 
     def create_download_connection(self, url, path_to_save, options_chain,
                                    rowposition, shard_index):
+        self.rowpositions_in_progress.append(False)
         local_filename = str(path_to_save).decode('utf-8')
         downloaded = False
         farmer_tries = 0
@@ -808,6 +828,14 @@ file with ID %s: ...' % file_id)
             tries_download_from_same_farmer += 1
             farmer_tries += 1
             try:
+                if self.another_farmer_manual_requests[int(shard_index)]:  # if this is True
+                    self.another_farmer_manual_requests[int(shard_index)] = False
+                    self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
+                              rowposition,
+                              "Cancelled by user! Getting another farmer...")
+                    tries_download_from_same_farmer = self.max_retries_download_from_same_farmer  # force max retries due to use cancel
+                    cancelled_manually = True
+                    break
                 self.rowpositions_in_progress[int(rowposition)] = True
                 self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
                 self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
@@ -838,17 +866,17 @@ file with ID %s: ...' % file_id)
                         file_size = int(r.headers['Content-Length'])
 
                     chunk = 1
-                    t1 = float(file_size) / float((32 * 1024))
+                    t1 = float(file_size) / float(MAX_DOWNLOAD_REQUEST_BLOCK_SIZE)
 
-                    if file_size <= (32 * 1024):
+                    if file_size <= MAX_DOWNLOAD_REQUEST_BLOCK_SIZE:
                         t1 = 1
 
                     i = 0
                     logger.debug('File size: %s' % file_size)
                     logger.debug('Chunks: %s' % t1)
                     f = open(local_filename, 'wb')
-                    for chunk in r.iter_content(32 * 1024):
-                        if self.another_farmer_manual_requests[int(shard_index)]: # if this is True
+                    for chunk in r.iter_content(MAX_DOWNLOAD_REQUEST_BLOCK_SIZE):
+                        if self.another_farmer_manual_requests[int(shard_index)]:  # if this is True
                             self.another_farmer_manual_requests[int(shard_index)] = False
                             self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
                                       rowposition,
@@ -975,6 +1003,7 @@ Getting another farmer pointer...")
         logger.debug('Beginning download proccess...')
         options_chain = {}
         file_name = os.path.split(file_save_path)[1]
+        self.pointers_exclusions[int(pointer['index'])].append(pointer.get('farmer')['nodeID'])
 
         try:
             # check ability to write files to selected directories
