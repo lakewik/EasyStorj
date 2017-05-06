@@ -30,7 +30,8 @@ from utilities.tools import Tools
 
 from resources.html_strings import html_format_begin, html_format_end
 from resources.constants import MAX_RETRIES_UPLOAD_TO_SAME_FARMER, \
-    MAX_RETRIES_NEGOTIATE_CONTRACT, AUTO_SCROLL_UPLOAD_DOWNLOAD_QUEUE, BUCKETS_LIST_SORTING_ENABLED, MAX_UPLOAD_CONNECTIONS_AT_SAME_TIME
+    MAX_RETRIES_NEGOTIATE_CONTRACT, AUTO_SCROLL_UPLOAD_DOWNLOAD_QUEUE, BUCKETS_LIST_SORTING_ENABLED, MAX_UPLOAD_CONNECTIONS_AT_SAME_TIME,\
+    FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED
 from resources.internal_backend_config_variables import APPLY_SELECTED_BUCKET_TO_UPLOADER
 
 
@@ -63,6 +64,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             QtCore.SIGNAL('clicked()'),
             self.handle_cancel_action)
 
+
+        self.already_used_farmers_nodes = []
 
         self.tools = Tools()
 
@@ -455,7 +458,12 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             #   "description": "Trying to negotiate storage contract for shard at index " + str(chapters) + "..."}))
 
             try:
-                frame_content = self.storj_engine.storj_client.frame_add_shard(shard, frame.id)
+                if FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED:
+                    frame_content = self.storj_engine.storj_client.frame_add_shard(shard,
+                                                                                   frame.id,
+                                                                 excludes=self.already_used_farmers_nodes)
+                else:
+                    frame_content = self.storj_engine.storj_client.frame_add_shard(shard, frame.id)
                 # Add a row to the table
                 rowposition = self._add_shard_to_table(
                     frame_content,
@@ -468,6 +476,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.__logger.debug(frame_content['farmer']['address'])
 
                 farmerNodeID = frame_content['farmer']['nodeID']
+
+                self.already_used_farmers_nodes.append(farmerNodeID)  # add item to array of already used farmers nodes
 
                 url = 'http://' + frame_content['farmer']['address'] + ':' + \
                       str(frame_content['farmer']['port']) + '/shards/' + \
