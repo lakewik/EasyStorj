@@ -24,7 +24,7 @@ from .utilities.account_manager import AccountManager
 import time
 from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP, MAX_DOWNLOAD_CONNECTIONS_AT_SAME_TIME, \
     ALLOW_DOWNLOAD_FARMER_POINTER_CANCEL_BY_USER, FARMER_NODES_EXCLUSION_FOR_DOWNLOAD_ENABLED, \
-    MAX_DOWNLOAD_REQUEST_BLOCK_SIZE
+    MAX_DOWNLOAD_REQUEST_BLOCK_SIZE, FILE_POINTERS_ITERATION_DELAY, DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT
 
 
 queue = Queue.Queue()
@@ -532,10 +532,11 @@ this window?",
 
     def retry_download_with_new_pointer(self, shard_index, old_ip):
         MAX_ATTEMPT = 200
+        pointer = None
         logger.debug('Look for a farmer different from %s' % old_ip)
         attempts = 0
-        try:
-            while attempts < MAX_ATTEMPT:
+        while attempts < MAX_ATTEMPT:
+            try:
                 attempts += 1
                 logger.debug('attempt %s' % attempts)
                 tnp = threading.Thread(
@@ -552,15 +553,25 @@ this window?",
                 logger.debug('Found farmer %s' % pointer.get('farmer')['address'])
                 if pointer.get('farmer')['address'] != old_ip:
                     break
+
+
+            except storj.exception.StorjFarmerError as err:
+                logger.error(err)
+                continue
+                #exit(0)
+            except Exception as err:
+                logger.error(err)
+                continue
+                #exit(0)
+
+        try:
             if pointer.get('farmer')['address'] == old_ip:
                 logger.error('This will raise an exception')
                 raise storj.exception.StorjFarmerError('Farmer not found')
-        except storj.exception.StorjFarmerError as err:
-            logger.error(err)
-            exit(0)
-        except Exception as err:
-            logger.error(err)
-            exit(0)
+        except:
+            print "Farmer not found! Unable to download shard!"
+
+
 
         options_array = {}
         options_array['tmp_path'] = self.tmp_path
@@ -768,7 +779,7 @@ file with ID %s: ...' % file_id)
                     row_lock.release()
                     s_index += 1
                     print self.pointers_exclusions
-                    time.sleep(1)
+                    time.sleep(FILE_POINTERS_ITERATION_DELAY)
 
                 for t in threads:
                     t.join()
@@ -828,6 +839,7 @@ file with ID %s: ...' % file_id)
             tries_download_from_same_farmer += 1
             farmer_tries += 1
             try:
+                '''
                 if self.another_farmer_manual_requests[int(shard_index)]:  # if this is True
                     self.another_farmer_manual_requests[int(shard_index)] = False
                     self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
@@ -836,7 +848,9 @@ file with ID %s: ...' % file_id)
                     tries_download_from_same_farmer = self.max_retries_download_from_same_farmer  # force max retries due to use cancel
                     cancelled_manually = True
                     break
-                self.rowpositions_in_progress[int(rowposition)] = True
+                '''
+
+                #self.rowpositions_in_progress[int(rowposition)] = True
                 self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
                 self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
                           rowposition,
@@ -852,14 +866,14 @@ file with ID %s: ...' % file_id)
                               'Downloading shard %s' % shard_index)
 
                 if options_chain['handle_progressbars'] != '1':
-                    r = requests.get(url)
+                    r = requests.get(url, timeout=DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT)
                     # requests
                     with open(local_filename, 'wb') as f:
                         for chunk in r.iter_content(chunk_size=1024):
                             if chunk:  # filter out keep-alive new chunks
                                 f.write(chunk)
                 else:
-                    r = requests.get(url, stream=True)
+                    r = requests.get(url, timeout=DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT, stream=True)
                     if options_chain['file_size_is_given'] == '1':
                         file_size = options_chain['shard_file_size']
                     else:
@@ -876,14 +890,20 @@ file with ID %s: ...' % file_id)
                     logger.debug('Chunks: %s' % t1)
                     f = open(local_filename, 'wb')
                     for chunk in r.iter_content(MAX_DOWNLOAD_REQUEST_BLOCK_SIZE):
-                        if self.another_farmer_manual_requests[int(shard_index)]:  # if this is True
-                            self.another_farmer_manual_requests[int(shard_index)] = False
-                            self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
-                                      rowposition,
-                                      "Cancelled by user! Getting another farmer...")
-                            tries_download_from_same_farmer = self.max_retries_download_from_same_farmer # force max retries due to use cancel
-                            cancelled_manually = True
-                            break
+                        '''
+                        try:
+                            if self.another_farmer_manual_requests[int(shard_index)]:  # if this is True
+                                self.another_farmer_manual_requests[int(shard_index)] = False
+                                self.emit(QtCore.SIGNAL('updateDownloadTaskState'),
+                                          rowposition,
+                                          "Cancelled by user! Getting another farmer...")
+                                tries_download_from_same_farmer = self.max_retries_download_from_same_farmer  # force max retries due to use cancel
+                                cancelled_manually = True
+                                break
+                        except:
+                            pass
+
+                        '''
 
                         i += 1
                         f.write(chunk)
@@ -947,7 +967,7 @@ shard at index %s. Retrying ...(%s)' % (shard_index, farmer_tries))
                 break
 
         if not downloaded:
-            self.rowpositions_in_progress[int(rowposition)] = False
+            #self.rowpositions_in_progress[int(rowposition)] = False
             self.current_active_connections -= 1
             self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
             # Update shard download state
@@ -969,7 +989,7 @@ Getting another farmer pointer...")
                     shard_index, url.split(':')[1].replace('//', ''))
 
         else:
-            self.rowpositions_in_progress[int(rowposition)] = False
+            #self.rowpositions_in_progress[int(rowposition)] = False
             self.current_active_connections -= 1
             self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
             logger.debug('Shard downloaded')
@@ -1003,7 +1023,19 @@ Getting another farmer pointer...")
         logger.debug('Beginning download proccess...')
         options_chain = {}
         file_name = os.path.split(file_save_path)[1]
-        self.pointers_exclusions[int(pointer['index'])].append(pointer.get('farmer')['nodeID'])
+
+        try:
+            self.pointers_exclusions[int(pointer['index'])].append(pointer.get('farmer')['nodeID'])
+        except:
+            self.semaphore.release()
+            self.emit(QtCore.SIGNAL('retryWithNewDownloadPointer'),
+                      pointer['index'], 'http://%s:%s/shards/%s?token=%s' % (
+                pointer.get('farmer')['address'],
+                str(pointer.get('farmer')['port']),
+                pointer['hash'],
+                pointer['token']))
+
+
 
         try:
             # check ability to write files to selected directories
