@@ -231,11 +231,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
     def initialize_buckets_select_list(self):
         """Get all the buckets in which it is possible to store files, and
         show the names in the dropdown list"""
-        # self.__logger.warning(str({
-        #   "log_event_type": "info",
-        #   "title": "Buckets",
-        #   "description": "Resolving buckets from Bridge to buckets combobox..."}))
-        # self.__logger.warning('"log_event_type": "info"')
         self.__logger.debug('"title": "Buckets"')
         self.__logger.debug('"description": "Resolving buckets from Bridge to buckets combobox..."')
 
@@ -316,20 +311,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.file_path.setText(str(QtGui.QFileDialog.getOpenFileName()).decode('utf-8'))
 
     def createNewUploadThread(self):
-        # self.download_thread = DownloadTaskQtThread(url, filelocation, options_chain, progress_bars_list)
-        # self.download_thread.start()
-        # self.download_thread.connect(self.download_thread, QtCore.SIGNAL('setStatus'), self.test1, Qt.QueuedConnection)
-        # self.download_thread.tick.connect(progress_bars_list.setValue)
-
-        # Refactor to QtTrhead
-
-
-        #upload_thread = multiprocessing.Process(target=self.file_upload_begin, args=())
         upload_thread = threading.Thread(target=self.file_upload_begin, args=())
         upload_thread.start()
 
     def initialize_upload_queue_table(self):
-
         # initialize variables
         self.shards_already_uploaded = 0
         self.uploaded_shards_count = 0
@@ -351,11 +336,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
     def createNewShardUploadThread(self, shard, chapters, frame, file_name):
         # another worker thread for single shard uploading and it will retry if download fail
 
-        #pool = multiprocessing.Pool()
-
         print "starting thread for shard"
-        # upload_thread = multiprocessing.Process(
-        # upload_thread = pool.apply_async(
         upload_thread = threading.Thread(
             self.upload_shard(
                 shard=shard,
@@ -363,8 +344,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 frame=frame,
                 file_name_ready_to_shard_upload=file_name
             ), args=())
-        #pool.close()
-        #pool.join()
         upload_thread.start()
         print "zakonczono"
 
@@ -382,15 +361,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         tablerowdata['shard_index'] = str(chapters)
 
         # self.__logger.warning('"log_event_type": "debug"')
-        self.__logger.debug('"title": "Contract negotiated"')
-        self.__logger.debug('"description": "Storage contract negotiated \
-                     with: "' +
-                            str(frame_content["farmer"]["address"]) + ":" +
-                            str(frame_content["farmer"]["port"]))
-        # self.__logger.warning(str({"log_event_type": "debug", "title": "Contract negotiated",
-        #   "description": "Storage contract negotiated with: " +
-        #   str(frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"]["port"]))}))
-
+        self.__logger.debug('Contract negotiated')
+        self.__logger.debug('Storage contract negotiated with: %s:%s' % (
+            frame_content["farmer"]["address"],
+            frame_content["farmer"]["port"]))
         # add row to table
         self.emit(QtCore.SIGNAL('addRowToUploadQueueTable'), tablerowdata)
 
@@ -432,30 +406,19 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             contract_negotiation_tries += 1
             exchange_report = storj.model.ExchangeReport()
 
-            # emit signal to add row to upload queue table
-            # self.emit(QtCore.SIGNAL("addRowToUploadQueueTable"), "important", "information")
-
-            # self.ui_single_file_upload.current_state.setText(
-            #   html_format_begin + "Adding shard " + str(chapters) +
-            #   " to file frame and getting contract..." + html_format_end)
-
-            # self.__logger.warning('"log_event_type": "debug"')
-            self.__logger.debug('"title": "Negotiating contract"')
-            self.__logger.debug('"description": "Trying to negotiate storage \
-                    contract for shard at index %s"' % chapters)
+            self.__logger.debug('Negotiating contract')
+            self.__logger.debug('Trying to negotiate storage contract for \
+shard at index %s' % chapters)
             if contract_negotiation_tries > 1:
                 self.emit(
                     QtCore.SIGNAL('setCurrentUploadState'),
-                    'Trying to negotiate storage contract for shard at index %s... Retry %s... ' % (
-                        str(chapters), contract_negotiation_tries))
+                    'Trying to negotiate storage contract for shard at \
+index %s... Retry %s... ' % (chapters, contract_negotiation_tries))
             else:
                 self.emit(
                     QtCore.SIGNAL('setCurrentUploadState'),
-                    'Trying to negotiate storage contract for shard at index %s...' % str(chapters))
-            # self.__logger.warning(str({
-            #   "log_event_type": "debug",
-            #   "title": "Negotiating contract",
-            #   "description": "Trying to negotiate storage contract for shard at index " + str(chapters) + "..."}))
+                    'Trying to negotiate storage contract for shard at \
+index %s...' % chapters)
 
             try:
                 if FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED:
@@ -471,8 +434,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                     chapters)
 
                 self.__logger.debug('-' * 30)
-                # self.__logger.debug("FRAME CONTENT: " + str(frame_content))
-                # self.__logger.debug("SHARD: " + str(shard))
                 self.__logger.debug(frame_content['farmer']['address'])
 
                 farmerNodeID = frame_content['farmer']['nodeID']
@@ -486,9 +447,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.__logger.debug('URL: %s', url)
 
                 self.__logger.debug('-' * 30)
-
-                # files = {'file': open(file_path + '.part%s' % chapters)}
-                # headers = {'content-type: application/octet-stream', 'x-storj-node-id: ' + str(farmerNodeID)}
 
                 self.emit(
                     QtCore.SIGNAL('setCurrentUploadState'),
@@ -517,20 +475,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                             ':' +
                             str(frame_content['farmer']['port']))
 
-                        # self.__logger.warning(str({
-                        #   "log_event_type": "debug",
-                        #   "title": "Uploading shard",
-                        #   "description": "Uploading shard at index " + str(shard.index) + " to " + str(
-                        #       frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"][
-                        #       "port"]))}))
-
                         mypath = os.path.join(self.parametrs.tmpPath,
                                               file_name_ready_to_shard_upload +
                                               '-' + str(chapters + 1))
 
-                        # with open(
-                        #   self.parametrs.tmpPath + file_name_ready_to_shard_upload + '-' +
-                        #   str(chapters + 1), 'rb') as f:
                         self.current_active_connections += 1
                         self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
                         with open(mypath, 'rb') as f:
@@ -552,8 +500,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         if response.status_code != 200 and response.status_code != 304:
                             raise storj.exception.StorjFarmerError(
                                 77)  # raise general farmer failure
-
-                        #self.ui_single_file_upload.shard_queue_table_widget.contex
 
                         success_shard_upload = True
 
@@ -581,7 +527,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                             rowposition,
                             'First try failed. Retrying... (' + str(farmer_tries) + ')')
 
-                        # self.__logger.warning('"log_event_type": "warning"')
                         self.__logger.warning('"title": "Shard upload error"')
                         self.__logger.warning(
                             '"description": "Error while uploading \
@@ -591,10 +536,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                             str(frame_content["farmer"]["port"]) +
                             " Retrying... (" + str(farmer_tries) +
                             ")")
-                        # self.__logger.warning(str({"log_event_type": "warning", "title": "Shard upload error",
-                        #   "description": "Error while uploading shard to: " + str(
-                        #   frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"][
-                        #   "port"])) + " Retrying... (" + str(farmer_tries) + ")"}))
                         continue
 
                     else:
@@ -612,10 +553,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                                      str(frame_content["farmer"]["address"]) +
                                      ":" +
                                      str(frame_content["farmer"]["port"]))
-                        # logger.warning(str({"log_event_type": "success", "title": "Uploading shard",
-                        #                     "description": "Shard uploaded successfully to " + str(
-                        #   frame_content["farmer"]["address"] + ":" + str(frame_content["farmer"][
-                        #                             "port"]))}))
 
                         self.emit(QtCore.SIGNAL("updateUploadTaskState"), rowposition,
                                   "Uploaded!")  # update shard upload state
@@ -654,10 +591,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.__logger.error('"description": "Exception raised while trying \
                                to negotiate storage contract for shard at index\
                                "' + str(chapters))
-                # self.__logger.warning(str({"log_event_type": "error", "title": "Bridge exception",
-                #   "description":
-                #   "Exception raised while trying to negitiate storage contract for shard at index " + str(
-                #   chapters)}))
                 continue
 
             except Exception as e:
@@ -668,17 +601,12 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 # upload failed probably while sending data to farmer
                 self.__logger.error('Error occured while trying to upload shard or negotiate contract. Retrying... ')
 
-                # self.__logger.warning('"log_event_type": "error"')
                 self.__logger.error('"title": "Unhandled exception"')
                 self.__logger.error('"description": "Unhandled exception occured\
                              while trying to upload shard or negotiate \
                              contract for shard at index "' +
                                     str(chapters) +
                                     " . Retrying...")
-                # self.__logger.warning(str({"log_event_type": "error", "title": "Unhandled exception",
-                #   "description":
-                #   "Unhandled exception occured while trying to upload shard or
-                #   negotiate contract for shard at index " + str(chapters) + " . Retrying..."}))
                 current_timestamp = int(time.time())
 
                 exchange_report.exchangeEnd = str(current_timestamp)
@@ -702,8 +630,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             # self.__logger.warning('"log_event_type": "debug"')
             self.__logger.info("Shard " + str(chapters + 1) +
                                " successfully added and exchange report sent.")
-            # self.__logger.warning(str({"log_event_type": "debug", "title": "Shard added",
-            #                     "description": "Shard " + str(chapters + 1) + " successfully added and exchange report sent."}))
             # self.storj_engine.storj_client.send_exchange_report(exchange_report) # send exchange report
             # Release the semaphore when the download is finished
             self.semaphore.release()
@@ -711,13 +637,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
     def finish_upload(self, bname, bucket_id):
         self.crypto_tools = CryptoTools()
-        # self.ui_single_file_upload.current_state.setText(
-        #   html_format_begin + "Generating SHA5212 HMAC..." + html_format_end)
-        # self.__logger.warning('"log_event_type": "debug"')
         self.__logger.debug('"title": "HMAC"')
         self.__logger.debug('"description": "Generating HMAC..."')
-        # self.__logger.warning(str({"log_event_type": "debug", "title": "HMAC",
-        #                     "description": "Generating HMAC..."}))
         hash_sha512_hmac_b64 = self.crypto_tools.prepare_bucket_entry_hmac(self.shard_manager_result.shards)
         hash_sha512_hmac = hashlib.sha224(str(hash_sha512_hmac_b64["SHA-512"])).hexdigest()
         self.__logger.debug(hash_sha512_hmac)
@@ -742,17 +663,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 'value': hash_sha512_hmac
             },
         }
-        # self.ui_single_file_upload.current_state.setText(
-        #   html_format_begin + "Adding file to bucket..." + html_format_end)
 
-        # self.__logger.warning('"log_event_type": "debug"')
         self.__logger.debug('"title": "Finishing upload"')
         self.__logger.debug('"description": "Adding file "' +
                             str(bname) + " to bucket...")
         self.emit(QtCore.SIGNAL("setCurrentUploadState"), "Adding file to bucket...")
-
-        # self.__logger.warning(str({"log_event_type": "debug", "title": "Finishing upload",
-        #                     "description": "Adding file " + str(bname) + " to bucket..."}))
 
         success = False
         try:
@@ -769,13 +684,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         except storj.exception.StorjBridgeApiError as e:
             QMessageBox.about(self, "Unhandled bridge exception", "Exception: " + str(e))
         if success:
-            # self.ui_single_file_upload.current_state.setText(
-            #   html_format_begin + "Upload success! Waiting for user..." + html_format_end)
-            # self.__logger.warning('"log_event_type": "success"')
             self.__logger.debug('"title": "File uploaded"')
             self.__logger.debug('"description": "File uploaded successfully!"')
-            # self.__logger.warning(str({"log_event_type": "success", "title": "File uploaded",
-            #                     "description": "File uploaded successfully!"}))
             self.emit(QtCore.SIGNAL("showFileUploadedSuccessfully"))
             self.emit(QtCore.SIGNAL("setCurrentUploadState"), "File uploaded successfully!")
             self.dashboard_instance.createNewFileListUpdateThread()
@@ -786,20 +696,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             int(self.ui_single_file_upload.connections_onetime.value()))
 
         self.ui_single_file_upload.overall_progress.setValue(0)
-        # upload finish function #
-
-        # end upload finishing function #
 
         file_path = None
         self.validation = {}
 
         self.initialize_upload_queue_table()
-
-        # item = ProgressWidgetItem()
-        # self.ui_single_file_upload.shard_queue_table_widget.setItem(1, 1, item)
-        # item.updateValue(1)
-
-        # progress.valueChanged.connect(item.updateValue)
 
         encryption_enabled = True
         self.parametrs = storj.model.StorjParametrs()
@@ -861,7 +762,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             if self.ui_single_file_upload.encrypt_files_checkbox.isChecked():
                 # encrypt file
                 self.emit(QtCore.SIGNAL("setCurrentUploadState"), "Encrypting file...")
-                # self.__logger.warning('"log_event_type": "debug"')
                 self.__logger.debug('"title": "Encryption"')
                 self.__logger.debug('"description": "Encrypting file..."')
 
@@ -901,11 +801,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             self.ui_single_file_upload.file_size.setText(str(self.tools.human_size(int(file_size))))
 
-            # self.ui_single_file_upload.current_state.setText(
-            #   html_format_begin + "Resolving PUSH token..." + html_format_end)
-
-            # self.__logger.warning('"log_event_type": "debug"')
-
             self.is_upload_active = True
             self.ui_single_file_upload.start_upload_bt.setStyleSheet(("QPushButton:hover{\n"
                                                                       "  background-color: #8C8A87;\n"
@@ -924,8 +819,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             self.__logger.debug('"title": "PUSH token"')
             self.__logger.debug('"description": "Resolving PUSH Token for upload..."')
-            # self.__logger.warning(str({"log_event_type": "debug", "title": "PUSH token",
-            #                     "description": "Resolving PUSH Token for upload..."}))
 
             push_token = None
 
@@ -942,14 +835,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             self.__logger.debug("PUSH Token ID: " + push_token.id)
 
-            # self.ui_single_file_upload.current_state.setText(
-            #    html_format_begin + "Resolving frame for file..." + html_format_end)
-
-            # self.__logger.warning('"log_event_type": "debug"')
             self.__logger.debug('"title": "Frame"')
             self.__logger.debug('"description": "Resolving frame for file upload..."')
-            # self.__logger.warning(str({"log_event_type": "debug", "title": "Frame",
-            #                     "description": "Resolving frame for file upload..."}))
 
             frame = None  # initialize variable
             try:
@@ -961,12 +848,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                     self,
                     'Unhandled exception while creating file staging frame',
                     'Exception: %s' % e)
-                # self.__logger.warning('"log_event_type": "error"')
                 self.__logger.debug('"title": "Frame"')
                 self.__logger.debug('"description": "Error while resolving frame for\
                     file upload..."')
-                # self.__logger.warning(str({"log_event_type": "error", "title": "Frame",
-                #                     "description": "Error while resolving frame for file upload..."}))
 
             self.ui_single_file_upload.file_frame_id.setText(str(frame.id))
 
@@ -976,21 +860,16 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             # Now generate shards
             self.emit(QtCore.SIGNAL('setCurrentUploadState'), 'Splitting file to shards...')
-            # self.__logger.warning('"log_event_type": "debug"')
             self.__logger.debug('"title": "Sharding"')
             self.__logger.debug('"description": "Splitting file to shards..."')
-            # self.__logger.warning(str({"log_event_type": "debug", "title": "Sharding",
-            #                     "description": "Splitting file to shards..."}))
 
             shards_manager = storj.model.ShardManager(filepath=file_path_ready, tmp_path=self.parametrs.tmpPath)
             self.all_shards_count = len(shards_manager.shards)
             self.emit(QtCore.SIGNAL("updateShardUploadCounters"))
 
             self.shard_manager_result = shards_manager
-            # self.ui_single_file_upload.current_state.setText(
-            #   html_format_begin + "Generating shards..." + html_format_end)
             # shards_manager._make_shards()
-            #shards_count = shards_manager.num_chunks # fix because new version of sdk
+            # shards_count = shards_manager.num_chunks # fix because new version of sdk
             shards_count = self.all_shards_count
             # create file hash
             self.__logger.debug('file_upload() push_token=%s', push_token)
@@ -1025,21 +904,16 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                       file_name_ready_to_shard_upload)) for shard in shards_manager.shards]
             self.current_line = 0
             for t in threads:
-                #self.shards_already_uploaded += 1
-                #row_lock.acquire()
+                # self.shards_already_uploaded += 1
+                # row_lock.acquire()
                 print "starting thread..."
                 t.start()
                 self.current_line += 1
-                #row_lock.release()
+                # row_lock.release()
                 time.sleep(1)
 
             for t in threads:
                 t.join()
-
-
-
-
-
 
                 # delete encrypted file TODO
 
