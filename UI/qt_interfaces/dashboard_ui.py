@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_MainMenu(object):
     def setupUi(self, MainMenu):
         MainMenu.setObjectName(_fromUtf8("MainMenu"))
-        MainMenu.resize(531, 430)
+        MainMenu.resize(780, 429)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -49,7 +49,7 @@ class Ui_MainMenu(object):
         MainMenu.setAutoFillBackground(False)
         MainMenu.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.file_download_bt = QtGui.QPushButton(MainMenu)
-        self.file_download_bt.setGeometry(QtCore.QRect(360, 390, 161, 31))
+        self.file_download_bt.setGeometry(QtCore.QRect(510, 390, 261, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -72,7 +72,7 @@ class Ui_MainMenu(object):
 "}"))
         self.file_download_bt.setObjectName(_fromUtf8("file_download_bt"))
         self.label_3 = QtGui.QLabel(MainMenu)
-        self.label_3.setGeometry(QtCore.QRect(30, 15, 151, 61))
+        self.label_3.setGeometry(QtCore.QRect(170, 10, 171, 71))
         self.label_3.setText(_fromUtf8(""))
         self.label_3.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/storj-logo-horizontal.png")))
         self.label_3.setScaledContents(True)
@@ -86,22 +86,22 @@ class Ui_MainMenu(object):
         font.setWeight(75)
         self.file_delete_bt.setFont(font)
         self.file_delete_bt.setStyleSheet(_fromUtf8("QPushButton {\n"
-"    background-color: #CC0000;\n"
-"    border: 1px solid #CC0000;\n"
+"    background-color: #fa6e50;\n"
+"    border: 1px solid #fa6e50;\n"
 "    color: #fff;\n"
 "    border-radius: 7px;\n"
 "}\n"
 "QPushButton:hover{\n"
-"    background-color: #bb0a0a;\n"
-"    border-color: #bb0a0a;\n"
+"    background-color: #fa6e50;\n"
+"    border-color: #fa6e50;\n"
 "}\n"
 "QPushButton:active {\n"
-"    background-color: #ce0e0e;\n"
-"    border-color: #ce0e0e;\n"
+"    background-color: #fa6e50;\n"
+"    border-color: #fa6e50\n"
 "}"))
         self.file_delete_bt.setObjectName(_fromUtf8("file_delete_bt"))
         self.label_4 = QtGui.QLabel(MainMenu)
-        self.label_4.setGeometry(QtCore.QRect(210, 15, 101, 16))
+        self.label_4.setGeometry(QtCore.QRect(470, 20, 101, 16))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -110,14 +110,14 @@ class Ui_MainMenu(object):
         self.label_4.setFont(font)
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.files_list_tableview = QtGui.QTableView(MainMenu)
-        self.files_list_tableview.setGeometry(QtCore.QRect(15, 135, 496, 241))
+        self.files_list_tableview.setGeometry(QtCore.QRect(15, 135, 751, 241))
         self.files_list_tableview.setObjectName(_fromUtf8("files_list_tableview"))
         self.bucket_select_combo_box = QtGui.QComboBox(MainMenu)
-        self.bucket_select_combo_box.setGeometry(QtCore.QRect(95, 90, 251, 31))
+        self.bucket_select_combo_box.setGeometry(QtCore.QRect(95, 90, 501, 31))
         self.bucket_select_combo_box.setStyleSheet(_fromUtf8(""))
         self.bucket_select_combo_box.setObjectName(_fromUtf8("bucket_select_combo_box"))
         self.create_bucket_bt = QtGui.QPushButton(MainMenu)
-        self.create_bucket_bt.setGeometry(QtCore.QRect(360, 90, 31, 31))
+        self.create_bucket_bt.setGeometry(QtCore.QRect(610, 90, 31, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(16)
@@ -125,22 +125,22 @@ class Ui_MainMenu(object):
         font.setWeight(75)
         self.create_bucket_bt.setFont(font)
         self.create_bucket_bt.setStyleSheet(_fromUtf8("QPushButton:hover{\n"
-"  background-color: #f5a005;\n"
-"  border-color: #f5a005;\n"
+"  background-color: #83bf20;\n"
+"  border-color: #83bf20;\n"
 "}\n"
 "QPushButton:active {\n"
-"  background-color: #f7ac23;\n"
-"  border-color: #f7ac23;\n"
+"  background-color: #93cc36;\n"
+"  border-color: #93cc36;\n"
 "}\n"
 "QPushButton{\n"
-"  background-color: #ffa500;\n"
-"    border: 1px solid #ffa500;\n"
+"  background-color: #88c425;\n"
+"    border: 1px solid #88c425;\n"
 "    color: #fff;\n"
 "    border-radius: 7px;\n"
 "}"))
         self.create_bucket_bt.setObjectName(_fromUtf8("create_bucket_bt"))
         self.edit_bucket_bt = QtGui.QPushButton(MainMenu)
-        self.edit_bucket_bt.setGeometry(QtCore.QRect(440, 90, 71, 31))
+        self.edit_bucket_bt.setGeometry(QtCore.QRect(690, 90, 81, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -163,7 +163,7 @@ class Ui_MainMenu(object):
 "}"))
         self.edit_bucket_bt.setObjectName(_fromUtf8("edit_bucket_bt"))
         self.account_label = QtGui.QLabel(MainMenu)
-        self.account_label.setGeometry(QtCore.QRect(210, 45, 301, 21))
+        self.account_label.setGeometry(QtCore.QRect(470, 40, 301, 41))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -176,7 +176,7 @@ class Ui_MainMenu(object):
 ""))
         self.account_label.setObjectName(_fromUtf8("account_label"))
         self.file_mirrors_bt = QtGui.QPushButton(MainMenu)
-        self.file_mirrors_bt.setGeometry(QtCore.QRect(240, 390, 111, 31))
+        self.file_mirrors_bt.setGeometry(QtCore.QRect(350, 390, 151, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -199,14 +199,14 @@ class Ui_MainMenu(object):
 "}"))
         self.file_mirrors_bt.setObjectName(_fromUtf8("file_mirrors_bt"))
         self.new_file_upload_bt = QtGui.QPushButton(MainMenu)
-        self.new_file_upload_bt.setGeometry(QtCore.QRect(60, 390, 171, 31))
+        self.new_file_upload_bt.setGeometry(QtCore.QRect(60, 390, 281, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
         self.new_file_upload_bt.setFont(font)
-        self.new_file_upload_bt.setStyleSheet(_fromUtf8("QPushButton:hover{\n"
+        self.new_file_upload_bt.setStyleSheet(_fromUtf8("QPushButton#pushButton:hover{\n"
 "  background-color: #83bf20;\n"
 "  border-color: #83bf20;\n"
 "}\n"
@@ -222,13 +222,13 @@ class Ui_MainMenu(object):
 "}"))
         self.new_file_upload_bt.setObjectName(_fromUtf8("new_file_upload_bt"))
         self.settings_bt = QtGui.QLabel(MainMenu)
-        self.settings_bt.setGeometry(QtCore.QRect(490, 10, 21, 21))
+        self.settings_bt.setGeometry(QtCore.QRect(740, 10, 31, 31))
         self.settings_bt.setText(_fromUtf8(""))
         self.settings_bt.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/cog-outline-filled.png")))
         self.settings_bt.setScaledContents(True)
         self.settings_bt.setObjectName(_fromUtf8("settings_bt"))
         self.refresh_bt = QtGui.QLabel(MainMenu)
-        self.refresh_bt.setGeometry(QtCore.QRect(400, 90, 31, 31))
+        self.refresh_bt.setGeometry(QtCore.QRect(650, 90, 31, 31))
         self.refresh_bt.setText(_fromUtf8(""))
         self.refresh_bt.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/refresh.png")))
         self.refresh_bt.setScaledContents(True)
@@ -242,6 +242,12 @@ class Ui_MainMenu(object):
         font.setWeight(75)
         self.label_5.setFont(font)
         self.label_5.setObjectName(_fromUtf8("label_5"))
+        self.crypto_keys_manager_bt = QtGui.QLabel(MainMenu)
+        self.crypto_keys_manager_bt.setGeometry(QtCore.QRect(700, 10, 31, 31))
+        self.crypto_keys_manager_bt.setText(_fromUtf8(""))
+        self.crypto_keys_manager_bt.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/keys.png")))
+        self.crypto_keys_manager_bt.setScaledContents(True)
+        self.crypto_keys_manager_bt.setObjectName(_fromUtf8("crypto_keys_manager_bt"))
 
         self.retranslateUi(MainMenu)
         QtCore.QMetaObject.connectSlotsByName(MainMenu)
