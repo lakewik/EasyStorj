@@ -1,14 +1,19 @@
+# -*- coding: utf-8 -*-
+
+import logging
+import json
+import storj
+
+
 from PyQt4 import QtCore, QtGui
 from .qt_interfaces.register_ui_new import Ui_UI_Register
 from .login import LoginUI
 from .utilities.tools import Tools
-import json
-import storj
-from .utilities.log_manager import logger
 
 
 # Register section
 class RegisterUI(QtGui.QMainWindow):
+    __logger = logging.getLogger('%s.RegisterUI' % __name__)
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -74,9 +79,9 @@ Distributed Storage Network! '
 sent to you. '
                                        'Then you can login',
                                        QtGui.QMessageBox.Ok)
-            logger.debug('New user registrated')
-            logger.debug('Email: ' + self.email)
-            logger.debug('Password: ' + self.password)
+            self.__logger.debug('New user registrated')
+            self.__logger.debug('Email: ' + self.email)
+            self.__logger.debug('Password: ' + self.password)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
                 self.login_window = LoginUI(self)

@@ -1,23 +1,24 @@
+# -*- coding: utf-8 -*-
+
 import json
+import logging
+import storj.exception as sjexc
 import threading
+
 from PyQt4 import QtCore, QtGui
 from six import print_
-from .qt_interfaces.file_mirrors_ui_new import Ui_FileMirrorsList
-import storj.exception as sjexc
-from .resources.constants import MIRRORS_TREE_SORTING_ENABLED
-
 from .engine import StorjEngine
 from .node_details import NodeDetailsUI
-#from UI.engine import StorjEngine
-#from UI.node_details import NodeDetailsUI
-
+from .qt_interfaces.file_mirrors_ui_new import Ui_FileMirrorsList
+from .resources.constants import MIRRORS_TREE_SORTING_ENABLED
 from .resources.html_strings import html_format_begin, html_format_end
-from .utilities.log_manager import logger
 
 
 class StoppableThread(threading.Thread):
     """Thread class with a stop() method. The thread itself has to check
     regularly for the stopped() condition."""
+
+    __logger = logging.getLogger('%s.StoppableThread' % __name__)
 
     def __init__(self, *args, **kwargs):
         super(StoppableThread, self).__init__(*args, **kwargs)
@@ -33,6 +34,8 @@ class StoppableThread(threading.Thread):
 
 
 class FileMirrorsListUI(QtGui.QMainWindow):
+
+    __logger = logging.getLogger('%s.FileMirrorsListUI' % __name__)
 
     def __init__(self, parent=None, bucketid=None, fileid=None, filename=None):
         QtGui.QWidget.__init__(self, parent)
@@ -68,7 +71,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         self.file_mirrors_list_ui.file_id.setText(str(self.fileid))
         self.file_mirrors_list_ui.file_name.setText(str(self.filename).decode('utf-8'))
 
-        logger.info(self.fileid)
+        self.__logger.info(self.fileid)
         self.storj_engine = StorjEngine()  # init StorjEngine
         self.createNewMirrorListInitializationThread()
 
@@ -122,11 +125,11 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                 self.node_details_window.show()
             else:
                 QtGui.QMessageBox.about(self, 'Warning', 'Please select farmer node from list')
-                logger.warning('Unhandled error')
+                self.__logger.warning('Unhandled error')
 
         except BaseException:
             QtGui.QMessageBox.about(self, 'Warning', 'Please select farmer node from list')
-            logger.error('Unhandled error')
+            self.__logger.error('Unhandled error')
 
     def createNewMirrorListInitializationThread(self):
         #self.mirror_list_initialization_thread = threading.Thread(target=self.initialize_mirrors_tree, args=())
@@ -169,7 +172,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
             for file_mirror in self.storj_engine.storj_client.file_mirrors(str(self.bucketid), str(self.fileid)):
                 for mirror in file_mirror.established:
                     self.established_mirrors_count_for_file += 1
-                    logger.info(file_mirror.established)
+                    self.__logger.info(file_mirror.established)
                     if mirror['shardHash'] != recent_shard_hash:
                         parent1 = QtGui.QStandardItem('Shard with hash {}'.format(mirror['shardHash']))
                         divider = divider + 1
@@ -240,4 +243,4 @@ class FileMirrorsListUI(QtGui.QMainWindow):
             self.emit(QtCore.SIGNAL('showStorjBridgeException'), str(e))  # emit Storj Bridge Exception
         except Exception as e:
             self.emit(QtCore.SIGNAL('showUnhandledException'), str(e))  # emit unhandled Exception
-            logger.error(e)
+            self.__logger.error(e)

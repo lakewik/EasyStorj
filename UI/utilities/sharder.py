@@ -1,7 +1,13 @@
-import math
+# -*- coding: utf-8 -*-
+
 import os
-from .log_manager import logger
+
+import logging
+import math
+
+
 from six import print_
+
 
 # global SHARD_MULTIPLES_BACK, MAX_SHARD_SIZE
 
@@ -9,7 +15,9 @@ from six import print_
 # SHARD_MULTIPLES_BACK = 4
 
 
-class ShardingTools():
+class ShardingTools(object):
+
+    __logger = logging.getLogger('%s.ShardingTools' % __name__)
 
     def __init__(self):
         self.MAX_SHARD_SIZE = 4294967296  # 4Gb
@@ -37,7 +45,7 @@ class ShardingTools():
             return 0
             # if accumulator != True:
             # accumulator  = 0
-        logger.debug(accumulator)
+        self.__logger.debug(accumulator)
 
         # Determine hops back by accumulator
         if ((accumulator - self.SHARD_MULTIPLES_BACK) < 0):
@@ -81,7 +89,7 @@ class ShardingTools():
         # Based on <http://code.activestate.com/recipes/224800-simple-file-splittercombiner-module/>
         import re
 
-        logger.info('Creating file %s' % destination_file_path)
+        self.__logger.info('Creating file %s' % destination_file_path)
 
         bname = str((os.path.split(destination_file_path))[1]).decode('utf-8')
         bname_input = str((os.path.split(shards_filepath))[1]).decode('utf-8')
@@ -102,35 +110,35 @@ class ShardingTools():
 
         chunkfiles = []
         for f in os.listdir(str(input_directory).decode('utf-8')):
-            # logger.debug(f)
+            # self.__logger.debug(f)
             if chunkre.match(f):
                 chunkfiles.append(f)
 
-        logger.info('Number of chunks %s' % len(chunkfiles))
+        self.__logger.info('Number of chunks %s' % len(chunkfiles))
         chunkfiles.sort(self.sort_index)
-        logger.info(chunkfiles)
+        self.__logger.info(chunkfiles)
         data = ''
         for f in chunkfiles:
 
             try:
-                logger.info('Appending chunk %s' %
+                self.__logger.info('Appending chunk %s' %
                             os.path.join(str(input_directory), f))
                 data += open(str(str(input_directory) + "/" + str(f)).decode('utf-8'), 'rb').read()
-                logger.info(str(input_directory) + "/" + str(f) +
+                self.__logger.info(str(input_directory) + "/" + str(f) +
                             "katalog wejsciowy")
             except (OSError, IOError, EOFError) as e:
-                logger.error(e)
+                self.__logger.error(e)
                 continue
 
         try:
-            logger.info(str(output_directory) + "katalog wyjsciowy")
+            self.__logger.info(str(output_directory) + "katalog wyjsciowy")
             f = open(str(str(output_directory) + "/" + str(bname)).decode('utf-8'), 'wb')
             f.write(data)
             f.close()
         except (OSError, IOError, EOFError) as e:
             raise ShardingException(str(e))
 
-        logger.info('Wrote file %s' % bname)
+        self.__logger.info('Wrote file %s' % bname)
         return 1
 
 

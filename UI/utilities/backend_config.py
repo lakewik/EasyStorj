@@ -1,11 +1,16 @@
+# -*- coding: utf-8 -*-
+
+import logging
 import xml.etree.cElementTree as ET
-from .log_manager import logger
+
 
 CONFIG_FILE = "storj_client_config.xml"
 
 
 # Configuration backend section
 class Configuration:
+
+    __logger = logging.getLogger('%s.Configuration' % __name__)
 
     def __init__(self, sameFileNamePrompt=None, sameFileHashPrompt=None,
                  load_config=False):
@@ -16,7 +21,7 @@ class Configuration:
             try:
                 et = ET.parse(CONFIG_FILE)
             except BaseException:
-                logger.error("Unspecified XML parse error")
+                self.__logger.error("Unspecified XML parse error")
 
             for tags in et.iter(str("same_file_name_prompt")):
                 if tags.text == "1":
@@ -45,7 +50,7 @@ class Configuration:
             for tags in et.iter(str(parametr)):
                 output = tags.text
         except BaseException:
-            logger.error("Unspecified error")
+            self.__logger.error("Unspecified error")
 
         return output
 
@@ -55,7 +60,7 @@ class Configuration:
             for tags in et.iter('password'):
                 output = tags.text
         except BaseException:
-            logger.error("Unspecified error")
+            self.__logger.error("Unspecified error")
 
     def paint_config_to_ui(self, settings_ui):
         et = None
@@ -81,7 +86,7 @@ class Configuration:
                 settings_ui.shard_size_unit.setCurrentIndex(int(tags.text))
 
         except Exception as e:
-            logger.error("Unspecified XML parse error" + str(e))
+            self.__logger.error("Unspecified XML parse error" + str(e))
 
     def save_client_configuration(self, settings_ui):
         root = ET.Element("configuration")
