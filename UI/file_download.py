@@ -313,8 +313,8 @@ this window?",
         tablerowdata['shard_index'] = str(chapters)
 
         self.__logger.debug('Resolved pointer for download: %s:%s' % (
-                     pointers_content['farmer']['address'],
-                     pointers_content['farmer']['port']))
+            pointers_content['farmer']['address'],
+            pointers_content['farmer']['port']))
         # Add row to table
         self.emit(QtCore.SIGNAL('addRowToDownloadQueueTable'), tablerowdata)
 
@@ -983,8 +983,8 @@ Getting another farmer pointer...")
             self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
             self.__logger.debug('Shard downloaded')
             self.__logger.debug('Shard at index ' +
-                         str(shard_index) +
-                         ' downloaded successfully.')
+                                str(shard_index) +
+                                ' downloaded successfully.')
             self.shards_already_downloaded += 1
             # Update already downloaded shards count
             self.emit(
@@ -1091,7 +1091,7 @@ Getting another farmer pointer...")
                     part)
 
             self.__logger.debug('%s-%s' % (os.path.join(self.tmp_path, file_name),
-                                    part))
+                                           part))
 
         except IOError as e:
             self.__logger.error('Perm error %s' % e)

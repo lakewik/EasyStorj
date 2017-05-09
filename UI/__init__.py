@@ -87,4 +87,5 @@ def load_default_logging():
 
     logging.getLogger(__name__).info('using default logging configuration')
 
+
 setup_logging()

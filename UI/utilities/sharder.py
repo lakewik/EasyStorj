@@ -122,10 +122,10 @@ class ShardingTools(object):
 
             try:
                 self.__logger.info('Appending chunk %s' %
-                            os.path.join(str(input_directory), f))
+                                   os.path.join(str(input_directory), f))
                 data += open(str(str(input_directory) + "/" + str(f)).decode('utf-8'), 'rb').read()
                 self.__logger.info(str(input_directory) + "/" + str(f) +
-                            "katalog wejsciowy")
+                                   "katalog wejsciowy")
             except (OSError, IOError, EOFError) as e:
                 self.__logger.error(e)
                 continue
