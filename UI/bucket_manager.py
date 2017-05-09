@@ -147,4 +147,3 @@ class BucketManagerUI(QtGui.QMainWindow):
         self.bucket_manager_ui.bucket_list_tableview.setModel(model)
         self.bucket_manager_ui.bucket_list_tableview.horizontalHeader().\
             setResizeMode(QtGui.QHeaderView.Stretch)
-

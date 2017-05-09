@@ -65,4 +65,3 @@ class LoginUI(QtGui.QMainWindow):
                 self.main_ui_window.show()
                 self.close()
                 # initial_window.hide()
-

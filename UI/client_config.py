@@ -36,11 +36,7 @@ class ClientConfigurationUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.client_configuration_ui.restore_to_default_bt, QtCore.SIGNAL('clicked()'),
                                self.reset_settings_to_default)  # restore to default settings
 
-
-
-
         self.configuration_manager.paint_config_to_ui(self.client_configuration_ui)
-
 
     def handle_logout_action(self):
         msgBox = QtGui.QMessageBox(
@@ -50,17 +46,16 @@ class ClientConfigurationUI(QtGui.QMainWindow):
             (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
 
         result = msgBox.exec_()
-        #self.__logger.debug(result)
+        # self.__logger.debug(result)
 
         if result == QtGui.QMessageBox.Yes:
             logged_out = self.account_manager.logout()
             if logged_out:
                 QtGui.QMessageBox.about(self, 'Success', 'Successfully logged out!')
 
-
     def select_crypto_keys_path(self):
         self.client_configuration_ui.crypto_keys_location.setText(str(QtGui.QFileDialog.getSaveFileName(
-          self, 'Save file to...', 'storj_client_keyring.sjkr')))
+            self, 'Save file to...', 'storj_client_keyring.sjkr')))
 
     def save_settings(self):
         # validate settings
@@ -79,7 +74,6 @@ class ClientConfigurationUI(QtGui.QMainWindow):
 
         if result == QtGui.QMessageBox.Yes:
             QtGui.QMessageBox.about(self, 'Success', 'All logs have been successfully cleared!')
-
 
     def reset_settings_to_default(self):
         msgBox = QtGui.QMessageBox(

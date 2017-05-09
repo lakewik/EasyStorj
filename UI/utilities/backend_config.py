@@ -15,7 +15,7 @@ class Configuration:
 
             try:
                 et = ET.parse(CONFIG_FILE)
-            except:
+            except BaseException:
                 logger.error("Unspecified XML parse error")
 
             for tags in et.iter(str("same_file_name_prompt")):
@@ -44,7 +44,7 @@ class Configuration:
             et = ET.parse(CONFIG_FILE)
             for tags in et.iter(str(parametr)):
                 output = tags.text
-        except:
+        except BaseException:
             logger.error("Unspecified error")
 
         return output
@@ -54,7 +54,7 @@ class Configuration:
             et = ET.parse(CONFIG_FILE)
             for tags in et.iter('password'):
                 output = tags.text
-        except:
+        except BaseException:
             logger.error("Unspecified error")
 
     def paint_config_to_ui(self, settings_ui):
@@ -94,7 +94,7 @@ class Configuration:
         ET.SubElement(doc, "max_download_bandwidth").text = str(settings_ui.max_download_bandwidth.text())
         ET.SubElement(doc, "max_upload_bandwidth").text = str(settings_ui.max_upload_bandwidth.text())
         ET.SubElement(doc, "default_file_encryption_algorithm").text = str(
-                                    settings_ui.default_crypto_algorithm.currentIndex())
+            settings_ui.default_crypto_algorithm.currentIndex())
         ET.SubElement(doc, "bridge_request_timeout").text = str(settings_ui.bridge_request_timeout.text())
         ET.SubElement(doc, "crypto_keys_location").text = str(settings_ui.crypto_keys_location.text())
         tree = ET.ElementTree(root)

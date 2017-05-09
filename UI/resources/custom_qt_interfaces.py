@@ -5,6 +5,7 @@ import operator
 from PyQt4.QtCore import QAbstractTableModel, SIGNAL
 from PyQt4.QtCore import QVariant
 
+
 class TableModel(QtGui.QStandardItemModel):
     _sort_order = QtCore.Qt.AscendingOrder
 

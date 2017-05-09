@@ -83,4 +83,3 @@ sent to you. '
                 self.login_window.show()
                 self.close()
                 # initial_window.hide()
-

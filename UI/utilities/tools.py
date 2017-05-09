@@ -6,6 +6,7 @@ from os.path import expanduser
 import tempfile
 import errno
 
+
 class Tools:
     def encrypt_file_name(self):
         return 1

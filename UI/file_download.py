@@ -31,8 +31,6 @@ queue = Queue.Queue()
 row_lock = threading.Lock()
 
 
-
-
 class SingleFileDownloadUI(QtGui.QMainWindow):
 
     def __init__(self, parent=None, bucketid=None, fileid=None):
@@ -60,10 +58,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.ui_single_file_download.shard_queue_table.customContextMenuRequested.connect(
             partial(self.display_table_context_menu))
 
-
         #self.connect(self.ui_single_file_download.shard_queue_table, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.receiver)
-
-
 
         self.tools = Tools()
 
@@ -157,7 +152,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         self.semaphore = threading.BoundedSemaphore(MAX_DOWNLOAD_CONNECTIONS_AT_SAME_TIME)
 
-        self.ui_single_file_download.connections_onetime.setValue(int(MAX_DOWNLOAD_CONNECTIONS_AT_SAME_TIME))  # user can set it manually default value from constants file
+        # user can set it manually default value from constants file
+        self.ui_single_file_download.connections_onetime.setValue(int(MAX_DOWNLOAD_CONNECTIONS_AT_SAME_TIME))
 
         # set default paths
         temp_dir = ''
@@ -227,7 +223,6 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
                 if result == QtGui.QMessageBox.Yes:
                     self.another_farmer_manual_requests[int(self.current_selected_shard_index)] = True
-
 
     def set_current_active_connections(self):
         self.ui_single_file_download.current_active_connections.setText(
@@ -311,7 +306,7 @@ this window?",
         Add a row to the shard table and return the row number
         """
         # Add items to shard queue table view
-        #self.rowpositions_in_progress.append(False)
+        # self.rowpositions_in_progress.append(False)
         tablerowdata = {}
         tablerowdata['farmer_address'] = pointers_content['farmer']['address']
         tablerowdata['farmer_port'] = pointers_content['farmer']['port']
@@ -363,7 +358,7 @@ this window?",
             else:
                 QtGui.QMessageBox.critical(self, 'Bridge error',
                                            str(j['error']))
-        except:
+        except BaseException:
             QtGui.QMessageBox.critical(self, 'Bridge error',
                                        str(exception_content))
 
@@ -554,24 +549,21 @@ this window?",
                 if pointer.get('farmer')['address'] != old_ip:
                     break
 
-
             except storj.exception.StorjFarmerError as err:
                 logger.error(err)
                 continue
-                #exit(0)
+                # exit(0)
             except Exception as err:
                 logger.error(err)
                 continue
-                #exit(0)
+                # exit(0)
 
         try:
             if pointer.get('farmer')['address'] == old_ip:
                 logger.error('This will raise an exception')
                 raise storj.exception.StorjFarmerError('Farmer not found')
-        except:
+        except BaseException:
             print "Farmer not found! Unable to download shard!"
-
-
 
         options_array = {}
         options_array['tmp_path'] = self.tmp_path
@@ -770,7 +762,7 @@ file with ID %s: ...' % file_id)
                 s_index = 0
                 self.pointers_exclusions = [[] for i3 in range(len(threads))]
                 for t in threads:
-                    #self.pointers_exclusions.append([s_index])
+                    # self.pointers_exclusions.append([s_index])
                     self.already_started_shard_downloads_count += 1
                     self.another_farmer_manual_requests.append(False)
                     row_lock.acquire()
@@ -786,7 +778,7 @@ file with ID %s: ...' % file_id)
 
                 if shard_pointer == 'error':
                     raise Exception()
-            except:
+            except BaseException:
                 logger.error('Error while initializing download proccess...')
 
     def update_shard_download_progess(self, row_position_index, value):
@@ -933,7 +925,6 @@ file with ID %s: ...' % file_id)
                 expected_shard_size = file_size
                 downloaded_shard_size = os.stat(local_filename).st_size
 
-
                 if expected_shard_size != downloaded_shard_size:
                     file_size_not_integral = True
                     raise storj.exception.StorjFarmerError(12)
@@ -986,7 +977,7 @@ Getting another farmer pointer...")
             logger.debug('Retry with new downoad pointer')
             self.semaphore.release()
             self.emit(QtCore.SIGNAL('retryWithNewDownloadPointer'),
-                    shard_index, url.split(':')[1].replace('//', ''))
+                      shard_index, url.split(':')[1].replace('//', ''))
 
         else:
             #self.rowpositions_in_progress[int(rowposition)] = False
@@ -1026,7 +1017,7 @@ Getting another farmer pointer...")
 
         try:
             self.pointers_exclusions[int(pointer['index'])].append(pointer.get('farmer')['nodeID'])
-        except:
+        except BaseException:
             self.semaphore.release()
             self.emit(QtCore.SIGNAL('retryWithNewDownloadPointer'),
                       pointer['index'], 'http://%s:%s/shards/%s?token=%s' % (
@@ -1034,8 +1025,6 @@ Getting another farmer pointer...")
                 str(pointer.get('farmer')['port']),
                 pointer['hash'],
                 pointer['token']))
-
-
 
         try:
             # check ability to write files to selected directories
@@ -1104,7 +1093,7 @@ Getting another farmer pointer...")
                     part)
 
             logger.debug('%s-%s' % (os.path.join(self.tmp_path, file_name),
-                         part))
+                                    part))
 
         except IOError as e:
             logger.error('Perm error %s' % e)

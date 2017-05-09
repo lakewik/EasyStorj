@@ -4,6 +4,8 @@ from PyQt4 import QtCore, QtGui
 from qt_interfaces.sync_menu_ui import Ui_SyncMenu
 
 # Synchronization menu section #
+
+
 class SyncMenuUI(QtGui.QMainWindow):
 
     def __init__(self, parent=None,):
@@ -26,4 +28,3 @@ class SyncMenuUI(QtGui.QMainWindow):
     def update_current_main_sync_stats(self, stats_array):
         self.sync_menu_ui.successfully_synced_files_count.setText(stats_array["successfully_synced_files_count"])
         return 1
-

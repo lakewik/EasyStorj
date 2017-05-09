@@ -14,6 +14,7 @@ from .node_details import NodeDetailsUI
 from .resources.html_strings import html_format_begin, html_format_end
 from .utilities.log_manager import logger
 
+
 class StoppableThread(threading.Thread):
     """Thread class with a stop() method. The thread itself has to check
     regularly for the stopped() condition."""
@@ -29,6 +30,8 @@ class StoppableThread(threading.Thread):
         return self._stop.isSet()
 
 # Mirrors section
+
+
 class FileMirrorsListUI(QtGui.QMainWindow):
 
     def __init__(self, parent=None, bucketid=None, fileid=None, filename=None):
@@ -75,7 +78,6 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         print_('Mirrors get proccess stopped!')
         event.accept()  # let the window close
 
-
     def change_loading_gif(self, is_visible):
         if is_visible:
             movie = QtGui.QMovie(':/resources/loading.gif')
@@ -92,7 +94,7 @@ class FileMirrorsListUI(QtGui.QMainWindow):
             j = json.loads(str(exception_content))
             QtGui.QMessageBox.critical(self, 'Bridge error', str(j['error']))
 
-        except:
+        except BaseException:
             QtGui.QMessageBox.critical(self, 'Bridge error', str(exception_content))
 
     def open_mirror_details_window(self, mirror_state):
@@ -122,11 +124,9 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                 QtGui.QMessageBox.about(self, 'Warning', 'Please select farmer node from list')
                 logger.warning('Unhandled error')
 
-        except:
+        except BaseException:
             QtGui.QMessageBox.about(self, 'Warning', 'Please select farmer node from list')
             logger.error('Unhandled error')
-
-
 
     def createNewMirrorListInitializationThread(self):
         #self.mirror_list_initialization_thread = threading.Thread(target=self.initialize_mirrors_tree, args=())
@@ -140,8 +140,8 @@ class FileMirrorsListUI(QtGui.QMainWindow):
         # model = QtGui.QFileSystemModel()
         # model.setRootPath(QtCore.QDir.currentPath())
 
-        #self.file_mirrors_list_ui.loading_label_mirrors_established.setStyleSheet('color: red')  # set loading color
-        #self.file_mirrors_list_ui.loading_label_mirrors_available.setStyleSheet('color: red')  # set loading color
+        # self.file_mirrors_list_ui.loading_label_mirrors_established.setStyleSheet('color: red')  # set loading color
+        # self.file_mirrors_list_ui.loading_label_mirrors_available.setStyleSheet('color: red')  # set loading color
 
         self.mirror_tree_view_header = ['Shard Hash / Address', 'User agent', 'Last seen', 'Node ID']
 
@@ -175,7 +175,8 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                         divider = divider + 1
                         self.established_mirrors_model.appendRow(parent1)
 
-                    child1 = QtGui.QStandardItem(str(mirror['contact']['address'] + ':' + str(mirror['contact']['port'])))
+                    child1 = QtGui.QStandardItem(
+                        str(mirror['contact']['address'] + ':' + str(mirror['contact']['port'])))
                     child2 = QtGui.QStandardItem(str(mirror['contact']['userAgent']))
                     child3 = QtGui.QStandardItem(str(mirror['contact']['lastSeen']).replace('Z', '').replace('T', ' '))
                     child4 = QtGui.QStandardItem(str(mirror['contact']['nodeID']))
@@ -186,11 +187,11 @@ class FileMirrorsListUI(QtGui.QMainWindow):
 
                     recent_shard_hash = mirror['shardHash']
 
-            #self.file_mirrors_list_ui.loading_label_mirrors_established.setText('')
+            # self.file_mirrors_list_ui.loading_label_mirrors_established.setText('')
 
             # dbQueryModel.itemData(treeView.selectedIndexes()[0])
 
-            ################################### set the model for available mirrors #########################################
+            ################################### set the model for available mirrors ##
             self.available_mirrors_model = QtGui.QStandardItemModel()
             self.available_mirrors_model.setHorizontalHeaderLabels(self.mirror_tree_view_header)
 
@@ -215,9 +216,11 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                         divider = divider + 1
                         self.available_mirrors_model.appendRow(parent2)
 
-                    child1 = QtGui.QStandardItem(str(mirror_2['contact']['address'] + ':' + str(mirror_2['contact']['port'])))
+                    child1 = QtGui.QStandardItem(
+                        str(mirror_2['contact']['address'] + ':' + str(mirror_2['contact']['port'])))
                     child2 = QtGui.QStandardItem(str(mirror_2['contact']['userAgent']))
-                    child3 = QtGui.QStandardItem(str(mirror_2['contact']['lastSeen']).replace('Z', '').replace('T', ' '))
+                    child3 = QtGui.QStandardItem(
+                        str(mirror_2['contact']['lastSeen']).replace('Z', '').replace('T', ' '))
                     child4 = QtGui.QStandardItem(str(mirror_2['contact']['nodeID']))
                     parent2.appendRow([child1, child2, child3, child4])
 
@@ -225,12 +228,12 @@ class FileMirrorsListUI(QtGui.QMainWindow):
                     # self.established_mirrors_tree_view.setFirstColumnSpanned(1, self.established_mirrors_tree_view.rootIndex(), True)
 
                     recent_shard_hash_2 = mirror_2['shardHash']
-            #self.file_mirrors_list_ui.loading_label_mirrors_available.setText('')
+            # self.file_mirrors_list_ui.loading_label_mirrors_available.setText('')
 
             self.file_mirrors_list_ui.established_mirrors_count.setText(
                 html_format_begin + 'ESTABLISHED (' + str(self.established_mirrors_count_for_file) + ')' + html_format_end)
             self.file_mirrors_list_ui.available_mirrors_count.setText(
-                html_format_begin +  'AVAILABLE (' + str(self.available_mirrors_count_for_file) + ')' + html_format_end)
+                html_format_begin + 'AVAILABLE (' + str(self.available_mirrors_count_for_file) + ')' + html_format_end)
 
             self.emit(QtCore.SIGNAL('changeLoadingGif'), False)
         except sjexc.StorjBridgeApiError as e:
