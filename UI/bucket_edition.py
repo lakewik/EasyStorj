@@ -1,24 +1,22 @@
 # -*- coding: utf-8 -*-
 
+from PyQt4 import QtCore, QtGui
+
+from .engine import StorjEngine
+from .qt_interfaces.bucket_editing_ui import Ui_BucketEditing
+import threading
+
+import storj.exception as sjexc
+
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-
-import threading
-
-import storj.exception as sjexc
-
-from PyQt4 import QtCore, QtGui
-
-from engine import StorjEngine
-from qt_interfaces.bucket_editing_ui import Ui_BucketEditing
-
-
 class BucketEditingUI(QtGui.QMainWindow):
 
-    def __init__(self, parent=None, bucketid=None, action=None, dashboard_instance=None):
+    def __init__(self, parent=None, bucketid=None, action=None,
+                 dashboard_instance=None):
         QtGui.QWidget.__init__(self, parent)
         self.bucket_create_ui = Ui_BucketEditing()
         self.bucket_create_ui.setupUi(self)
@@ -26,16 +24,22 @@ class BucketEditingUI(QtGui.QMainWindow):
         self.bucket_id = bucketid
 
         QtCore.QObject.connect(
-            self.bucket_create_ui.cancel_bt, QtCore.SIGNAL('clicked()'),  self.close)
+            self.bucket_create_ui.cancel_bt, QtCore.SIGNAL('clicked()'),
+            self.close)
 
-
-        self.connect(self, QtCore.SIGNAL('printBucketDetails'), self.set_bucket_details)
-        self.connect(self, QtCore.SIGNAL('showBucketCreatingException'), self.show_bucket_creating_exception_dialog)
-        self.connect(self, QtCore.SIGNAL('showBucketCreatedSuccessfully'), self.show_bucket_created_successfully)
-        self.connect(self, QtCore.SIGNAL('showBucketDeletedSuccessfully'), self.show_bucket_deleted_successfully)
-        self.connect(self, QtCore.SIGNAL('showBucketUpdatedSuccessfully'), self.show_bucket_updated_successfully)
+        self.connect(self, QtCore.SIGNAL('printBucketDetails'),
+                     self.set_bucket_details)
+        self.connect(self, QtCore.SIGNAL('showBucketCreatingException'),
+                     self.show_bucket_creating_exception_dialog)
+        self.connect(self, QtCore.SIGNAL('showBucketCreatedSuccessfully'),
+                     self.show_bucket_created_successfully)
+        self.connect(self, QtCore.SIGNAL('showBucketDeletedSuccessfully'),
+                     self.show_bucket_deleted_successfully)
+        self.connect(self, QtCore.SIGNAL('showBucketUpdatedSuccessfully'),
+                     self.show_bucket_updated_successfully)
         self.connect(self, QtCore.SIGNAL('showBucketCreationMissingFields'),
-            lambda: QtGui.QMessageBox.about(self, 'Warning', 'Please fill out all fields!'))
+                     lambda: QtGui.QMessageBox.about(
+                         self, 'Warning', 'Please fill out all fields!'))
         self.dashboard_instance = dashboard_instance
         self.storj_engine = StorjEngine()
 
@@ -52,10 +56,12 @@ class BucketEditingUI(QtGui.QMainWindow):
             self.createBucketDetailsLoadThread()
 
             # edit bucket action
-            QtCore.QObject.connect(self.bucket_create_ui.create_edit_bucket_bt, QtCore.SIGNAL('clicked()'),
+            QtCore.QObject.connect(self.bucket_create_ui.create_edit_bucket_bt,
+                                   QtCore.SIGNAL('clicked()'),
                                    lambda: self.createNewBucketEditThread())
             # remove bucket action
-            QtCore.QObject.connect(self.bucket_create_ui.remove_bucket_bt, QtCore.SIGNAL('clicked()'),
+            QtCore.QObject.connect(self.bucket_create_ui.remove_bucket_bt,
+                                   QtCore.SIGNAL('clicked()'),
                                    self.createNewBucketRemoveThread)
             self.bucket_create_ui.create_edit_bucket_bt.setText('SAVE')
 
@@ -66,7 +72,8 @@ class BucketEditingUI(QtGui.QMainWindow):
 
     def resolve_bucket_details(self):
         # update bucket details
-        bucket_details = self.storj_engine.storj_client.bucket_get(str(self.bucket_id))
+        bucket_details = self.storj_engine.storj_client.bucket_get(
+            str(self.bucket_id))
         self.emit(QtCore.SIGNAL('printBucketDetails'), bucket_details.name,
                   bucket_details.transfer, bucket_details.storage)
 
@@ -92,7 +99,6 @@ class BucketEditingUI(QtGui.QMainWindow):
             QtGui.QMessageBox.Ok)
         msgBox.exec_()
 
-
     def show_bucket_updated_successfully(self):
         msgBox = QtGui.QMessageBox(
             QtGui.QMessageBox.Information,
@@ -101,18 +107,19 @@ class BucketEditingUI(QtGui.QMainWindow):
             QtGui.QMessageBox.Ok)
         msgBox.exec_()
 
-
     def createNewBucketRemoveThread(self):
         self.bucket_name = self.bucket_create_ui.bucket_name.text()
         msgBox = QtGui.QMessageBox(
             QtGui.QMessageBox.Question,
             'Are you sure?',
-            'Are you sure to delete this bucket? Bucket name: \'%s\'' % self.bucket_name,
+            'Are you sure to delete this bucket? Bucket name: \'%s\'' %
+            self.bucket_name,
             (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
 
         result = msgBox.exec_()
         if result == QtGui.QMessageBox.Yes:
-            bucket_create_thread = threading.Thread(target=self.remove_bucket, args=())
+            bucket_create_thread = threading.Thread(
+                target=self.remove_bucket, args=())
             bucket_create_thread.start()
 
     def remove_bucket(self):
@@ -123,25 +130,29 @@ class BucketEditingUI(QtGui.QMainWindow):
             success = True
         except Exception as e:
             self.__logger.error(e)
-            self.__logger.error('Unhandled exception while deleting bucket %s' % e)
-            # QtGui.QMessageBox.about(self, "Unhandled exception deleting bucket", "Exception: " + str(e))
+            self.__logger.error('Unhandled exception while deleting bucket %s'
+                                % e)
             success = False
 
         if success:
             # show dialog - bucket deleted successfully
             self.dashboard_instance.createNewBucketResolveThread()
-            self.emit(QtCore.SIGNAL('showBucketDeletedSuccessfully'), str(self.bucket_name))
+            self.emit(QtCore.SIGNAL('showBucketDeletedSuccessfully'),
+                      str(self.bucket_name))
 
     def createNewBucketCreateThread(self):
-        bucket_create_thread = threading.Thread(target=self.create_bucket, args=())
+        bucket_create_thread = threading.Thread(
+            target=self.create_bucket, args=())
         bucket_create_thread.start()
 
     def createNewBucketEditThread(self):
-        bucket_create_thread = threading.Thread(target=self.edit_bucket, args=())
+        bucket_create_thread = threading.Thread(
+            target=self.edit_bucket, args=())
         bucket_create_thread.start()
 
     def createBucketDetailsLoadThread(self):
-        bucket_create_thread = threading.Thread(target=self.resolve_bucket_details, args=())
+        bucket_create_thread = threading.Thread(
+            target=self.resolve_bucket_details, args=())
         bucket_create_thread.start()
 
     def edit_bucket(self):
@@ -176,6 +187,7 @@ class BucketEditingUI(QtGui.QMainWindow):
             self.dashboard_instance.createNewBucketResolveThread()
 
             # show dialog - bucket created successfully
-            self.emit(QtCore.SIGNAL('showBucketCreatedSuccessfully'), str(self.bucket_name))
+            self.emit(QtCore.SIGNAL('showBucketCreatedSuccessfully'),
+                      str(self.bucket_name))
 
         self.logger.debug(1)

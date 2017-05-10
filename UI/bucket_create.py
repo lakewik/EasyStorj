@@ -3,9 +3,9 @@
 import logging
 import threading
 
-from engine import StorjEngine
+from .engine import StorjEngine
 from PyQt4 import QtCore, QtGui
-from qt_interfaces.create_bucket_ui import Ui_BucketCreate
+from .qt_interfaces.create_bucket_ui import Ui_BucketCreate
 
 import storj.exception as sjexc
 
@@ -19,9 +19,9 @@ class BucketCreateUI(QtGui.QMainWindow):
         self.bucket_create_ui = Ui_BucketCreate()
         self.bucket_create_ui.setupUi(self)
 
-        QtCore.QObject.connect(self.bucket_create_ui.create_bucket_bt, QtCore.SIGNAL("clicked()"),
+        QtCore.QObject.connect(self.bucket_create_ui.create_bucket_bt, QtCore.SIGNAL('clicked()'),
                                self.createNewBucketCreateThread)  # create bucket action
-        QtCore.QObject.connect(self.bucket_create_ui.cancel_bt, QtCore.SIGNAL("clicked()"),
+        QtCore.QObject.connect(self.bucket_create_ui.cancel_bt, QtCore.SIGNAL('clicked()'),
                                self.close)  # create bucket action
 
         self.connect(self, QtCore.SIGNAL('showBucketCreatingException'), self.show_bucket_creating_exception_dialog)
@@ -31,8 +31,8 @@ class BucketCreateUI(QtGui.QMainWindow):
             QtCore.SIGNAL('showBucketCreationMissingFields'),
             lambda: QtGui.QMessageBox.about(
                 self,
-                "Warning",
-                "Please fill out all fields!"))
+                'Warning',
+                'Please fill out all fields!'))
 
         self.storj_engine = StorjEngine()  # init StorjEngine
 
@@ -60,9 +60,9 @@ class BucketCreateUI(QtGui.QMainWindow):
         self.bucket_transfer = self.bucket_create_ui.bucket_transfer.text()
 
         bucket_created = False  # init boolean
-        if self.bucket_name != "" and \
-                self.bucket_transfer != "" and \
-                self.bucket_storage != "":
+        if self.bucket_name != '' and \
+                self.bucket_transfer != '' and \
+                self.bucket_storage != '':
 
             try:
                 self.storj_engine.storj_client.bucket_create(

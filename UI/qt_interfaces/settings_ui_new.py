@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_ClientConfiguration(object):
     def setupUi(self, ClientConfiguration):
         ClientConfiguration.setObjectName(_fromUtf8("ClientConfiguration"))
-        ClientConfiguration.resize(412, 483)
+        ClientConfiguration.resize(512, 455)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -49,7 +49,7 @@ class Ui_ClientConfiguration(object):
         ClientConfiguration.setAutoFillBackground(False)
         ClientConfiguration.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.logout_bt = QtGui.QPushButton(ClientConfiguration)
-        self.logout_bt.setGeometry(QtCore.QRect(10, 360, 391, 31))
+        self.logout_bt.setGeometry(QtCore.QRect(10, 410, 251, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -57,22 +57,22 @@ class Ui_ClientConfiguration(object):
         font.setWeight(75)
         self.logout_bt.setFont(font)
         self.logout_bt.setStyleSheet(_fromUtf8("QPushButton {\n"
-"    background-color: #CC0000;\n"
-"    border: 1px solid #CC0000;\n"
+"    background-color: #fa6e50;\n"
+"    border: 1px solid #fa6e50;\n"
 "    color: #fff;\n"
 "    border-radius: 7px;\n"
 "}\n"
 "QPushButton:hover{\n"
-"    background-color: #bb0a0a;\n"
-"    border-color: #bb0a0a;\n"
+"    background-color: #fa6e50;\n"
+"    border-color: #fa6e50;\n"
 "}\n"
 "QPushButton:active {\n"
-"    background-color: #ce0e0e;\n"
-"    border-color: #ce0e0e;\n"
+"    background-color: #fa6e50;\n"
+"    border-color: #fa6e50\n"
 "}"))
         self.logout_bt.setObjectName(_fromUtf8("logout_bt"))
         self.label_5 = QtGui.QLabel(ClientConfiguration)
-        self.label_5.setGeometry(QtCore.QRect(10, 14, 251, 21))
+        self.label_5.setGeometry(QtCore.QRect(10, 84, 251, 21))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -81,10 +81,10 @@ class Ui_ClientConfiguration(object):
         self.label_5.setFont(font)
         self.label_5.setObjectName(_fromUtf8("label_5"))
         self.connections_onetime = QtGui.QSpinBox(ClientConfiguration)
-        self.connections_onetime.setGeometry(QtCore.QRect(260, 50, 141, 32))
+        self.connections_onetime.setGeometry(QtCore.QRect(280, 120, 221, 32))
         self.connections_onetime.setObjectName(_fromUtf8("connections_onetime"))
         self.label_19 = QtGui.QLabel(ClientConfiguration)
-        self.label_19.setGeometry(QtCore.QRect(10, 56, 171, 20))
+        self.label_19.setGeometry(QtCore.QRect(10, 126, 251, 20))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -93,41 +93,45 @@ class Ui_ClientConfiguration(object):
         self.label_19.setFont(font)
         self.label_19.setObjectName(_fromUtf8("label_19"))
         self.clear_logs_bt = QtGui.QPushButton(ClientConfiguration)
-        self.clear_logs_bt.setGeometry(QtCore.QRect(10, 260, 391, 41))
+        self.clear_logs_bt.setGeometry(QtCore.QRect(270, 410, 231, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
         self.clear_logs_bt.setFont(font)
-        self.clear_logs_bt.setStyleSheet(_fromUtf8("QPushButton:pressed {\n"
-"\n"
-"}\n"
-"QPushButton {\n"
-"    background-color: #ffa500;\n"
-"    border: 1px solid #ffa500;\n"
+        self.clear_logs_bt.setStyleSheet(_fromUtf8("QPushButton {\n"
+"    background-color: #2683ff;\n"
+"    border: 1px solid #2683ff;\n"
 "    color: #fff;\n"
 "    border-radius: 7px;\n"
 "}\n"
-""))
+"QPushButton:hover{\n"
+"  background-color: #2274e2;\n"
+"  border-color: #2274e2;\n"
+"}\n"
+"QPushButton:active{\n"
+"  background-color: #4393ff;\n"
+"  border-color: #4393ff;\n"
+"}"))
         self.clear_logs_bt.setObjectName(_fromUtf8("clear_logs_bt"))
         self.shard_size_unit = QtGui.QComboBox(ClientConfiguration)
-        self.shard_size_unit.setGeometry(QtCore.QRect(340, 8, 61, 31))
+        self.shard_size_unit.setGeometry(QtCore.QRect(440, 80, 61, 31))
         self.shard_size_unit.setObjectName(_fromUtf8("shard_size_unit"))
         self.shard_size_unit.addItem(_fromUtf8(""))
         self.shard_size_unit.addItem(_fromUtf8(""))
         self.shard_size_unit.addItem(_fromUtf8(""))
         self.shard_size_unit.addItem(_fromUtf8(""))
         self.max_shard_size = QtGui.QSpinBox(ClientConfiguration)
-        self.max_shard_size.setGeometry(QtCore.QRect(260, 7, 71, 32))
+        self.max_shard_size.setGeometry(QtCore.QRect(280, 80, 151, 32))
         self.max_shard_size.setObjectName(_fromUtf8("max_shard_size"))
         self.max_download_bandwidth = QtGui.QLineEdit(ClientConfiguration)
         self.max_download_bandwidth.setEnabled(False)
-        self.max_download_bandwidth.setGeometry(QtCore.QRect(260, 93, 141, 31))
+        self.max_download_bandwidth.setGeometry(QtCore.QRect(280, 160, 221, 31))
         self.max_download_bandwidth.setObjectName(_fromUtf8("max_download_bandwidth"))
         self.label_7 = QtGui.QLabel(ClientConfiguration)
         self.label_7.setEnabled(False)
-        self.label_7.setGeometry(QtCore.QRect(10, 100, 211, 16))
+        self.label_7.setGeometry(QtCore.QRect(10, 170, 211, 16))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -137,11 +141,11 @@ class Ui_ClientConfiguration(object):
         self.label_7.setObjectName(_fromUtf8("label_7"))
         self.max_upload_bandwidth = QtGui.QLineEdit(ClientConfiguration)
         self.max_upload_bandwidth.setEnabled(False)
-        self.max_upload_bandwidth.setGeometry(QtCore.QRect(260, 133, 141, 31))
+        self.max_upload_bandwidth.setGeometry(QtCore.QRect(280, 200, 221, 31))
         self.max_upload_bandwidth.setObjectName(_fromUtf8("max_upload_bandwidth"))
         self.label_8 = QtGui.QLabel(ClientConfiguration)
         self.label_8.setEnabled(False)
-        self.label_8.setGeometry(QtCore.QRect(10, 140, 191, 16))
+        self.label_8.setGeometry(QtCore.QRect(10, 210, 191, 16))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -150,27 +154,31 @@ class Ui_ClientConfiguration(object):
         self.label_8.setFont(font)
         self.label_8.setObjectName(_fromUtf8("label_8"))
         self.restore_to_default_bt = QtGui.QPushButton(ClientConfiguration)
-        self.restore_to_default_bt.setGeometry(QtCore.QRect(10, 310, 391, 41))
+        self.restore_to_default_bt.setGeometry(QtCore.QRect(110, 370, 231, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
         self.restore_to_default_bt.setFont(font)
-        self.restore_to_default_bt.setStyleSheet(_fromUtf8("QPushButton:pressed {\n"
-"\n"
-"}\n"
-"QPushButton {\n"
-"    background-color: #ffa500;\n"
-"    border: 1px solid #ffa500;\n"
+        self.restore_to_default_bt.setStyleSheet(_fromUtf8("QPushButton {\n"
+"    background-color: #2683ff;\n"
+"    border: 1px solid #2683ff;\n"
 "    color: #fff;\n"
 "    border-radius: 7px;\n"
 "}\n"
-""))
+"QPushButton:hover{\n"
+"  background-color: #2274e2;\n"
+"  border-color: #2274e2;\n"
+"}\n"
+"QPushButton:active{\n"
+"  background-color: #4393ff;\n"
+"  border-color: #4393ff;\n"
+"}"))
         self.restore_to_default_bt.setObjectName(_fromUtf8("restore_to_default_bt"))
         self.label_9 = QtGui.QLabel(ClientConfiguration)
         self.label_9.setEnabled(False)
-        self.label_9.setGeometry(QtCore.QRect(10, 180, 221, 16))
+        self.label_9.setGeometry(QtCore.QRect(10, 250, 221, 16))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -178,12 +186,12 @@ class Ui_ClientConfiguration(object):
         font.setWeight(75)
         self.label_9.setFont(font)
         self.label_9.setObjectName(_fromUtf8("label_9"))
-        self.shard_size_unit_2 = QtGui.QComboBox(ClientConfiguration)
-        self.shard_size_unit_2.setGeometry(QtCore.QRect(260, 173, 141, 31))
-        self.shard_size_unit_2.setObjectName(_fromUtf8("shard_size_unit_2"))
-        self.shard_size_unit_2.addItem(_fromUtf8(""))
+        self.default_crypto_algorithm = QtGui.QComboBox(ClientConfiguration)
+        self.default_crypto_algorithm.setGeometry(QtCore.QRect(280, 240, 221, 31))
+        self.default_crypto_algorithm.setObjectName(_fromUtf8("default_crypto_algorithm"))
+        self.default_crypto_algorithm.addItem(_fromUtf8(""))
         self.apply_bt = QtGui.QPushButton(ClientConfiguration)
-        self.apply_bt.setGeometry(QtCore.QRect(280, 440, 121, 31))
+        self.apply_bt.setGeometry(QtCore.QRect(350, 370, 151, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -206,7 +214,7 @@ class Ui_ClientConfiguration(object):
 "}"))
         self.apply_bt.setObjectName(_fromUtf8("apply_bt"))
         self.cancel_bt = QtGui.QPushButton(ClientConfiguration)
-        self.cancel_bt.setGeometry(QtCore.QRect(10, 440, 91, 31))
+        self.cancel_bt.setGeometry(QtCore.QRect(10, 370, 91, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -214,28 +222,28 @@ class Ui_ClientConfiguration(object):
         font.setWeight(75)
         self.cancel_bt.setFont(font)
         self.cancel_bt.setStyleSheet(_fromUtf8("QPushButton {\n"
-"    background-color: #CC0000;\n"
-"    border: 1px solid #CC0000;\n"
+"    background-color: #fa6e50;\n"
+"    border: 1px solid #fa6e50;\n"
 "    color: #fff;\n"
 "    border-radius: 7px;\n"
 "}\n"
 "QPushButton:hover{\n"
-"    background-color: #bb0a0a;\n"
-"    border-color: #bb0a0a;\n"
+"    background-color: #fa6e50;\n"
+"    border-color: #fa6e50;\n"
 "}\n"
 "QPushButton:active {\n"
-"    background-color: #ce0e0e;\n"
-"    border-color: #ce0e0e;\n"
+"    background-color: #fa6e50;\n"
+"    border-color: #fa6e50\n"
 "}"))
         self.cancel_bt.setObjectName(_fromUtf8("cancel_bt"))
         self.bridge_request_timeout = QtGui.QSpinBox(ClientConfiguration)
-        self.bridge_request_timeout.setGeometry(QtCore.QRect(260, 210, 111, 32))
+        self.bridge_request_timeout.setGeometry(QtCore.QRect(280, 280, 201, 32))
         self.bridge_request_timeout.setMinimum(1)
         self.bridge_request_timeout.setMaximum(3600)
         self.bridge_request_timeout.setProperty("value", 5)
         self.bridge_request_timeout.setObjectName(_fromUtf8("bridge_request_timeout"))
         self.label_20 = QtGui.QLabel(ClientConfiguration)
-        self.label_20.setGeometry(QtCore.QRect(10, 216, 241, 20))
+        self.label_20.setGeometry(QtCore.QRect(10, 286, 241, 20))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -244,7 +252,7 @@ class Ui_ClientConfiguration(object):
         self.label_20.setFont(font)
         self.label_20.setObjectName(_fromUtf8("label_20"))
         self.label_21 = QtGui.QLabel(ClientConfiguration)
-        self.label_21.setGeometry(QtCore.QRect(380, 220, 20, 21))
+        self.label_21.setGeometry(QtCore.QRect(490, 290, 20, 21))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -252,17 +260,68 @@ class Ui_ClientConfiguration(object):
         font.setWeight(75)
         self.label_21.setFont(font)
         self.label_21.setObjectName(_fromUtf8("label_21"))
+        self.label_10 = QtGui.QLabel(ClientConfiguration)
+        self.label_10.setEnabled(False)
+        self.label_10.setGeometry(QtCore.QRect(10, 320, 221, 31))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_10.setFont(font)
+        self.label_10.setObjectName(_fromUtf8("label_10"))
+        self.crypto_keys_location = QtGui.QLineEdit(ClientConfiguration)
+        self.crypto_keys_location.setEnabled(False)
+        self.crypto_keys_location.setGeometry(QtCore.QRect(280, 320, 181, 31))
+        self.crypto_keys_location.setObjectName(_fromUtf8("crypto_keys_location"))
+        self.crypto_keys_location_select_bt = QtGui.QPushButton(ClientConfiguration)
+        self.crypto_keys_location_select_bt.setGeometry(QtCore.QRect(470, 320, 31, 31))
+        self.crypto_keys_location_select_bt.setStyleSheet(_fromUtf8("QPushButton {\n"
+"    background-color: #555555;\n"
+"    border: 1px solid #555555;\n"
+"    color: #fff;\n"
+"    border-radius: 7px;\n"
+"  padding: 100px;\n"
+"}\n"
+"QPushButton:hover{\n"
+"    background-color: #403f3f;\n"
+"    border-color: #403f3f;\n"
+"}\n"
+"QPushButton:active {\n"
+"    background-color: #505050;\n"
+"    border-color: #505050;\n"
+"}"))
+        self.crypto_keys_location_select_bt.setObjectName(_fromUtf8("crypto_keys_location_select_bt"))
+        self.label_3 = QtGui.QLabel(ClientConfiguration)
+        self.label_3.setGeometry(QtCore.QRect(50, 10, 151, 61))
+        self.label_3.setText(_fromUtf8(""))
+        self.label_3.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/storj-logo-horizontal.png")))
+        self.label_3.setScaledContents(True)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.file_name = QtGui.QLabel(ClientConfiguration)
+        self.file_name.setGeometry(QtCore.QRect(240, 10, 211, 61))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.file_name.setFont(font)
+        self.file_name.setStyleSheet(_fromUtf8("QLabel{\n"
+"color: #2683ff;\n"
+"}\n"
+""))
+        self.file_name.setObjectName(_fromUtf8("file_name"))
 
         self.retranslateUi(ClientConfiguration)
         self.shard_size_unit.setCurrentIndex(1)
-        self.shard_size_unit_2.setCurrentIndex(0)
+        self.default_crypto_algorithm.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(ClientConfiguration)
         ClientConfiguration.setTabOrder(self.max_shard_size, self.shard_size_unit)
         ClientConfiguration.setTabOrder(self.shard_size_unit, self.connections_onetime)
         ClientConfiguration.setTabOrder(self.connections_onetime, self.max_download_bandwidth)
         ClientConfiguration.setTabOrder(self.max_download_bandwidth, self.max_upload_bandwidth)
-        ClientConfiguration.setTabOrder(self.max_upload_bandwidth, self.shard_size_unit_2)
-        ClientConfiguration.setTabOrder(self.shard_size_unit_2, self.clear_logs_bt)
+        ClientConfiguration.setTabOrder(self.max_upload_bandwidth, self.default_crypto_algorithm)
+        ClientConfiguration.setTabOrder(self.default_crypto_algorithm, self.clear_logs_bt)
         ClientConfiguration.setTabOrder(self.clear_logs_bt, self.restore_to_default_bt)
         ClientConfiguration.setTabOrder(self.restore_to_default_bt, self.logout_bt)
         ClientConfiguration.setTabOrder(self.logout_bt, self.cancel_bt)
@@ -272,7 +331,7 @@ class Ui_ClientConfiguration(object):
         ClientConfiguration.setWindowTitle(_translate("ClientConfiguration", "Main settings - Storj GUI", None))
         self.logout_bt.setText(_translate("ClientConfiguration", "LOGOUT", None))
         self.label_5.setText(_translate("ClientConfiguration", "<html><head/><body><p><span style=\" color:#555555;\">MAX SIZE OF SINGLE SHARD:</span></p></body></html>", None))
-        self.label_19.setText(_translate("ClientConfiguration", "<html><head/><body><p><span style=\" color:#555555;\">MAX CONNECTIONS:</span></p></body></html>", None))
+        self.label_19.setText(_translate("ClientConfiguration", "<html><head/><body><p><span style=\" color:#555555;\">MAX ONETIME CONNECTIONS:</span></p></body></html>", None))
         self.clear_logs_bt.setText(_translate("ClientConfiguration", "CLEAR LOGS", None))
         self.shard_size_unit.setItemText(0, _translate("ClientConfiguration", "MB", None))
         self.shard_size_unit.setItemText(1, _translate("ClientConfiguration", "GB", None))
@@ -282,9 +341,13 @@ class Ui_ClientConfiguration(object):
         self.label_8.setText(_translate("ClientConfiguration", "<html><head/><body><p><span style=\" color:#555555;\">MAX UPLOAD SPEED:</span></p></body></html>", None))
         self.restore_to_default_bt.setText(_translate("ClientConfiguration", "RESTORE TO DEFAULTS", None))
         self.label_9.setText(_translate("ClientConfiguration", "<html><head/><body><p><span style=\" color:#555555;\">ENCRYPTION ALGORITHM:</span></p></body></html>", None))
-        self.shard_size_unit_2.setItemText(0, _translate("ClientConfiguration", "AES", None))
+        self.default_crypto_algorithm.setItemText(0, _translate("ClientConfiguration", "AES", None))
         self.apply_bt.setText(_translate("ClientConfiguration", "SAVE", None))
         self.cancel_bt.setText(_translate("ClientConfiguration", "CANCEL", None))
         self.label_20.setText(_translate("ClientConfiguration", "<html><head/><body><p><span style=\" color:#555555;\">BRIDGE REQUEST TIMEOUT:</span></p></body></html>", None))
         self.label_21.setText(_translate("ClientConfiguration", "<html><head/><body><p><span style=\" color:#555555;\">s</span></p></body></html>", None))
+        self.label_10.setText(_translate("ClientConfiguration", "<html><head/><body><p><span style=\" color:#555555;\">CRYPTO KEYS LOCATION:</span></p></body></html>", None))
+        self.crypto_keys_location_select_bt.setText(_translate("ClientConfiguration", "...", None))
+        self.file_name.setText(_translate("ClientConfiguration", "<html><head/><body><p><span style=\" font-size:18pt;\">Main settings</span></p></body></html>", None))
 
+import resources_rc
