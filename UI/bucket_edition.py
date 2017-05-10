@@ -191,4 +191,3 @@ class BucketEditingUI(QtGui.QMainWindow):
                       str(self.bucket_name))
 
         self.logger.debug(1)
-

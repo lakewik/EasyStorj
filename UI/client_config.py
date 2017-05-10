@@ -1,12 +1,18 @@
+# -*- coding: utf-8 -*-
+
+import logging
+
+
 from PyQt4 import QtCore, QtGui
 from .utilities.backend_config import Configuration
 from .qt_interfaces.settings_ui_new import Ui_ClientConfiguration
-from .utilities.log_manager import logger
 from .utilities.account_manager import AccountManager
 
 
 # Configuration Ui section
 class ClientConfigurationUI(QtGui.QMainWindow):
+
+    __logger = logging.getLogger('%s.ClientConfigurationUI' % __name__)
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -36,11 +42,7 @@ class ClientConfigurationUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.client_configuration_ui.restore_to_default_bt, QtCore.SIGNAL('clicked()'),
                                self.reset_settings_to_default)  # restore to default settings
 
-
-
-
         self.configuration_manager.paint_config_to_ui(self.client_configuration_ui)
-
 
     def handle_logout_action(self):
         msgBox = QtGui.QMessageBox(
@@ -50,17 +52,16 @@ class ClientConfigurationUI(QtGui.QMainWindow):
             (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
 
         result = msgBox.exec_()
-        #self.__logger.debug(result)
+        # self.__logger.debug(result)
 
         if result == QtGui.QMessageBox.Yes:
             logged_out = self.account_manager.logout()
             if logged_out:
                 QtGui.QMessageBox.about(self, 'Success', 'Successfully logged out!')
 
-
     def select_crypto_keys_path(self):
         self.client_configuration_ui.crypto_keys_location.setText(str(QtGui.QFileDialog.getSaveFileName(
-          self, 'Save file to...', 'storj_client_keyring.sjkr')))
+            self, 'Save file to...', 'storj_client_keyring.sjkr')))
 
     def save_settings(self):
         # validate settings
@@ -80,7 +81,6 @@ class ClientConfigurationUI(QtGui.QMainWindow):
         if result == QtGui.QMessageBox.Yes:
             QtGui.QMessageBox.about(self, 'Success', 'All logs have been successfully cleared!')
 
-
     def reset_settings_to_default(self):
         msgBox = QtGui.QMessageBox(
             QtGui.QMessageBox.Question,
@@ -91,4 +91,4 @@ class ClientConfigurationUI(QtGui.QMainWindow):
         result = msgBox.exec_()
         if result == QtGui.QMessageBox.Yes:
             QtGui.QMessageBox.about(self, 'Success', 'Settings successfully restored to default!')
-        logger.debug(1)
+        self.__logger.debug(1)

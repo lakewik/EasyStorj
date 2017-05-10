@@ -107,9 +107,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('refreshOverallProgress'), self.refresh_overall_progress)
         self.connect(self, QtCore.SIGNAL('showFileUploadedSuccessfully'), self.show_upload_finished_message)
         self.connect(self, QtCore.SIGNAL('finishUpload'),
-            lambda: self.finish_upload(os.path.split(
-                str(self.ui_single_file_upload.file_path.text()))[1],
-                str(self.current_selected_bucket_id)))
+                     lambda: self.finish_upload(os.path.split(
+                         str(self.ui_single_file_upload.file_path.text()))[1],
+            str(self.current_selected_bucket_id)))
         self.connect(self, QtCore.SIGNAL('setCurrentUploadState'), self.set_current_status)
         self.connect(self, QtCore.SIGNAL('updateShardUploadCounters'), self.update_shards_counters)
         self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'), self.set_current_active_connections)
@@ -139,7 +139,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
     def set_shard_size(self, shard_size):
         self.ui_single_file_upload.shardsize.setText(str(self.tools.human_size(int(shard_size))))
 
-
     def handle_cancel_action(self):
         if self.is_upload_active:
             msgBox = QtGui.QMessageBox(
@@ -153,7 +152,6 @@ window?',
                 self.close()
         else:
             self.close()
-
 
     def show_upload_finished_message(self):
         self.is_upload_active = False
@@ -231,7 +229,8 @@ window?',
         self.storj_engine = StorjEngine()
         try:
             for bucket in self.storj_engine.storj_client.bucket_list():
-                self.bucket_id_name_2D_list.append([str(bucket.id), str(bucket.name).decode('utf8')])  # append buckets to list
+                self.bucket_id_name_2D_list.append([str(bucket.id),
+                                                    str(bucket.name).decode('utf8')])  # append buckets to list
 
             if BUCKETS_LIST_SORTING_ENABLED:
                 self.bucket_id_name_2D_list = sorted(self.bucket_id_name_2D_list, key=lambda x: x[1], reverse=False)
@@ -249,7 +248,8 @@ window?',
         self.ui_single_file_upload.save_to_bucket_select.addItems(self.buckets_list)
 
         if APPLY_SELECTED_BUCKET_TO_UPLOADER:
-            self.ui_single_file_upload.save_to_bucket_select.setCurrentIndex(int(self.dashboard_instance.current_bucket_index))
+            self.ui_single_file_upload.save_to_bucket_select.setCurrentIndex(
+                int(self.dashboard_instance.current_bucket_index))
 
     def increment_shards_progress_counters(self):
         # self.shards_already_uploaded += 1
@@ -415,7 +415,7 @@ index %s...' % chapters)
                 if FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED:
                     frame_content = self.storj_engine.storj_client.frame_add_shard(shard,
                                                                                    frame.id,
-                                                                 excludes=self.already_used_farmers_nodes)
+                                                                                   excludes=self.already_used_farmers_nodes)
                 else:
                     frame_content = self.storj_engine.storj_client.frame_add_shard(shard, frame.id)
                 # Add a row to the table
@@ -670,7 +670,7 @@ report sent.' % chapters + 1)
             self.__logger.debug('File uploaded successfully!')
             self.emit(QtCore.SIGNAL('showFileUploadedSuccessfully'))
             self.emit(QtCore.SIGNAL('setCurrentUploadState'),
-                                    'File uploaded successfully!')
+                      'File uploaded successfully!')
             self.dashboard_instance.createNewFileListUpdateThread()
 
     def file_upload_begin(self):
@@ -869,9 +869,9 @@ report sent.' % chapters + 1)
                 #self.emit(QtCore.SIGNAL("_createShardUploadThread"), shard, chapters, frame, file_name_ready_to_shard_upload)
                 #self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
                 #self.createNewShardUploadThread(shard, chapters, frame, file_name_ready_to_shard_upload)
-                #print "wysylanie sharda..." + str(shard.index)
+                # print "wysylanie sharda..." + str(shard.index)
                 #chapters += 1
-                #time.sleep(1)
+                # time.sleep(1)
 
             threads = [threading.Thread(
                 target=self.upload_shard,

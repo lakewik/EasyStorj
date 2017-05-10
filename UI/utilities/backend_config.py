@@ -1,11 +1,16 @@
+# -*- coding: utf-8 -*-
+
+import logging
 import xml.etree.cElementTree as ET
-from .log_manager import logger
+
 
 CONFIG_FILE = "storj_client_config.xml"
 
 
 # Configuration backend section
 class Configuration:
+
+    __logger = logging.getLogger('%s.Configuration' % __name__)
 
     def __init__(self, sameFileNamePrompt=None, sameFileHashPrompt=None,
                  load_config=False):
@@ -15,8 +20,8 @@ class Configuration:
 
             try:
                 et = ET.parse(CONFIG_FILE)
-            except:
-                logger.error("Unspecified XML parse error")
+            except BaseException:
+                self.__logger.error("Unspecified XML parse error")
 
             for tags in et.iter(str("same_file_name_prompt")):
                 if tags.text == "1":
@@ -44,8 +49,8 @@ class Configuration:
             et = ET.parse(CONFIG_FILE)
             for tags in et.iter(str(parametr)):
                 output = tags.text
-        except:
-            logger.error("Unspecified error")
+        except BaseException:
+            self.__logger.error("Unspecified error")
 
         return output
 
@@ -54,8 +59,8 @@ class Configuration:
             et = ET.parse(CONFIG_FILE)
             for tags in et.iter('password'):
                 output = tags.text
-        except:
-            logger.error("Unspecified error")
+        except BaseException:
+            self.__logger.error("Unspecified error")
 
     def paint_config_to_ui(self, settings_ui):
         et = None
@@ -81,7 +86,7 @@ class Configuration:
                 settings_ui.shard_size_unit.setCurrentIndex(int(tags.text))
 
         except Exception as e:
-            logger.error("Unspecified XML parse error" + str(e))
+            self.__logger.error("Unspecified XML parse error" + str(e))
 
     def save_client_configuration(self, settings_ui):
         root = ET.Element("configuration")
@@ -94,7 +99,7 @@ class Configuration:
         ET.SubElement(doc, "max_download_bandwidth").text = str(settings_ui.max_download_bandwidth.text())
         ET.SubElement(doc, "max_upload_bandwidth").text = str(settings_ui.max_upload_bandwidth.text())
         ET.SubElement(doc, "default_file_encryption_algorithm").text = str(
-                                    settings_ui.default_crypto_algorithm.currentIndex())
+            settings_ui.default_crypto_algorithm.currentIndex())
         ET.SubElement(doc, "bridge_request_timeout").text = str(settings_ui.bridge_request_timeout.text())
         ET.SubElement(doc, "crypto_keys_location").text = str(settings_ui.crypto_keys_location.text())
         tree = ET.ElementTree(root)

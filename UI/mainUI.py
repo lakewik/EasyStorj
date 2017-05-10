@@ -41,15 +41,15 @@ class MainUI(QtGui.QMainWindow):
         self.file_manager_ui = Ui_MainMenu()
         self.file_manager_ui.setupUi(self)
 
-        #self.change_loading_gif()
+        # self.change_loading_gif()
         QtCore.QObject.connect(self.file_manager_ui.bucket_select_combo_box,
                                QtCore.SIGNAL('currentIndexChanged(const QString&)'),
                                self.createNewFileListUpdateThread)  # connect ComboBox change listener
         QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt, QtCore.SIGNAL('clicked()'),
                                self.open_mirrors_list_window)  # open mirrors list window
 
-        #QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt, QtCore.SIGNAL('clicked()'),
-         #                      self.open_sync_menu)  # open sync menu window
+        # QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt, QtCore.SIGNAL('clicked()'),
+        #                      self.open_sync_menu)  # open sync menu window
         # create bucket action
         # QtCore.QObject.connect(self.file_manager_ui.quit_bt, QtCore.SIGNAL('clicked()'),  self.close)
         QtCore.QObject.connect(self.file_manager_ui.file_download_bt, QtCore.SIGNAL('clicked()'),
@@ -96,7 +96,7 @@ class MainUI(QtGui.QMainWindow):
 
         """
 
-        #self.file_manager_ui.files_list_tableview.setStyleSheet(appStyle)
+        # self.file_manager_ui.files_list_tableview.setStyleSheet(appStyle)
 
         self.file_manager_ui.settings_bt.mousePressEvent = self.open_settings_window
         self.file_manager_ui.refresh_bt.mousePressEvent = self.createNewFileListUpdateThread
@@ -122,8 +122,7 @@ class MainUI(QtGui.QMainWindow):
 
         self.createNewBucketResolveThread()
 
-        #self.file_manager_ui.new_file_upload_bt.mouseReleaseEvent()
-
+        # self.file_manager_ui.new_file_upload_bt.mouseReleaseEvent()
 
     def open_sync_menu(self):
         self.open_sync_menu_window = SyncMenuUI(self)
@@ -136,7 +135,6 @@ class MainUI(QtGui.QMainWindow):
             movie.start()
         else:
             self.file_manager_ui.refresh_bt.setPixmap(QtGui.QPixmap((':/resources/refresh.png')))
-
 
     def open_bucket_editing_window(self, action):
         if action == 'edit':
@@ -245,9 +243,9 @@ class MainUI(QtGui.QMainWindow):
 
         self.tools = Tools()
 
-        #model = MyTableModel(headerdata = )
+        # model = MyTableModel(headerdata = )
         model = TableModel(1, 1)
-        #model = QtGui.QStandardItemModel(1, 1)  # initialize model for inserting to table
+        # model = QtGui.QStandardItemModel(1, 1)  # initialize model for inserting to table
 
         file_list_header_labels = ['File name', 'File size', 'File ID']
 
@@ -264,7 +262,8 @@ class MainUI(QtGui.QMainWindow):
         try:
             self.emit(QtCore.SIGNAL('changeLoadingGif'), True)
             for self.file_details in self.storj_engine.storj_client.bucket_files(str(self.current_selected_bucket_id)):
-                item = QtGui.QStandardItem(str(self.file_details['filename'].replace('[DECRYPTED]', '')).decode('utf8'))
+                item = QtGui.QStandardItem(
+                    str(self.file_details['filename'].replace('[DECRYPTED]', '')).decode('utf8'))
                 model.setItem(i, 0, item)  # row, column, item (StandardItem)
 
                 file_size_str = self.tools.human_size(int(self.file_details['size']))  # get human readable file size
@@ -278,7 +277,7 @@ class MainUI(QtGui.QMainWindow):
                 item = QtGui.QStandardItem(str(self.file_details['id']))
                 model.setItem(i, 2, item)  # row, column, item (QStandardItem)
 
-                #print_(self.file_details)
+                # print_(self.file_details)
 
                 if DISPLAY_FILE_CREATION_DATE_IN_MAIN:
                     item = QtGui.QStandardItem(str(self.file_details['created']).replace('Z', '').replace('T', ' '))
@@ -319,7 +318,8 @@ class MainUI(QtGui.QMainWindow):
         self.emit(QtCore.SIGNAL('changeLoadingGif'), True)
         try:
             for bucket in self.storj_engine.storj_client.bucket_list():
-                self.bucket_id_name_2D_list.append([str(bucket.id), str(bucket.name).decode('utf8')])  # append buckets to list
+                self.bucket_id_name_2D_list.append([str(bucket.id),
+                                                    str(bucket.name).decode('utf8')])  # append buckets to list
 
                 i += 1
 
@@ -333,7 +333,6 @@ class MainUI(QtGui.QMainWindow):
         except sjexc.StorjBridgeApiError as e:
             self.__logger.error(e)
             QtGui.QMessageBox.about(self, 'Unhandled bucket resolving exception', 'Exception: ' % e)
-
 
         self.file_manager_ui.bucket_select_combo_box.addItems(self.buckets_list)
         self.emit(QtCore.SIGNAL('changeLoadingGif'), False)

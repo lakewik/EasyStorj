@@ -10,7 +10,6 @@ from PyQt4.QtGui import QStandardItem, QStandardItemModel
 from .bucket_create import BucketCreateUI
 from .engine import StorjEngine
 from .qt_interfaces.bucket_manager_ui import Ui_BucketManager
-from .utilities.log_manager import logger
 
 
 class BucketManagerUI(QtGui.QMainWindow):
@@ -105,7 +104,7 @@ class BucketManagerUI(QtGui.QMainWindow):
                 'Please select bucket which you want to delete.')
 
     def open_bucket_edit_window(self):
-        logger.debug(1)
+        self.__logger.debug(1)
 
     def open_bucket_create_window(self):
         self.bucket_create_window = BucketCreateUI(self)
@@ -113,7 +112,7 @@ class BucketManagerUI(QtGui.QMainWindow):
 
     def initialize_buckets_table(self):
         self.storj_engine = StorjEngine()  # Init StorjEngine
-        logger.info('resolving buckets')
+        self.__logger.info('resolving buckets')
         # Initialize model for inserting to table
         model = QStandardItemModel(1, 1)
 
@@ -147,4 +146,3 @@ class BucketManagerUI(QtGui.QMainWindow):
         self.bucket_manager_ui.bucket_list_tableview.setModel(model)
         self.bucket_manager_ui.bucket_list_tableview.horizontalHeader().\
             setResizeMode(QtGui.QHeaderView.Stretch)
-

@@ -1,15 +1,20 @@
+# -*- coding: utf-8 -*-
+
 import json
+import logging
 import storj
+
 from PyQt4 import QtCore, QtGui
+
 from .mainUI import MainUI
 from .qt_interfaces.login_ui_new import Ui_Login
 from .utilities.account_manager import AccountManager
 
-from .utilities.log_manager import logger
-
 
 # Login section
 class LoginUI(QtGui.QMainWindow):
+
+    __logger = logging.getLogger('%s.LoginUI' % __name__)
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -39,7 +44,7 @@ class LoginUI(QtGui.QMainWindow):
             success = True
         except storj.exception.StorjBridgeApiError as e:
             j = json.loads(str(e))
-            logger.debug(j)
+            self.__logger.debug(j)
             if j[0]['error'] == 'Invalid email or password':
                 QtGui.QMessageBox.about(
                     self, 'Warning',
@@ -60,9 +65,8 @@ class LoginUI(QtGui.QMainWindow):
                                        QtGui.QMessageBox.Ok)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
-                logger.info('User {} succesfully logged in'.format(self.email))
+                self.__logger.info('User {} succesfully logged in'.format(self.email))
                 self.main_ui_window = MainUI(self)
                 self.main_ui_window.show()
                 self.close()
                 # initial_window.hide()
-
