@@ -11,18 +11,13 @@ It is GUI Client for Storj Network written in Python 2.7 and PyQt4. Currently we
 The layout has been designed by @Davasny (https://github.com/Davasny)
 
 
-## Honor supporters
+## Honor supporters 
+**[You can support me by donating CryptoCurrency](#support)**
  - Will Topping
 
 ## How to run (Alpha version)
 
-- Clone newest version of python-sdk:
-
 ```
-$ git clone https://github.com/Storj/storj-python-sdk.git
-$ cd storj-python-sdk
-$ python setup.py install
-$ cd ..
 $ git clone https://github.com/lakewik/storj-gui-client.git
 $ cd storj-gui-client
 ```
@@ -39,10 +34,10 @@ $ cd storj-gui-client
 - [X] File manager
 - [X] Listing mirros
 - [X] Creating new user in network
+- [X] Improve uploader
+- [X] Improve downloader
 
 ## To do:
-- [ ] Improve uploader
-- [ ] Improve downloader
 - [ ] Drag and drop feature
 - [ ] Limits for maximum connection speed
 - [ ] Multiple file uploader and downloader
