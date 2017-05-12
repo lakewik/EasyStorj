@@ -28,7 +28,7 @@ from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP, \
     ALLOW_DOWNLOAD_FARMER_POINTER_CANCEL_BY_USER, \
     FARMER_NODES_EXCLUSION_FOR_DOWNLOAD_ENABLED, \
     MAX_DOWNLOAD_REQUEST_BLOCK_SIZE, FILE_POINTERS_ITERATION_DELAY, \
-    DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT
+    DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT, MAX_ALLOWED_DOWNLOAD_CONCURRENCY
 
 
 queue = Queue.Queue()
@@ -192,6 +192,8 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         self.rowpositions_in_progress = []
         self.pointers_exclusions = [[]]
+
+        self.ui_single_file_download.connections_onetime.setMaximum(MAX_ALLOWED_DOWNLOAD_CONCURRENCY)
 
     def display_table_context_menu(self, position):
         tablemodel = self.ui_single_file_download.shard_queue_table.model()
@@ -915,7 +917,6 @@ file with ID %s: ...' % file_id)
                                 break
                         except:
                             pass
-
                         '''
 
                         i += 1
