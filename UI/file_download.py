@@ -352,8 +352,12 @@ this window?",
              '    color: #fff;\n'
              '    border-radius: 7px;\n'
              '}'))
+
+        self.ui_single_file_download.connections_onetime.setEnabled(True)
+
         QtGui.QMessageBox.information(self, 'Success!',
                                       'File downloaded successfully!')
+
 
     def show_unhandled_exception(self, exception_content):
         QtGui.QMessageBox.critical(self, 'Unhandled error',
@@ -737,6 +741,8 @@ this window?",
                  '    color: #fff;\n'
                  '    border-radius: 7px;\n'
                  '}'))
+
+            self.ui_single_file_download.connections_onetime.setEnabled(False)
 
             self.emit(QtCore.SIGNAL('updateShardCounters'))
 
