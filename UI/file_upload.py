@@ -31,7 +31,7 @@ from utilities.tools import Tools
 from resources.html_strings import html_format_begin, html_format_end
 from resources.constants import MAX_RETRIES_UPLOAD_TO_SAME_FARMER, \
     MAX_RETRIES_NEGOTIATE_CONTRACT, AUTO_SCROLL_UPLOAD_DOWNLOAD_QUEUE, BUCKETS_LIST_SORTING_ENABLED, MAX_UPLOAD_CONNECTIONS_AT_SAME_TIME,\
-    FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED, BLACKLISTING_MODE
+    FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED, BLACKLISTING_MODE, MAX_ALLOWED_UPLOAD_CONCURRENCY
 from resources.internal_backend_config_variables import APPLY_SELECTED_BUCKET_TO_UPLOADER
 
 
@@ -140,6 +140,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.overall_progress.setValue(0)
 
         self.clip = QtGui.QApplication.clipboard()
+
+        self.ui_single_file_upload.connections_onetime.setMaximum(MAX_ALLOWED_UPLOAD_CONCURRENCY)
 
     def keyPressEvent(self, e):
         # copy upload queue table content to clipboard #
@@ -1006,7 +1008,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             # self.__logger.warning(str({"log_event_type": "debug", "title": "Sharding",
             #                     "description": "Splitting file to shards..."}))
 
-            shards_manager = storj.model.ShardManager(filepath=file_path_ready, tmp_path=self.parametrs.tmpPath)
+            max_shard_size_setting = self.configuration.max_shard_size()
+            print str(max_shard_size_setting) + " max shard size"
+            shards_manager = storj.model.ShardManager(filepath=file_path_ready, tmp_path=self.parametrs.tmpPath, max_shard_size=int(max_shard_size_setting))
             self.all_shards_count = len(shards_manager.shards)
             self.emit(QtCore.SIGNAL("updateShardUploadCounters"))
 
