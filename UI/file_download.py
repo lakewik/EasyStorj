@@ -632,8 +632,14 @@ this window?",
                     'Resolving pointers. Retry %s ...' % (
                         tries_get_file_pointers))
             else:
-                self.emit(QtCore.SIGNAL('setCurrentState'),
-                          'Resolving pointer for shards')
+                if stage > 1:
+                    self.emit(QtCore.SIGNAL('setCurrentState'),
+                              'Resolving pointers - Stage %s of %s' % (
+                                  stage, stages))
+                else:
+                    self.emit(QtCore.SIGNAL('setCurrentState'),
+                              'Resolving shards pointers...')
+
             try:
                 if FARMER_NODES_EXCLUSION_FOR_DOWNLOAD_ENABLED:
                     pointers = self.storj_engine.storj_client.file_pointers(
@@ -772,17 +778,26 @@ file with ID %s: ...' % file_id)
             #     num_of_shards=str(self.all_shards_count))
 
             try:
-                current_shard_applied = 0
                 applied_shards_count = 0
-                thread_pointers = None
                 shard_pointer = []
                 self.pointers_exclusions = [[] for i3 in range(self.all_shards_count)]
+                stages = 0
                 while applied_shards_count < self.all_shards_count:
+                    stages += 1
+                    applied_shards_count += MAX_POINTERS_RESOLVED_IN_ONE_PART
+
+                applied_shards_count = 0
+                shard_pointer = []
+                i = 0
+                while applied_shards_count < self.all_shards_count:
+                    i += 1
                     thread_pointers = threading.Thread(
                         target=self.get_shard_pointers,
                         args=(bucket_id,
                               file_id,
-                              str(MAX_POINTERS_RESOLVED_IN_ONE_PART), applied_shards_count))  # limit, skip
+                              str(MAX_POINTERS_RESOLVED_IN_ONE_PART),
+                              applied_shards_count,
+                              stages, i))  # limit, skip
                     applied_shards_count += MAX_POINTERS_RESOLVED_IN_ONE_PART
                     thread_pointers.start()
                     # thread_pointers.join()
