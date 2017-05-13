@@ -30,8 +30,10 @@ from utilities.tools import Tools
 
 from resources.html_strings import html_format_begin, html_format_end
 from resources.constants import MAX_RETRIES_UPLOAD_TO_SAME_FARMER, \
-    MAX_RETRIES_NEGOTIATE_CONTRACT, AUTO_SCROLL_UPLOAD_DOWNLOAD_QUEUE, BUCKETS_LIST_SORTING_ENABLED, MAX_UPLOAD_CONNECTIONS_AT_SAME_TIME,\
-    FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED, BLACKLISTING_MODE, MAX_ALLOWED_UPLOAD_CONCURRENCY
+    MAX_RETRIES_NEGOTIATE_CONTRACT, AUTO_SCROLL_UPLOAD_DOWNLOAD_QUEUE, BUCKETS_LIST_SORTING_ENABLED, \
+    MAX_UPLOAD_CONNECTIONS_AT_SAME_TIME,\
+    FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED, BLACKLISTING_MODE, MAX_ALLOWED_UPLOAD_CONCURRENCY,\
+    CONTRACT_NEGOTIATION_ITERATION_DELAY
 from resources.internal_backend_config_variables import APPLY_SELECTED_BUCKET_TO_UPLOADER
 
 
@@ -189,6 +191,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
     def show_upload_finished_message(self):
         self.is_upload_active = False
+        self.ui_single_file_upload.connections_onetime.setEnabled(True)
         self.ui_single_file_upload.start_upload_bt.setStyleSheet(("QPushButton:hover{\n"
                                                                   "  background-color: #83bf20;\n"
                                                                   "  border-color: #83bf20;\n"
@@ -216,7 +219,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         total_percent = (base_percent * 100) + (0.90 * actual_percent_uploaded)
 
-        self.__logger.info('%s %s total_percent_uploaded' % (actual_percent_uploaded, base_percent))
+        #self.__logger.info('%s %s total_percent_uploaded' % (actual_percent_uploaded, base_percent))
 
         # actual_upload_progressbar_value = self.ui_single_file_upload.overall_progress.value()
 
@@ -434,7 +437,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             percent_uploaded = int(round((100.0 * i) / t1))
 
-            self.__logger.debug(i)
+            #self.__logger.debug(i)
             chunks -= 1
 
             # update progress bar in upload queue table
@@ -933,6 +936,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             # self.__logger.warning('"log_event_type": "debug"')
 
             self.is_upload_active = True
+            self.ui_single_file_upload.connections_onetime.setEnabled(False)
             self.ui_single_file_upload.start_upload_bt.setStyleSheet(("QPushButton:hover{\n"
                                                                       "  background-color: #8C8A87;\n"
                                                                       "  border-color: #8C8A87;\n"
@@ -1059,7 +1063,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 t.start()
                 self.current_line += 1
                 #row_lock.release()
-                time.sleep(1)
+                time.sleep(CONTRACT_NEGOTIATION_ITERATION_DELAY)
 
             for t in threads:
                 t.join()
