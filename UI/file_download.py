@@ -28,7 +28,8 @@ from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP, \
     ALLOW_DOWNLOAD_FARMER_POINTER_CANCEL_BY_USER, \
     FARMER_NODES_EXCLUSION_FOR_DOWNLOAD_ENABLED, \
     MAX_DOWNLOAD_REQUEST_BLOCK_SIZE, FILE_POINTERS_ITERATION_DELAY, \
-    DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT, MAX_ALLOWED_DOWNLOAD_CONCURRENCY
+    DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT, MAX_ALLOWED_DOWNLOAD_CONCURRENCY, \
+    MAX_POINTERS_RESOLVED_IN_ONE_PART
 
 
 queue = Queue.Queue()
@@ -619,7 +620,7 @@ this window?",
         return len(frame_data.shards)
 
     def get_shard_pointers(self, bucket_id, file_id, num_of_shards='1',
-                           shard_index='0'):
+                           shard_index='0', stages=0, stage=0):
         tries_get_file_pointers = 0
         success = False
         while self.max_retries_get_file_pointers > tries_get_file_pointers:
@@ -647,6 +648,12 @@ this window?",
                         file_id,
                         limit=num_of_shards,
                         skip=shard_index)
+
+                # validate returned data
+
+                for pointer in pointers:
+                    tmp1 = pointer.get('farmer')['address']
+
                 # return pointers
                 success = True
                 queue.put(pointers)
@@ -661,7 +668,7 @@ this window?",
                           str(e))
                 continue
             except Exception as e:
-                self.__logger.error('Exception while resolving file pointers.')
+                self.__logger.error('Exception while resolving file pointers.' + str(e))
                 continue
         if success is not True:
             queue.put('error')
@@ -765,15 +772,21 @@ file with ID %s: ...' % file_id)
             #     num_of_shards=str(self.all_shards_count))
 
             try:
-                thread_pointers = threading.Thread(
-                    target=self.get_shard_pointers,
-                    args=(bucket_id,
-                          file_id,
-                          str(self.all_shards_count)))
-
-                thread_pointers.start()
-                # thread_pointers.join()
-                shard_pointer = queue.get()
+                current_shard_applied = 0
+                applied_shards_count = 0
+                thread_pointers = None
+                shard_pointer = []
+                self.pointers_exclusions = [[] for i3 in range(self.all_shards_count)]
+                while applied_shards_count < self.all_shards_count:
+                    thread_pointers = threading.Thread(
+                        target=self.get_shard_pointers,
+                        args=(bucket_id,
+                              file_id,
+                              str(MAX_POINTERS_RESOLVED_IN_ONE_PART), applied_shards_count))  # limit, skip
+                    applied_shards_count += MAX_POINTERS_RESOLVED_IN_ONE_PART
+                    thread_pointers.start()
+                    # thread_pointers.join()
+                    shard_pointer = shard_pointer + queue.get()
 
                 threads = [threading.Thread(
                     target=self.shard_download,
@@ -782,7 +795,7 @@ file with ID %s: ...' % file_id)
                           options_array)) for p in shard_pointer]
                 self.current_line = 0
                 s_index = 0
-                self.pointers_exclusions = [[] for i3 in range(len(threads))]
+
                 for t in threads:
                     # self.pointers_exclusions.append([s_index])
                     self.already_started_shard_downloads_count += 1
@@ -799,6 +812,7 @@ file with ID %s: ...' % file_id)
                     t.join()
 
                 if shard_pointer == 'error':
+                    print "Lost shard pointer! Unable to download file form network"
                     raise Exception()
             except BaseException:
                 self.__logger.error(
