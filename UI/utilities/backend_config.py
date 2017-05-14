@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
-
-import logging
 import xml.etree.cElementTree as ET
-
+from log_manager import logger
+from UI.resources.constants import DEFAULT_MAX_SHARD_SIZE, DEFAULT_SHARD_SIZE, DEFAULT_MAX_BRIDGE_REQUEST_TIMEOUT
 
 CONFIG_FILE = "storj_client_config.xml"
 
 
 # Configuration backend section
 class Configuration:
-
-    __logger = logging.getLogger('%s.Configuration' % __name__)
 
     def __init__(self, sameFileNamePrompt=None, sameFileHashPrompt=None,
                  load_config=False):
@@ -20,8 +16,8 @@ class Configuration:
 
             try:
                 et = ET.parse(CONFIG_FILE)
-            except BaseException:
-                self.__logger.error("Unspecified XML parse error")
+            except:
+                logger.error("Unspecified XML parse error")
 
             for tags in et.iter(str("same_file_name_prompt")):
                 if tags.text == "1":
@@ -49,8 +45,8 @@ class Configuration:
             et = ET.parse(CONFIG_FILE)
             for tags in et.iter(str(parametr)):
                 output = tags.text
-        except BaseException:
-            self.__logger.error("Unspecified error")
+        except:
+            logger.error("Unspecified error")
 
         return output
 
@@ -59,8 +55,8 @@ class Configuration:
             et = ET.parse(CONFIG_FILE)
             for tags in et.iter('password'):
                 output = tags.text
-        except BaseException:
-            self.__logger.error("Unspecified error")
+        except:
+            logger.error("Unspecified error")
 
     def paint_config_to_ui(self, settings_ui):
         et = None
@@ -84,23 +80,82 @@ class Configuration:
                 settings_ui.default_crypto_algorithm.setCurrentIndex(int(tags.text))
             for tags in et.iter(str("shard_size_unit")):
                 settings_ui.shard_size_unit.setCurrentIndex(int(tags.text))
+            for tags in et.iter(str("custom_max_shard_size_enabled")):
+                if int(tags.text) == 1:
+                    settings_ui.max_shard_size_enabled_checkBox.setChecked(True)
+                else:
+                    settings_ui.max_shard_size_enabled_checkBox.setChecked(False)
 
         except Exception as e:
-            self.__logger.error("Unspecified XML parse error" + str(e))
+            logger.error("Unspecified XML parse error" + str(e))
 
     def save_client_configuration(self, settings_ui):
         root = ET.Element("configuration")
         doc = ET.SubElement(root, "client")
 
         # settings_ui = Ui_
+        if settings_ui.max_shard_size_enabled_checkBox.isChecked():
+            custom_max_shard_size_enabled_checkbox = '1'
+        else:
+            custom_max_shard_size_enabled_checkbox = '0'
+
+        ET.SubElement(doc, "custom_max_shard_size_enabled").text = str(custom_max_shard_size_enabled_checkbox)
         ET.SubElement(doc, "max_shard_size").text = str(settings_ui.max_shard_size.text())
         ET.SubElement(doc, "max_connections_onetime").text = str(settings_ui.connections_onetime.text())
         ET.SubElement(doc, "shard_size_unit").text = str(settings_ui.shard_size_unit.currentIndex())
         ET.SubElement(doc, "max_download_bandwidth").text = str(settings_ui.max_download_bandwidth.text())
         ET.SubElement(doc, "max_upload_bandwidth").text = str(settings_ui.max_upload_bandwidth.text())
         ET.SubElement(doc, "default_file_encryption_algorithm").text = str(
-            settings_ui.default_crypto_algorithm.currentIndex())
+                                    settings_ui.default_crypto_algorithm.currentIndex())
         ET.SubElement(doc, "bridge_request_timeout").text = str(settings_ui.bridge_request_timeout.text())
         ET.SubElement(doc, "crypto_keys_location").text = str(settings_ui.crypto_keys_location.text())
         tree = ET.ElementTree(root)
         tree.write(CONFIG_FILE)
+
+    def max_shard_size(self):
+        et = None
+
+        max_shard_size = DEFAULT_SHARD_SIZE
+
+        try:
+
+            et = ET.parse(CONFIG_FILE)
+            shard_size_unit = 2
+            max_shard_size_sterile = None
+            for tags in et.iter(str("custom_max_shard_size_enabled")):
+                if int(tags.text) == 1:
+                    for tags2 in et.iter(str("max_shard_size")):
+                        max_shard_size_sterile = int(tags2.text)
+                    for tags3 in et.iter(str("shard_size_unit")):
+                        shard_size_unit = int(tags3.text)
+
+                    if shard_size_unit == 0:  # KB:
+                        max_shard_size = (max_shard_size_sterile * 2048)
+                    elif shard_size_unit == 1:  # MB:
+                        max_shard_size = (max_shard_size_sterile * 1024 * 2048)
+                    elif shard_size_unit == 2:  # GB:
+                        max_shard_size = (max_shard_size_sterile * 1024 * 1024 * 2048)
+                    elif shard_size_unit == 3:  # TB:
+                        max_shard_size = (max_shard_size_sterile * 1024 * 1024 * 1024 * 2048)
+                else:
+                    max_shard_size = DEFAULT_SHARD_SIZE
+
+        except Exception as e:
+            logger.error("Unspecified XML parse error" + str(e))
+
+        return max_shard_size
+
+    def get_max_bridge_request_timeout(self):
+        max_bridge_request_timeout = DEFAULT_MAX_BRIDGE_REQUEST_TIMEOUT
+
+        et = None
+
+        try:
+            et = ET.parse(CONFIG_FILE)
+            for tags in et.iter(str("bridge_request_timeout")):
+                max_bridge_request_timeout = int(tags.text)
+
+        except Exception as e:
+            logger.error("Unspecified XML parse error" + str(e))
+
+        return max_bridge_request_timeout
