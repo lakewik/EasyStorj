@@ -533,6 +533,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 farmer_tries = 0
                 response = None
                 success_shard_upload = False
+
+                farmer_error_class = storj.exception.FarmerError(10002)
+                SUPPLIED_TOKEN_NOT_ACCEPTED_ERROR = farmer_error_class.SUPPLIED_TOKEN_NOT_ACCEPTED
+
                 while MAX_RETRIES_UPLOAD_TO_SAME_FARMER > farmer_tries:
                     farmer_tries += 1
                     try:
@@ -590,7 +594,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
 
                         # upload failed due to Farmer Failure
-                        if str(e) == str(storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED):
+                        if str(e) == str(SUPPLIED_TOKEN_NOT_ACCEPTED_ERROR):
                             self.__logger.error('The supplied token not accepted')
                         # print "Exception raised while trying to negitiate contract: " + str(e)
                         continue
@@ -669,8 +673,10 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                 j = json.loads(str(response.content))
                 if j.get('result') == 'The supplied token is not accepted':
+                    farmer_error_class = storj.exception.FarmerError(10002)
+                    SUPPLIED_TOKEN_NOT_ACCEPTED_ERROR = farmer_error_class.SUPPLIED_TOKEN_NOT_ACCEPTED
                     raise storj.exception.StorjFarmerError(
-                        storj.exception.StorjFarmerError.SUPPLIED_TOKEN_NOT_ACCEPTED)
+                        storj.exception.SuppliedTokenNotAcceptedError)
 
             except storj.exception.StorjBridgeApiError as e:
                 print str(e)
