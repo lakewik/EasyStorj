@@ -520,6 +520,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                     QtCore.SIGNAL('setCurrentUploadState'),
                     'Uploading shard %s to farmer...' % str(chapters + 1))
 
+                self.emit(QtCore.SIGNAL("setCurrentUploadState"),
+                          'Uploading shard %s to farmer...' % str(chapters + 1))
+
                 # begin recording exchange report
 
                 current_timestamp = int(time.time())
@@ -610,6 +613,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                             QtCore.SIGNAL('updateUploadTaskState'),
                             rowposition,
                             'First try failed. Retrying... (' + str(farmer_tries) + ')')
+
+                        self.emit(QtCore.SIGNAL("setCurrentUploadState"),
+                                  'First try failed. Retrying... (' + str(farmer_tries) + ')')
 
                         # self.__logger.warning('"log_event_type": "warning"')
                         self.__logger.warning('"title": "Shard upload error"')
