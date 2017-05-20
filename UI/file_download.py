@@ -196,6 +196,26 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
 
         self.ui_single_file_download.connections_onetime.setMaximum(MAX_ALLOWED_DOWNLOAD_CONCURRENCY)
 
+        self.clip = QtGui.QApplication.clipboard()
+
+    def keyPressEvent(self, e):
+        # copy upload queue table content to clipboard #
+        if (e.modifiers() & QtCore.Qt.ControlModifier):
+            selected = self.ui_single_file_download.shard_queue_table.selectedRanges()
+
+            if e.key() == QtCore.Qt.Key_C:  # copy
+                s = ""
+
+                for r in xrange(selected[0].topRow(), selected[0].bottomRow() + 1):
+                    for c in xrange(selected[0].leftColumn(), selected[0].rightColumn() + 1):
+                        try:
+                            s += str(self.ui_single_file_download.shard_queue_table.item(r, c).text()) + "\t"
+                        except AttributeError:
+                            s += "\t"
+                    s = s[:-1] + "\n"  # eliminate last '\t'
+                self.clip.setText(s)
+
+
     def display_table_context_menu(self, position):
         tablemodel = self.ui_single_file_download.shard_queue_table.model()
         rows = sorted(set(index.row() for index in
@@ -355,6 +375,7 @@ this window?",
              '}'))
 
         self.ui_single_file_download.connections_onetime.setEnabled(True)
+        self.ui_single_file_download.start_download_bt.setEnabled(True)
 
         QtGui.QMessageBox.information(self, 'Success!',
                                       'File downloaded successfully!')
@@ -754,6 +775,8 @@ this window?",
                  '    color: #fff;\n'
                  '    border-radius: 7px;\n'
                  '}'))
+
+            self.ui_single_file_download.start_download_bt.setDisabled(True)
 
             self.ui_single_file_download.connections_onetime.setEnabled(False)
 
