@@ -206,6 +206,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                                                                   "    color: #fff;\n"
                                                                   "    border-radius: 7px;\n"
                                                                   "}"))
+
+        self.ui_single_file_upload.start_upload_bt.setEnabled(True)
         self.ui_single_file_upload.file_path.setText("")
         QMessageBox.information(self, 'Success!', 'File uploaded successfully!')
 
@@ -949,6 +951,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             self.is_upload_active = True
             self.ui_single_file_upload.connections_onetime.setEnabled(False)
+            self.ui_single_file_upload.start_upload_bt.setDisabled(True)
             self.ui_single_file_upload.start_upload_bt.setStyleSheet(("QPushButton:hover{\n"
                                                                       "  background-color: #8C8A87;\n"
                                                                       "  border-color: #8C8A87;\n"
