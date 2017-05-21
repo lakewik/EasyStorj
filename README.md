@@ -14,6 +14,10 @@ The layout has been designed by @Davasny (https://github.com/Davasny)
 ## Honor supporters 
 **[You can support me by donating CryptoCurrency](#support)**
  - Will Topping
+ 
+## Download
+- Portable binary package for Windows: https://github.com/lakewik/storj-gui-client/releases/download/0.1.5/storj-gui-0.1.5.exe
+
 
 ## How to run (Alpha version)
 
