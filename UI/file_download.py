@@ -29,7 +29,8 @@ from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP, \
     FARMER_NODES_EXCLUSION_FOR_DOWNLOAD_ENABLED, \
     MAX_DOWNLOAD_REQUEST_BLOCK_SIZE, FILE_POINTERS_ITERATION_DELAY, \
     DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT, MAX_ALLOWED_DOWNLOAD_CONCURRENCY, \
-    MAX_POINTERS_RESOLVED_IN_ONE_PART
+    MAX_POINTERS_RESOLVED_IN_ONE_PART, GET_DEFAULT_TMP_PATH_FROM_ENV_VARIABLES, \
+    GET_HOME_PATH_FROM_ENV_VARIABLES
 
 
 queue = Queue.Queue()
@@ -163,16 +164,30 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         temp_dir = ''
         if platform == 'linux' or platform == 'linux2':
             # linux
-            temp_dir = '/tmp'
+            if GET_DEFAULT_TMP_PATH_FROM_ENV_VARIABLES:
+                try:
+                    temp_dir = str(os.environ['TEMP'])
+                except Exception as e:
+                    temp_dir = '/tmp'
+                    print str(e)
+            else:
+                temp_dir = '/tmp'
+
         elif platform == 'darwin':
             # OS X
             temp_dir = '/tmp'
+
         elif platform == 'win32':
             # Windows
             if USE_USER_ENV_PATH_FOR_TEMP:
                 temp_dir = os.path.join(
                     self.tools.get_home_user_directory().decode('utf-8'),
                     'AppData', 'Local', 'Temp')
+            elif GET_DEFAULT_TMP_PATH_FROM_ENV_VARIABLES:
+                try:
+                    temp_dir = str(os.environ['HOME'])
+                except BaseException:
+                    temp_dir = '/tmp'
             else:
                 temp_dir = 'C:\\Windows\\temp'
 
