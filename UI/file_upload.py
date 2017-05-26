@@ -66,11 +66,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             QtCore.SIGNAL('clicked()'),
             self.handle_cancel_action)
 
-
         self.already_used_farmers_nodes = []
 
         self.tools = Tools()
-
 
         self.storj_engine = StorjEngine()
 
@@ -112,28 +110,22 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('refreshOverallProgress'), self.refresh_overall_progress)
         self.connect(self, QtCore.SIGNAL('showFileUploadedSuccessfully'), self.show_upload_finished_message)
         self.connect(self, QtCore.SIGNAL('finishUpload'),
-            lambda: self.finish_upload(os.path.split(
-                str(self.ui_single_file_upload.file_path.text()))[1],
-                str(self.current_selected_bucket_id)))
+                     lambda: self.finish_upload(os.path.split(
+                                                str(self.ui_single_file_upload.file_path.text()))[1],
+                                                str(self.current_selected_bucket_id)))
         self.connect(self, QtCore.SIGNAL('setCurrentUploadState'), self.set_current_status)
         self.connect(self, QtCore.SIGNAL('updateShardUploadCounters'), self.update_shards_counters)
         self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'), self.set_current_active_connections)
         self.connect(self, QtCore.SIGNAL('setShardSize'), self.set_shard_size)
         self.connect(self, QtCore.SIGNAL('createShardUploadThread'), self.createNewShardUploadThread)
-        #self.connect(self, QtCore.SIGNAL('handleCancelAction'), self.ha)
+        # self.connect(self, QtCore.SIGNAL('handleCancelAction'), self.ha)
 
         # resolve buckets and put to buckets combobox
         self.createBucketResolveThread()
 
-        # file_pointers = self.storj_engine.storj_client.file_pointers(
-        #   "6acfcdc62499144929cf9b4a", "dfba26ab34466b1211c60d02")
-
         # self.emit(QtCore.SIGNAL("addRowToUploadQueueTable"), "important", "information")
         # self.emit(QtCore.SIGNAL("addRowToUploadQueueTable"), "important", "information")
         # self.emit(QtCore.SIGNAL("incrementShardsProgressCounters"))
-
-        #self.max_retries_upload_to_same_farmer = MAX_RETRIES_UPLOAD_TO_SAME_FARMER
-        #self.max_retries_negotiate_contract = MAX_RETRIES_NEGOTIATE_CONTRACT
 
         # self.initialize_shard_queue_table(file_pointers)
 
@@ -162,7 +154,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                     s = s[:-1] + "\n"  # eliminate last '\t'
                 self.clip.setText(s)
 
-
     def shardUploadInitThread(self, shard, chapters, frame, file_name):
         shard_upload_init_thread = threading.Thread(
             target=self.createNewShardUploadThread(
@@ -176,7 +167,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
     def set_shard_size(self, shard_size):
         self.ui_single_file_upload.shardsize.setText(str(self.tools.human_size(int(shard_size))))
 
-
     def handle_cancel_action(self):
         if self.is_upload_active:
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Question",
@@ -187,7 +177,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.close()
         else:
             self.close()
-
 
     def show_upload_finished_message(self):
         self.is_upload_active = False
@@ -216,15 +205,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         """
         total_percent_to_upload = self.all_shards_count * 100
         total_percent_uploaded = sum(self.shard_upload_percent_list) * 100
-
         actual_percent_uploaded = total_percent_uploaded / total_percent_to_upload
-
         total_percent = (base_percent * 100) + (0.90 * actual_percent_uploaded)
-
-        #self.__logger.info('%s %s total_percent_uploaded' % (actual_percent_uploaded, base_percent))
-
-        # actual_upload_progressbar_value = self.ui_single_file_upload.overall_progress.value()
-
         self.ui_single_file_upload.overall_progress.setValue(int(total_percent))
 
     def set_current_active_connections(self):
@@ -232,7 +214,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
     def update_shards_counters(self):
         self.ui_single_file_upload.uploaded_shards.setText(str(self.shards_already_uploaded) + "/" + str(self.all_shards_count))
-
 
     def update_shard_upload_progess(self, row_position_index, value):
         self.upload_queue_progressbar_list[row_position_index].setValue(value)
@@ -286,7 +267,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         if APPLY_SELECTED_BUCKET_TO_UPLOADER:
             self.ui_single_file_upload.save_to_bucket_select.setCurrentIndex(int(self.dashboard_instance.current_bucket_index))
-
 
     def increment_shards_progress_counters(self):
         # self.shards_already_uploaded += 1
@@ -454,14 +434,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             # emit signal to add row to upload queue table
             # self.emit(QtCore.SIGNAL("addRowToUploadQueueTable"), "important", "information")
 
-            # self.ui_single_file_upload.current_state.setText(
-            #   html_format_begin + "Adding shard " + str(chapters) +
-            #   " to file frame and getting contract..." + html_format_end)
-
-            # self.__logger.warning('"log_event_type": "debug"')
-            self.__logger.debug('"title": "Negotiating contract"')
-            self.__logger.debug('"description": "Trying to negotiate storage \
-                    contract for shard at index %s"' % chapters)
+            self.__logger.debug('Negotiating contract')
+            self.__logger.debug('Trying to negotiate storage contract for \
+shard at index %s' % chapters)
             if contract_negotiation_tries > 1:
                 self.emit(
                     QtCore.SIGNAL('setCurrentUploadState'),
@@ -474,9 +449,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
             try:
                 if FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED:
-                    frame_content = self.storj_engine.storj_client.frame_add_shard(shard,
-                                                                                   frame.id,
-                                                                 excludes=self.already_used_farmers_nodes)
+                    frame_content = self.storj_engine.storj_client.frame_add_shard(
+                        shard, frame.id, excludes=self.already_used_farmers_nodes)
                 else:
                     frame_content = self.storj_engine.storj_client.frame_add_shard(shard, frame.id)
                 # Add a row to the table
@@ -575,7 +549,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         # upload failed due to Farmer Failure
                         if str(e) == str(SUPPLIED_TOKEN_NOT_ACCEPTED_ERROR):
                             self.__logger.error('The supplied token not accepted')
-                        # print "Exception raised while trying to negitiate contract: " + str(e)
                         continue
 
                     except Exception as e:
@@ -596,9 +569,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                         self.__logger.warning('Shard upload error')
                         self.__logger.warning('Error while uploading shard to:\
                                 %s:%s. Retrying... (%s)' % (
-                            str(frame_content["farmer"]["address"]),
-                            str(frame_content["farmer"]["port"]),
-                            str(farmer_tries)))
+                            frame_content["farmer"]["address"],
+                            frame_content["farmer"]["port"],
+                            farmer_tries))
                         continue
 
                     else:
@@ -611,16 +584,17 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                         # update already uploaded shards count
                         self.emit(QtCore.SIGNAL('updateShardUploadCounters'))
-                        self.__logger.debug("Shard uploaded successfully to " +
-                                     str(frame_content["farmer"]["address"]) +
-                                     ":" +
-                                     str(frame_content["farmer"]["port"]))
+                        self.__logger.debug(
+                            'Shard uploaded successfully to %s:%s' % (
+                                frame_content["farmer"]["address"],
+                                frame_content["farmer"]["port"]))
 
                         self.emit(QtCore.SIGNAL("updateUploadTaskState"), rowposition,
                                   "Uploaded!")  # update shard upload state
 
-                        self.__logger.debug(str(self.all_shards_count) + " shards, " +
-                                     str(self.shards_already_uploaded) + "sent")
+                        self.__logger.debug('%s shards, %s sent' %
+                                            (self.all_shards_count,
+                                             self.shards_already_uploaded))
 
                         if int(self.all_shards_count) <= int(self.shards_already_uploaded):
                             # send signal to save to bucket after all files are uploaded
@@ -631,7 +605,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 if not success_shard_upload:
                     if BLACKLISTING_MODE == 2:
                         self.already_used_farmers_nodes.append(
-                         farmerNodeID)  # Add item to array of already used farmers nodes
+                            farmerNodeID)  # Add item to array of already used farmers nodes
                     # Update shard upload state
                     self.emit(
                         QtCore.SIGNAL('updateUploadTaskState'),
@@ -655,8 +629,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.__logger.error('Exception raised while trying to negotiate contract')
                 self.__logger.error('Bridge exception')
                 self.__logger.error('Exception raised while trying \
-                               to negotiate storage contract for shard at index\
-                               ' + str(chapters))
+to negotiate storage contract for shard at index %s' % chapters)
                 continue
 
             except Exception as e:
@@ -667,7 +640,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 # upload failed probably while sending data to farmer
                 self.__logger.error('Error occured while trying to upload shard or negotiate contract. Retrying... ')
 
-                # self.__logger.warning('"log_event_type": "error"')
                 self.__logger.error('Unhandled exception')
                 self.__logger.error('Unhandled exception occured while trying \
 to upload shard or negotiate contract for shard at index %s. Retrying...' % str(chapters))
@@ -691,7 +663,6 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
             exchange_report.exchangeResultMessage = exchange_report.STORJ_REPORT_SHARD_UPLOADED
             self.emit(QtCore.SIGNAL("setCurrentUploadState"),
                       "Sending Exchange Report for shard " + str(chapters + 1))
-            # self.__logger.warning('"log_event_type": "debug"')
             self.__logger.info("Shard " + str(chapters + 1) +
                                " successfully added and exchange report sent.")
             # self.storj_engine.storj_client.send_exchange_report(exchange_report) # send exchange report
@@ -868,8 +839,6 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
             self.uploaded_file_size = file_size
             self.file_mime_type = file_mime_type
 
-
-
             self.ui_single_file_upload.file_size.setText(str(self.tools.human_size(int(file_size))))
 
             self.is_upload_active = True
@@ -960,7 +929,6 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
             self.all_shards_count = shards_count
 
             chapters = 0
-
 
             for shard in shards_manager.shards:
                 self.emit(QtCore.SIGNAL("setShardSize"), int(shard.size))
