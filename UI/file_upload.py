@@ -15,8 +15,6 @@ import multiprocessing
 
 import requests
 import storj
-import storj.model
-import storj.exception
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtGui import QMessageBox
@@ -512,7 +510,7 @@ shard at index %s' % chapters)
                             ':' +
                             str(frame_content['farmer']['port']))
 
-                        mypath = os.path.join(self.parametrs.tmpPath,
+                        mypath = os.path.join(self.tmp_path,
                                               file_name_ready_to_shard_upload +
                                               '-' + str(chapters + 1))
 
@@ -730,39 +728,29 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
             int(self.ui_single_file_upload.connections_onetime.value()))
 
         self.ui_single_file_upload.overall_progress.setValue(0)
-        # upload finish function #
-
-        # end upload finishing function #
 
         file_path = None
         self.validation = {}
 
         self.initialize_upload_queue_table()
 
-        # item = ProgressWidgetItem()
-        # self.ui_single_file_upload.shard_queue_table_widget.setItem(1, 1, item)
-        # item.updateValue(1)
-
-        # progress.valueChanged.connect(item.updateValue)
-
         encryption_enabled = True
-        self.parametrs = storj.model.StorjParametrs()
 
         # get temporary files path
-        self.parametrs.tmpPath = str(self.ui_single_file_upload.tmp_path.text())
-        self.__logger.debug("Temporary path chosen: " + self.parametrs.tmpPath)
+        self.tmp_path = str(self.ui_single_file_upload.tmp_path.text())
+        self.__logger.debug('Temporary path chosen: %s' % self.tmp_path)
 
         self.configuration = Configuration()
 
         # TODO: redundant lines?
         # get temporary files path
         if self.ui_single_file_upload.file_path.text() == "":
-            self.parametrs.tmpPath = "/tmp/"
+            self.tmp_path = "/tmp"
             self.validation["file_path"] = False
             self.emit(QtCore.SIGNAL("showFileNotSelectedError"))  # show error missing file path
             self.__logger.error("temporary path missing")
         else:
-            self.parametrs.tmpPath = str(self.ui_single_file_upload.tmp_path.text())
+            self.tmp_path = str(self.ui_single_file_upload.tmp_path.text())
             self.validation["file_path"] = True
             file_path = str(self.ui_single_file_upload.file_path.text()).decode('utf-8')
 
@@ -811,9 +799,9 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
 
                 file_crypto_tools = FileCrypto()
                 # Path where to save the encrypted file in temp dir
-                file_path_ready = os.path.join(self.parametrs.tmpPath,
-                                               bname + ".encrypted")
-                self.__logger.debug("Call encryption method")
+                file_path_ready = os.path.join(self.tmp_path,
+                                               '%s.encrypted' % bname)
+                self.__logger.debug('Call encryption method')
                 # begin file encryption
                 file_crypto_tools.encrypt_file(
                     "AES",
@@ -827,7 +815,7 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
                 file_path_ready = file_path
                 file_name_ready_to_shard_upload = bname
 
-            self.__logger.debug("Temp path: " + self.parametrs.tmpPath)
+            self.__logger.debug('Temp path: %s' % self.tmp_path)
             self.__logger.debug(file_path_ready + "sciezka2")
 
             def get_size(file_like_object):
@@ -908,7 +896,9 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
 
             max_shard_size_setting = self.configuration.max_shard_size()
             print str(max_shard_size_setting) + " max shard size"
-            shards_manager = storj.model.ShardManager(filepath=file_path_ready, tmp_path=self.parametrs.tmpPath, max_shard_size=int(max_shard_size_setting))
+            shards_manager = storj.model.ShardManager(filepath=file_path_ready,
+                                                      tmp_path=self.tmp_path,
+                                                      max_shard_size=int(max_shard_size_setting))
             self.all_shards_count = len(shards_manager.shards)
             self.emit(QtCore.SIGNAL("updateShardUploadCounters"))
 
@@ -925,7 +915,6 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
             self.__logger.debug('Shards count %s' % shards_count)
 
             # set shards count
-            # self.ui_single_file_upload.shards_count.setText(html_format_begin + str(shards_count) + html_format_end)
             self.all_shards_count = shards_count
 
             chapters = 0
