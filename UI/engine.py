@@ -1,10 +1,12 @@
 from utilities.account_manager import AccountManager
 from utilities.backend_config import Configuration
 import storj
-from utilities.log_manager import logger
+import logging
 
 
 class StorjEngine:
+
+    __logger = logging.getLogger('%s.StorjEngine' % __name__)
 
     def __init__(self):
         self.conf_manager = Configuration()
@@ -20,5 +22,5 @@ class StorjEngine:
                                              password=self.password,
                                              do_hashing=False,
                                              timeout=max_bridge_request_timeout)
-            logger.debug("Login from credentials xml file")
-        logger.debug("testlogin, StorjEngine")
+            self.__logger.debug("Login from credentials xml file")
+        self.__logger.debug("testlogin, StorjEngine")

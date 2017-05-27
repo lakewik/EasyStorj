@@ -1,5 +1,5 @@
 import xml.etree.cElementTree as ET
-from log_manager import logger
+import logging
 from UI.resources.constants import DEFAULT_SHARD_SIZE,\
     DEFAULT_MAX_BRIDGE_REQUEST_TIMEOUT
 
@@ -9,6 +9,8 @@ CONFIG_FILE = 'storj_client_config.xml'
 # Configuration backend section
 class Configuration:
 
+    __logger = logging.getLogger('%s.Configuration' % __name__)
+
     def __init__(self, sameFileNamePrompt=None, sameFileHashPrompt=None,
                  load_config=False):
         if load_config:
@@ -16,7 +18,7 @@ class Configuration:
             try:
                 et = ET.parse(CONFIG_FILE)
             except:
-                logger.error('Unspecified XML parse error')
+                self.__logger.error('Unspecified XML parse error')
 
             for tags in et.iter('same_file_name_prompt'):
                 if tags.text == '1':
@@ -45,7 +47,7 @@ class Configuration:
             for tags in et.iter(str(parametr)):
                 output = tags.text
         except:
-            logger.error('Unspecified error')
+            self.__logger.error('Unspecified error')
 
         return output
 
@@ -55,7 +57,7 @@ class Configuration:
             for tags in et.iter('password'):
                 output = tags.text
         except:
-            logger.error('Unspecified error')
+            self.__logger.error('Unspecified error')
 
     def paint_config_to_ui(self, settings_ui):
         et = None
@@ -86,8 +88,8 @@ class Configuration:
                     settings_ui.max_shard_size_enabled_checkBox.setChecked(False)
 
         except Exception as e:
-            logger.error('Unspecified XML parse error')
-            logger.error(e)
+            self.__logger.error('Unspecified XML parse error')
+            self.__logger.error(e)
 
     def save_client_configuration(self, settings_ui):
         root = ET.Element('configuration')
@@ -149,8 +151,8 @@ class Configuration:
                     max_shard_size = DEFAULT_SHARD_SIZE
 
         except Exception as e:
-            logger.error('Unspecified XML parse error')
-            logger.error(e)
+            self.__logger.error('Unspecified XML parse error')
+            self.__logger.error(e)
 
         return max_shard_size
 
@@ -163,7 +165,7 @@ class Configuration:
                 max_bridge_request_timeout = int(tags.text)
 
         except Exception as e:
-            logger.error('Unspecified XML parse error')
-            logger.error(e)
+            self.__logger.error('Unspecified XML parse error')
+            self.__logger.error(e)
 
         return max_bridge_request_timeout
