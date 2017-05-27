@@ -4,10 +4,8 @@ import logging
 import threading
 
 import storj.exception as sjexc
-import os
 
 from PyQt4 import QtCore, QtGui
-from six import print_
 
 from .qt_interfaces.dashboard_ui import Ui_MainMenu
 from .bucket_edition import BucketEditingUI
@@ -19,11 +17,14 @@ from .file_upload import SingleFileUploadUI
 from .utilities.tools import Tools
 from .sync_menu import SyncMenuUI
 
-from .resources.constants import DISPLAY_FILE_CREATION_DATE_IN_MAIN, FILE_LIST_SORTING_MAIN_ENABLED, BUCKETS_LIST_SORTING_ENABLED
+from .resources.constants import DISPLAY_FILE_CREATION_DATE_IN_MAIN,\
+    FILE_LIST_SORTING_MAIN_ENABLED, BUCKETS_LIST_SORTING_ENABLED
 from .resources.custom_qt_interfaces import TableModel
 
 
 class ExtendedQLabel(QtGui.QLabel):
+    """"""
+
     def __init(self, parent):
         QtGui.QLabel.__init__(self, parent)
 
@@ -45,16 +46,19 @@ class MainUI(QtGui.QMainWindow):
         QtCore.QObject.connect(self.file_manager_ui.bucket_select_combo_box,
                                QtCore.SIGNAL('currentIndexChanged(const QString&)'),
                                self.createNewFileListUpdateThread)  # connect ComboBox change listener
-        QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt, QtCore.SIGNAL('clicked()'),
+        QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt,
+                               QtCore.SIGNAL('clicked()'),
                                self.open_mirrors_list_window)  # open mirrors list window
 
         # QtCore.QObject.connect(self.file_manager_ui.file_mirrors_bt, QtCore.SIGNAL('clicked()'),
         #                      self.open_sync_menu)  # open sync menu window
         # create bucket action
         # QtCore.QObject.connect(self.file_manager_ui.quit_bt, QtCore.SIGNAL('clicked()'),  self.close)
-        QtCore.QObject.connect(self.file_manager_ui.file_download_bt, QtCore.SIGNAL('clicked()'),
+        QtCore.QObject.connect(self.file_manager_ui.file_download_bt,
+                               QtCore.SIGNAL('clicked()'),
                                self.open_single_file_download_window)  # create bucket action
-        QtCore.QObject.connect(self.file_manager_ui.file_delete_bt, QtCore.SIGNAL('clicked()'),
+        QtCore.QObject.connect(self.file_manager_ui.file_delete_bt,
+                               QtCore.SIGNAL('clicked()'),
                                self.delete_selected_file)  # delete selected file
 
         self.connect(self, QtCore.SIGNAL('changeLoadingGif'), self.change_loading_gif)
@@ -101,21 +105,21 @@ class MainUI(QtGui.QMainWindow):
         self.file_manager_ui.settings_bt.mousePressEvent = self.open_settings_window
         self.file_manager_ui.refresh_bt.mousePressEvent = self.createNewFileListUpdateThread
 
-        # self.file_manager_ui.refresh_bt.mousePressEvent = self.createNewFileListUpdateThread()
-
-        QtCore.QObject.connect(self.file_manager_ui.new_file_upload_bt, QtCore.SIGNAL('clicked()'),
+        QtCore.QObject.connect(self.file_manager_ui.new_file_upload_bt,
+                               QtCore.SIGNAL('clicked()'),
                                self.open_single_file_upload_window)  # delete selected file
 
         # open bucket edit window
-        QtCore.QObject.connect(self.file_manager_ui.edit_bucket_bt, QtCore.SIGNAL('clicked()'),
+        QtCore.QObject.connect(self.file_manager_ui.edit_bucket_bt,
+                               QtCore.SIGNAL('clicked()'),
                                lambda: self.open_bucket_editing_window(action='edit'))
 
         # open bucket edit window
-        QtCore.QObject.connect(self.file_manager_ui.create_bucket_bt, QtCore.SIGNAL('clicked()'),
+        QtCore.QObject.connect(self.file_manager_ui.create_bucket_bt,
+                               QtCore.SIGNAL('clicked()'),
                                lambda: self.open_bucket_editing_window(action='add'))
 
         self.storj_engine = StorjEngine()  # init StorjEngine
-        # self.account_manager = AccountManager()  # init AccountManager
 
         user_email = self.storj_engine.account_manager.get_user_email()
         self.file_manager_ui.account_label.setText(str(user_email))
@@ -139,7 +143,9 @@ class MainUI(QtGui.QMainWindow):
     def open_bucket_editing_window(self, action):
         if action == 'edit':
             self.bucket_editing_window = BucketEditingUI(
-                self, action=action, bucketid=str(self.current_selected_bucket_id), dashboard_instance=self)
+                self, action=action,
+                bucketid=str(self.current_selected_bucket_id),
+                dashboard_instance=self)
 
         else:
             self.bucket_editing_window = BucketEditingUI(
@@ -240,13 +246,8 @@ class MainUI(QtGui.QMainWindow):
         download_thread.start()
 
     def update_files_list(self):
-
         self.tools = Tools()
-
-        # model = MyTableModel(headerdata = )
         model = TableModel(1, 1)
-        # model = QtGui.QStandardItemModel(1, 1)  # initialize model for inserting to table
-
         file_list_header_labels = ['File name', 'File size', 'File ID']
 
         if DISPLAY_FILE_CREATION_DATE_IN_MAIN:
@@ -285,7 +286,8 @@ class MainUI(QtGui.QMainWindow):
 
                 i = i + 1
 
-                self.__logger.info(self.file_details)
+                # self.__logger.info(self.file_details)
+                self.__logger.debug(self.file_details['filename'].replace('[DECRYPTED]', '').decode('utf8'))
         except sjexc.StorjBridgeApiError as e:
             self.__logger.error(e)
 
