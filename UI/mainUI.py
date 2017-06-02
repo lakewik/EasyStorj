@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 import logging
@@ -18,7 +19,7 @@ from .utilities.tools import Tools
 from .sync_menu import SyncMenuUI
 
 from .resources.constants import DISPLAY_FILE_CREATION_DATE_IN_MAIN,\
-    FILE_LIST_SORTING_MAIN_ENABLED, BUCKETS_LIST_SORTING_ENABLED
+    FILE_LIST_SORTING_MAIN_ENABLED, BUCKETS_LIST_SORTING_ENABLED, DATA_TABLE_EDIT_ENABLED
 from .resources.custom_qt_interfaces import TableModel
 
 
@@ -101,6 +102,9 @@ class MainUI(QtGui.QMainWindow):
         """
 
         # self.file_manager_ui.files_list_tableview.setStyleSheet(appStyle)
+
+        if DATA_TABLE_EDIT_ENABLED == False:
+            self.file_manager_ui.files_list_tableview.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
 
         self.file_manager_ui.settings_bt.mousePressEvent = self.open_settings_window
         self.file_manager_ui.refresh_bt.mousePressEvent = self.createNewFileListUpdateThread
