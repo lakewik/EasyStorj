@@ -18,5 +18,6 @@ strict_rfc3339>=0.7
 ws4py>=0.3.4
 pycoin>=0.62
 base58>=0.2.4
+logger
 # NOTE: PyQt4 must be install separately.
 # On Debian, this is possible via `sudo apt install python-qt4`
