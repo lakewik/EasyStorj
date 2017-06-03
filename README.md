@@ -16,6 +16,7 @@ The layout has been designed by @Davasny (https://github.com/Davasny)
  - Will Topping
  
 ## Download
+- Portable binary package for Linux: https://github.com/lakewik/storj-gui-client/releases/download/0.1.5/storj-gui-linux-0.1.5
 - Portable binary package for Windows: https://github.com/lakewik/storj-gui-client/releases/download/0.1.5/storj-gui-0.1.5.exe
 
 
