@@ -24,7 +24,7 @@ The layout has been designed by @Davasny (https://github.com/Davasny)
 ## How to run (Alpha version)
 
 ```
-$ git clone https://github.com/lakewik/storj-gui-client.git
+$ git clone https://github.com/lakewik/storj-gui-client.git -b develop
 $ cd storj-gui-client
 ```
 
