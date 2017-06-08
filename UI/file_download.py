@@ -520,17 +520,17 @@ this window?",
             fileisencrypted = True
 
         # Join shards
-        sharing_tools = ShardingTools()
+        sharding_tools = ShardingTools()
         self.emit(QtCore.SIGNAL('setCurrentState'), 'Joining shards...')
         self.__logger.debug('Joining shards...')
 
         if fileisencrypted:
-            sharing_tools.join_shards(
+            sharding_tools.join_shards(
                 os.path.join(self.tmp_path, file_name),
                 '-',
                 '%s.encrypted' % self.destination_file_path)
         else:
-            sharing_tools.join_shards(
+            sharding_tools.join_shards(
                 os.path.join(self.tmp_path, file_name),
                 '-',
                 self.destination_file_path)
