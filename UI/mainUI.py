@@ -64,43 +64,6 @@ class MainUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('changeLoadingGif'),
                      self.change_loading_gif)
 
-        appStyle = """
-
-        QTableView
-        {
-            alternate-background-color: #1F1F1F;
-            background-color: gray;
-            gridline-color: gray;
-            color: gray;
-        }
-        QTableView::item
-        {
-            color: white;
-        }
-
-        QTableView::item:focus
-        {
-            color: gray;
-            background: #0063cd;
-        }
-        QTableView::item:selected
-        {
-            color: gray;
-            background: #0063cd;
-        }
-
-        QCheckBox::indicator:checked, QCheckBox::indicator:unchecked{
-            color: #b1b1b1;
-            background-color: #323232;
-            border: 1px solid #b1b1b1;
-            border-radius: 1px;
-            width: 7px;
-            height: 7px;
-            margin: 0px 5px 0 5px;
-        }
-
-        """
-
         if not DATA_TABLE_EDIT_ENABLED:
             self.file_manager_ui.files_list_tableview.setEditTriggers(
                 QtGui.QAbstractItemView.NoEditTriggers)
