@@ -19,7 +19,7 @@ class LoginUI(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        # login UI
+        # Login UI
         self.login_ui = Ui_Login()
         self.login_ui.setupUi(self)
 
@@ -28,17 +28,17 @@ class LoginUI(QtGui.QMainWindow):
 
         QtCore.QObject.connect(self.login_ui.login_bt,
                                QtCore.SIGNAL('clicked()'),
-                               self.login)  # take login action
+                               self.login)  # Take login action
 
     def login(self):
-        # take login action
-        self.email = str(self.login_ui.email.text()).strip()  # get mail
-        self.password = str(self.login_ui.password.text()).strip()  # get password
+        # Take login action
+        self.email = str(self.login_ui.email.text()).strip()
+        self.password = str(self.login_ui.password.text()).strip()
 
         self.storj_client = storj.Client(email=self.email,
                                          password=self.password)
         success = False
-        # take login action - check credentials by listing keys :D
+        # Take login action - check credentials by listing keys :D
         try:
             self.storj_client.key_list()
             success = True
@@ -69,4 +69,3 @@ class LoginUI(QtGui.QMainWindow):
                 self.main_ui_window = MainUI(self)
                 self.main_ui_window.show()
                 self.close()
-                # initial_window.hide()
