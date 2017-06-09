@@ -417,6 +417,7 @@ upload and close this window?",
 
         contract_negotiation_tries = 0
 
+        self.__logger.debug('Farmers already used:')
         self.__logger.debug(self.already_used_farmers_nodes)
 
         while MAX_RETRIES_NEGOTIATE_CONTRACT > contract_negotiation_tries:
@@ -429,12 +430,13 @@ shard at index %s' % chapters)
             if contract_negotiation_tries > 1:
                 self.emit(
                     QtCore.SIGNAL('setCurrentUploadState'),
-                    'Trying to negotiate storage contract for shard at index %s... Retry %s... ' % (
-                        chapters, contract_negotiation_tries))
+                    'Trying to negotiate storage contract for shard at \
+index %s... Retry %s... ' % (chapters, contract_negotiation_tries))
             else:
                 self.emit(
                     QtCore.SIGNAL('setCurrentUploadState'),
-                    'Trying to negotiate storage contract for shard at index %s...' % chapters)
+                    'Trying to negotiate storage contract for shard at \
+index %s...' % chapters)
 
             try:
                 if FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED:
@@ -453,15 +455,20 @@ shard at index %s' % chapters)
 
                 farmerNodeID = frame_content['farmer']['nodeID']
 
+                # Add item to array of already used farmers nodes
                 if BLACKLISTING_MODE == 1:
-                    self.already_used_farmers_nodes.append(farmerNodeID)  # add item to array of already used farmers nodes
+                    self.already_used_farmers_nodes.append(farmerNodeID)
 
-                url = 'http://' + frame_content['farmer']['address'] + ':' + \
-                      str(frame_content['farmer']['port']) + '/shards/' + \
-                      frame_content['hash'] + '?token=' + \
-                      frame_content['token']
+                url = 'http://%s:%s/shards/%s?token=%s' % (
+                    frame_content['farmer']['address'],
+                    frame_content['farmer']['port'],
+                    frame_content['hash'],
+                    frame_content['token'])
+                # url = 'http://' + frame_content['farmer']['address'] + ':' + \
+                #       str(frame_content['farmer']['port']) + '/shards/' + \
+                #       frame_content['hash'] + '?token=' + \
+                #       frame_content['token']
                 self.__logger.debug('URL: %s', url)
-
                 self.__logger.debug('-' * 30)
 
                 self.emit(
@@ -484,9 +491,6 @@ shard at index %s' % chapters)
                 farmer_tries = 0
                 response = None
                 success_shard_upload = False
-
-                farmer_error_class = storj.exception.FarmerError(10002)
-                SUPPLIED_TOKEN_NOT_ACCEPTED_ERROR = farmer_error_class.SUPPLIED_TOKEN_NOT_ACCEPTED
 
                 while MAX_RETRIES_UPLOAD_TO_SAME_FARMER > farmer_tries:
                     farmer_tries += 1
@@ -533,7 +537,7 @@ shard at index %s' % chapters)
                         self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
 
                         # upload failed due to Farmer Failure
-                        if str(e) == str(SUPPLIED_TOKEN_NOT_ACCEPTED_ERROR):
+                        if e.code == 10002:
                             self.__logger.error('The supplied token not accepted')
                         continue
 
