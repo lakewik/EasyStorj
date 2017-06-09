@@ -149,7 +149,7 @@ class Configuration:
         except Exception as e:
             logger.error("Unspecified XML parse error" + str(e))
 
-        return (max_shard_size/2)
+        return max_shard_size/2
 
     def get_max_bridge_request_timeout(self):
         max_bridge_request_timeout = DEFAULT_MAX_BRIDGE_REQUEST_TIMEOUT
