@@ -28,10 +28,10 @@ from utilities.tools import Tools
 
 from resources.html_strings import html_format_begin, html_format_end
 from resources.constants import MAX_RETRIES_UPLOAD_TO_SAME_FARMER, \
-    MAX_RETRIES_NEGOTIATE_CONTRACT, AUTO_SCROLL_UPLOAD_DOWNLOAD_QUEUE, BUCKETS_LIST_SORTING_ENABLED, \
-    MAX_UPLOAD_CONNECTIONS_AT_SAME_TIME,\
-    FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED, BLACKLISTING_MODE, MAX_ALLOWED_UPLOAD_CONCURRENCY,\
-    CONTRACT_NEGOTIATION_ITERATION_DELAY
+    MAX_RETRIES_NEGOTIATE_CONTRACT, AUTO_SCROLL_UPLOAD_DOWNLOAD_QUEUE, \
+    BUCKETS_LIST_SORTING_ENABLED, MAX_UPLOAD_CONNECTIONS_AT_SAME_TIME,\
+    FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED, BLACKLISTING_MODE, \
+    MAX_ALLOWED_UPLOAD_CONCURRENCY, CONTRACT_NEGOTIATION_ITERATION_DELAY
 from resources.internal_backend_config_variables import APPLY_SELECTED_BUCKET_TO_UPLOADER
 
 
@@ -42,23 +42,26 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_upload = Ui_SingleFileUpload()
         self.ui_single_file_upload.setupUi(self)
-        # open bucket manager
+
+        # Open bucket manager
         QtCore.QObject.connect(
             self.ui_single_file_upload.start_upload_bt,
             QtCore.SIGNAL('clicked()'),
             self.createNewUploadThread)
-        # open file select dialog
+
+        # Open file select dialog
         QtCore.QObject.connect(
             self.ui_single_file_upload.file_path_select_bt,
             QtCore.SIGNAL('clicked()'),
             self.select_file_path)
-        # open tmp directory select dialog
+
+        # Open tmp directory select dialog
         QtCore.QObject.connect(
             self.ui_single_file_upload.tmp_path_select_bt,
             QtCore.SIGNAL('clicked()'),
             self.select_tmp_directory)
 
-        # handle cancel action
+        # Handle cancel action
         QtCore.QObject.connect(
             self.ui_single_file_upload.cancel_bt,
             QtCore.SIGNAL('clicked()'),
@@ -98,25 +101,37 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.uploaded_shards_count = 0
         self.upload_queue_progressbar_list = []
 
-        self.connect(self, QtCore.SIGNAL('addRowToUploadQueueTable'), self.add_row_upload_queue_table)
-
-        self.connect(self, QtCore.SIGNAL('incrementShardsProgressCounters'), self.increment_shards_progress_counters)
-        self.connect(self, QtCore.SIGNAL('updateUploadTaskState'), self.update_upload_task_state)
-        self.connect(self, QtCore.SIGNAL('updateShardUploadProgress'), self.update_shard_upload_progess)
-        self.connect(self, QtCore.SIGNAL('showFileNotSelectedError'), self.show_error_not_selected_file)
-        self.connect(self, QtCore.SIGNAL('showInvalidPathError'), self.show_error_invalid_file_path)
-        self.connect(self, QtCore.SIGNAL('showInvalidTemporaryPathError'), self.show_error_invalid_temporary_path)
-        self.connect(self, QtCore.SIGNAL('refreshOverallProgress'), self.refresh_overall_progress)
-        self.connect(self, QtCore.SIGNAL('showFileUploadedSuccessfully'), self.show_upload_finished_message)
+        self.connect(self, QtCore.SIGNAL('addRowToUploadQueueTable'),
+                     self.add_row_upload_queue_table)
+        self.connect(self, QtCore.SIGNAL('incrementShardsProgressCounters'),
+                     self.increment_shards_progress_counters)
+        self.connect(self, QtCore.SIGNAL('updateUploadTaskState'),
+                     self.update_upload_task_state)
+        self.connect(self, QtCore.SIGNAL('updateShardUploadProgress'),
+                     self.update_shard_upload_progess)
+        self.connect(self, QtCore.SIGNAL('showFileNotSelectedError'),
+                     self.show_error_not_selected_file)
+        self.connect(self, QtCore.SIGNAL('showInvalidPathError'),
+                     self.show_error_invalid_file_path)
+        self.connect(self, QtCore.SIGNAL('showInvalidTemporaryPathError'),
+                     self.show_error_invalid_temporary_path)
+        self.connect(self, QtCore.SIGNAL('refreshOverallProgress'),
+                     self.refresh_overall_progress)
+        self.connect(self, QtCore.SIGNAL('showFileUploadedSuccessfully'),
+                     self.show_upload_finished_message)
         self.connect(self, QtCore.SIGNAL('finishUpload'),
                      lambda: self.finish_upload(os.path.split(
                                                 str(self.ui_single_file_upload.file_path.text()))[1],
                                                 str(self.current_selected_bucket_id)))
-        self.connect(self, QtCore.SIGNAL('setCurrentUploadState'), self.set_current_status)
-        self.connect(self, QtCore.SIGNAL('updateShardUploadCounters'), self.update_shards_counters)
-        self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'), self.set_current_active_connections)
+        self.connect(self, QtCore.SIGNAL('setCurrentUploadState'),
+                     self.set_current_status)
+        self.connect(self, QtCore.SIGNAL('updateShardUploadCounters'),
+                     self.update_shards_counters)
+        self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'),
+                     self.set_current_active_connections)
         self.connect(self, QtCore.SIGNAL('setShardSize'), self.set_shard_size)
-        self.connect(self, QtCore.SIGNAL('createShardUploadThread'), self.createNewShardUploadThread)
+        self.connect(self, QtCore.SIGNAL('createShardUploadThread'),
+                     self.createNewShardUploadThread)
 
         # resolve buckets and put to buckets combobox
         self.createBucketResolveThread()
@@ -127,18 +142,22 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.clip = QtGui.QApplication.clipboard()
 
-        self.ui_single_file_upload.connections_onetime.setMaximum(MAX_ALLOWED_UPLOAD_CONCURRENCY)
+        self.ui_single_file_upload.connections_onetime.setMaximum(
+            MAX_ALLOWED_UPLOAD_CONCURRENCY)
 
     def keyPressEvent(self, e):
         # copy upload queue table content to clipboard #
         if (e.modifiers() & QtCore.Qt.ControlModifier):
-            selected = self.ui_single_file_upload.shard_queue_table_widget.selectedRanges()
+            selected = self.ui_single_file_upload.shard_queue_table_widget.\
+                selectedRanges()
 
             if e.key() == QtCore.Qt.Key_C:  # copy
                 s = ""
 
-                for r in xrange(selected[0].topRow(), selected[0].bottomRow() + 1):
-                    for c in xrange(selected[0].leftColumn(), selected[0].rightColumn() + 1):
+                for r in xrange(selected[0].topRow(),
+                                selected[0].bottomRow() + 1):
+                    for c in xrange(selected[0].leftColumn(),
+                                    selected[0].rightColumn() + 1):
                         try:
                             s += str(self.ui_single_file_upload.shard_queue_table_widget.item(r, c).text()) + "\t"
                         except AttributeError:
@@ -162,7 +181,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
     def handle_cancel_action(self):
         if self.is_upload_active:
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Question, "Question",
-                                       "Are you sure that you want cancel upload and close this window?",
+                                       "Are you sure that you want cancel \
+upload and close this window?",
                                        (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No))
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Yes:
@@ -216,7 +236,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                                                                     QtGui.QTableWidgetItem(str(state)))
 
     def show_error_not_selected_file(self):
-        QMessageBox.about(self, 'Error', 'Please select file which you want to upload!')
+        QMessageBox.about(self, 'Error',
+                          'Please select file which you want to upload!')
 
     def show_error_invalid_file_path(self):
         QMessageBox.about(self, 'Error', 'File path seems to be invalid!')
@@ -225,7 +246,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         QMessageBox.about(self, 'Error', 'Temporary path seems to be invalid!')
 
     def createBucketResolveThread(self):
-        bucket_resolve_thread = threading.Thread(target=self.initialize_buckets_select_list, args=())
+        bucket_resolve_thread = threading.Thread(
+            target=self.initialize_buckets_select_list, args=())
         bucket_resolve_thread.start()
 
     def initialize_buckets_select_list(self):
@@ -261,9 +283,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.ui_single_file_upload.save_to_bucket_select.setCurrentIndex(int(self.dashboard_instance.current_bucket_index))
 
     def increment_shards_progress_counters(self):
-        # self.shards_already_uploaded += 1
-        # self.ui_single_file_upload.shards_uploaded.setText(
-        #   html_format_begin + str(self.shards_already_uploaded) + html_format_end)
         return 1
 
     def add_row_upload_queue_table(self, row_data):
@@ -751,7 +770,6 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % chap
             if self.ui_single_file_upload.encrypt_files_checkbox.isChecked():
                 # encrypt file
                 self.emit(QtCore.SIGNAL("setCurrentUploadState"), "Encrypting file...")
-                # self.__logger.warning('"log_event_type": "debug"')
                 self.__logger.debug('Encrypting file...')
 
                 file_crypto_tools = FileCrypto()
