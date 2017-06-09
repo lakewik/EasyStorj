@@ -850,18 +850,17 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % chap
             self.__logger.debug('Splitting file to shards...')
 
             max_shard_size_setting = self.configuration.max_shard_size()
-            print str(max_shard_size_setting) + " max shard size"
+            num_shards = os.path.getsize(file_path_ready) / max_shard_size_setting
+            self.__logger.debug('Max shard size setting %s' % max_shard_size_setting)
+            self.__logger.debug('Number of shards %s' % num_shards)
+
             shards_manager = storj.model.ShardManager(filepath=file_path_ready,
                                                       tmp_path=self.tmp_path,
-                                                      max_shard_size=int(max_shard_size_setting))
+                                                      num_chunks=num_shards)
             self.all_shards_count = len(shards_manager.shards)
             self.emit(QtCore.SIGNAL("updateShardUploadCounters"))
 
             self.shard_manager_result = shards_manager
-            # self.ui_single_file_upload.current_state.setText(
-            #   html_format_begin + "Generating shards..." + html_format_end)
-            # shards_manager._make_shards()
-            #shards_count = shards_manager.num_chunks # fix because new version of sdk
             shards_count = self.all_shards_count
             # create file hash
             self.__logger.debug('file_upload() push_token=%s', push_token)
