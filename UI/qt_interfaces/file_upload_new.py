@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_SingleFileUpload(object):
     def setupUi(self, SingleFileUpload):
         SingleFileUpload.setObjectName(_fromUtf8("SingleFileUpload"))
-        SingleFileUpload.resize(975, 591)
+        SingleFileUpload.resize(977, 590)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -120,10 +120,10 @@ class Ui_SingleFileUpload(object):
         self.overall_progress.setProperty("value", 0)
         self.overall_progress.setObjectName(_fromUtf8("overall_progress"))
         self.file_path = QtGui.QLineEdit(SingleFileUpload)
-        self.file_path.setGeometry(QtCore.QRect(130, 57, 801, 31))
+        self.file_path.setGeometry(QtCore.QRect(130, 57, 761, 31))
         self.file_path.setObjectName(_fromUtf8("file_path"))
         self.file_path_select_bt = QtGui.QPushButton(SingleFileUpload)
-        self.file_path_select_bt.setGeometry(QtCore.QRect(940, 60, 31, 31))
+        self.file_path_select_bt.setGeometry(QtCore.QRect(900, 60, 31, 31))
         self.file_path_select_bt.setStyleSheet(_fromUtf8("QPushButton {\n"
 "    background-color: #555555;\n"
 "    border: 1px solid #555555;\n"
@@ -226,7 +226,7 @@ class Ui_SingleFileUpload(object):
         self.label_9.setFont(font)
         self.label_9.setObjectName(_fromUtf8("label_9"))
         self.push_token = QtGui.QLabel(SingleFileUpload)
-        self.push_token.setGeometry(QtCore.QRect(140, 210, 821, 16))
+        self.push_token.setGeometry(QtCore.QRect(140, 210, 801, 16))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -270,7 +270,7 @@ class Ui_SingleFileUpload(object):
         self.label_13.setFont(font)
         self.label_13.setObjectName(_fromUtf8("label_13"))
         self.file_frame_id = QtGui.QLabel(SingleFileUpload)
-        self.file_frame_id.setGeometry(QtCore.QRect(660, 180, 291, 16))
+        self.file_frame_id.setGeometry(QtCore.QRect(660, 180, 281, 16))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -283,7 +283,7 @@ class Ui_SingleFileUpload(object):
 ""))
         self.file_frame_id.setObjectName(_fromUtf8("file_frame_id"))
         self.label_15 = QtGui.QLabel(SingleFileUpload)
-        self.label_15.setGeometry(QtCore.QRect(640, 250, 181, 20))
+        self.label_15.setGeometry(QtCore.QRect(620, 250, 181, 20))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -292,7 +292,7 @@ class Ui_SingleFileUpload(object):
         self.label_15.setFont(font)
         self.label_15.setObjectName(_fromUtf8("label_15"))
         self.uploaded_shards = QtGui.QLabel(SingleFileUpload)
-        self.uploaded_shards.setGeometry(QtCore.QRect(820, 250, 141, 20))
+        self.uploaded_shards.setGeometry(QtCore.QRect(800, 250, 131, 20))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -373,6 +373,49 @@ class Ui_SingleFileUpload(object):
         self.connections_onetime = QtGui.QSpinBox(SingleFileUpload)
         self.connections_onetime.setGeometry(QtCore.QRect(810, 10, 151, 32))
         self.connections_onetime.setObjectName(_fromUtf8("connections_onetime"))
+        self.settings_bt = QtGui.QLabel(SingleFileUpload)
+        self.settings_bt.setGeometry(QtCore.QRect(940, 190, 31, 41))
+        self.settings_bt.setText(_fromUtf8(""))
+        self.settings_bt.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/rarrow.png")))
+        self.settings_bt.setScaledContents(True)
+        self.settings_bt.setObjectName(_fromUtf8("settings_bt"))
+        self.shard_queue_table_widget_2 = QtGui.QTableWidget(SingleFileUpload)
+        self.shard_queue_table_widget_2.setGeometry(QtCore.QRect(990, 60, 371, 511))
+        self.shard_queue_table_widget_2.setObjectName(_fromUtf8("shard_queue_table_widget_2"))
+        self.shard_queue_table_widget_2.setColumnCount(0)
+        self.shard_queue_table_widget_2.setRowCount(0)
+        self.label_10 = QtGui.QLabel(SingleFileUpload)
+        self.label_10.setGeometry(QtCore.QRect(990, 10, 371, 41))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_10.setFont(font)
+        self.label_10.setObjectName(_fromUtf8("label_10"))
+        self.start_upload_bt_2 = QtGui.QPushButton(SingleFileUpload)
+        self.start_upload_bt_2.setGeometry(QtCore.QRect(940, 60, 31, 31))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.start_upload_bt_2.setFont(font)
+        self.start_upload_bt_2.setStyleSheet(_fromUtf8("QPushButton:hover{\n"
+"  background-color: #83bf20;\n"
+"  border-color: #83bf20;\n"
+"}\n"
+"QPushButton:active {\n"
+"  background-color: #93cc36;\n"
+"  border-color: #93cc36;\n"
+"}\n"
+"QPushButton{\n"
+"  background-color: #88c425;\n"
+"    border: 1px solid #88c425;\n"
+"    color: #fff;\n"
+"    border-radius: 7px;\n"
+"}"))
+        self.start_upload_bt_2.setObjectName(_fromUtf8("start_upload_bt_2"))
 
         self.retranslateUi(SingleFileUpload)
         QtCore.QMetaObject.connectSlotsByName(SingleFileUpload)
@@ -411,4 +454,7 @@ class Ui_SingleFileUpload(object):
         self.label_16.setText(_translate("SingleFileUpload", "<html><head/><body><p><span style=\" color:#555555;\">ACTIVE CONNECTIONS:</span></p></body></html>", None))
         self.current_active_connections.setText(_translate("SingleFileUpload", "<html><head/><body><p align=\"center\"><span style=\" color:#2683ff;\">0</span></p></body></html>", None))
         self.label_7.setText(_translate("SingleFileUpload", "<html><head/><body><p>CONCURRENCY (MAX ONE-TIME CONNECTIONS):</p></body></html>", None))
+        self.label_10.setText(_translate("SingleFileUpload", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt;\">FILES QUEUE</span></p></body></html>", None))
+        self.start_upload_bt_2.setText(_translate("SingleFileUpload", "+", None))
 
+import resources_rc
