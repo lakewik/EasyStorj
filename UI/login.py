@@ -61,7 +61,7 @@ class LoginUI(QtGui.QMainWindow):
             self.account_manager.save_account_credentials()
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information,
                                        'Success',
-                                       'Successfully loged in!',
+                                       'Successfully logged in!',
                                        QtGui.QMessageBox.Ok)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
