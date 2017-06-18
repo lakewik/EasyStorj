@@ -20,31 +20,19 @@ class InitialWindowUI(QtGui.QMainWindow):
         self.ui_initial_window = Ui_InitialWindow()
         self.ui_initial_window.setupUi(self)
 
-        # open bucket manager
-        # QtCore.QObject.connect(
-        #   self.ui.pushButton_3,
-        #   QtCore.SIGNAL("clicked()"),
-        #   self.save_config)
-
         self.storj_engine = StorjEngine()
 
-        # open login window
+        # Open login window
         QtCore.QObject.connect(
             self.ui_initial_window.login_bt,
             QtCore.SIGNAL('clicked()'),
             self.open_login_window)
 
-        # open registration window
+        # Open registration window
         QtCore.QObject.connect(
             self.ui_initial_window.register_bt,
             QtCore.SIGNAL('clicked()'),
             self.open_register_window)
-
-        # open about window
-        # QtCore.QObject.connect(
-        #   self.ui_initial_window.about_bt,
-        #   QtCore.SIGNAL("clicked()"),
-        #   self.open_about_window)
 
     def open_login_window(self):
         self.login_window = LoginUI(self)

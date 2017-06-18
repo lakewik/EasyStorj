@@ -19,20 +19,25 @@ class BucketCreateUI(QtGui.QMainWindow):
         self.bucket_create_ui = Ui_BucketCreate()
         self.bucket_create_ui.setupUi(self)
 
-        QtCore.QObject.connect(self.bucket_create_ui.create_bucket_bt, QtCore.SIGNAL('clicked()'),
-                               self.createNewBucketCreateThread)  # create bucket action
-        QtCore.QObject.connect(self.bucket_create_ui.cancel_bt, QtCore.SIGNAL('clicked()'),
-                               self.close)  # create bucket action
+        # Create bucket action
+        QtCore.QObject.connect(self.bucket_create_ui.create_bucket_bt,
+                               QtCore.SIGNAL('clicked()'),
+                               self.createNewBucketCreateThread)
+        # Delete bucket action
+        QtCore.QObject.connect(self.bucket_create_ui.cancel_bt,
+                               QtCore.SIGNAL('clicked()'),
+                               self.close)
 
-        self.connect(self, QtCore.SIGNAL('showBucketCreatingException'), self.show_bucket_creating_exception_dialog)
-        self.connect(self, QtCore.SIGNAL('showBucketCreatedSuccessfully'), self.show_bucket_crated_successfully)
-        self.connect(
-            self,
-            QtCore.SIGNAL('showBucketCreationMissingFields'),
-            lambda: QtGui.QMessageBox.about(
-                self,
-                'Warning',
-                'Please fill out all fields!'))
+        self.connect(self, QtCore.SIGNAL('showBucketCreatingException'),
+                     self.show_bucket_creating_exception_dialog)
+        self.connect(self, QtCore.SIGNAL('showBucketCreatedSuccessfully'),
+                     self.show_bucket_crated_successfully)
+        self.connect(self,
+                     QtCore.SIGNAL('showBucketCreationMissingFields'),
+                     lambda: QtGui.QMessageBox.about(
+                         self,
+                         'Warning',
+                         'Please fill out all fields!'))
 
         self.storj_engine = StorjEngine()  # init StorjEngine
 
@@ -51,11 +56,12 @@ class BucketCreateUI(QtGui.QMainWindow):
         msgBox.exec_()
 
     def createNewBucketCreateThread(self):
-        bucket_create_thread = threading.Thread(target=self.create_bucket, args=())
+        bucket_create_thread = threading.Thread(target=self.create_bucket,
+                                                args=())
         bucket_create_thread.start()
 
     def create_bucket(self):
-        self.bucket_name = self.bucket_create_ui.bucket_name.text()
+        self.bucket_name = str(self.bucket_create_ui.bucket_name.text())
         self.bucket_storage = self.bucket_create_ui.bucket_storage_size.text()
         self.bucket_transfer = self.bucket_create_ui.bucket_transfer.text()
 
@@ -66,22 +72,24 @@ class BucketCreateUI(QtGui.QMainWindow):
 
             try:
                 self.storj_engine.storj_client.bucket_create(
-                    str(self.bucket_name),
+                    self.bucket_name,
                     int(self.bucket_storage),
                     int(self.bucket_transfer))
                 bucket_created = True
             except sjexc.StorjBridgeApiError as e:
+                self.__logger.error('Bucket not created')
+                self.__logger.error(e)
                 bucket_created = False
                 self.emit(QtCore.SIGNAL('showBucketCreatingException'), str(e))
 
         else:
             self.emit(QtCore.SIGNAL('showBucketCreationMissingFields'))
+            self.__logger.warning('Bucket not created')
             bucket_created = False
 
         if bucket_created:
+            self.__logger.info('Bucket created')
             self.emit(
                 QtCore.SIGNAL('showBucketCreatedSuccessfully'),
-                str(self.bucket_name))  # show dialog - bucket created successfully
+                self.bucket_name)  # Show dialog - Bucket created successfully
             self.close()
-
-        self.__logger.debug(1)
