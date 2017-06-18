@@ -1,11 +1,10 @@
 import re
 import os
 import platform
-from . import pingparser
+import pingparser
 from os.path import expanduser
 import tempfile
 import errno
-
 
 class Tools:
     def encrypt_file_name(self):
@@ -74,3 +73,22 @@ class Tools:
     def get_home_user_directory(self):
         home = expanduser("~")
         return str(home)
+
+    def count_directory_size(self, directory, include_subdirs):
+
+        if include_subdirs:
+            start_path = str(directory)
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(start_path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+        else:
+            total_size = sum(os.path.getsize(f) for f in os.listdir(str(directory)) if os.path.isfile(f))
+
+        return total_size
+
+    def count_files_in_dir(self, directory, include_subdirs=False):
+        files_count = len([name for name in os.listdir(str(directory)) if os.path.isfile(os.path.join(str(directory), name))])
+        return files_count
+
