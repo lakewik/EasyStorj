@@ -14,11 +14,17 @@ The layout has been designed by @Davasny (https://github.com/Davasny)
 ## Honor supporters 
 **[You can support me by donating CryptoCurrency](#support)**
  - Will Topping
+ - Meije Sibbel
+ 
+## Download
+- Portable binary package for Linux: https://github.com/lakewik/storj-gui-client/releases/download/0.1.5/storj-gui-linux-0.1.5
+- Portable binary package for Windows: https://github.com/lakewik/storj-gui-client/releases/download/0.1.5/storj-gui-0.1.5.exe
+
 
 ## How to run (Alpha version)
 
 ```
-$ git clone https://github.com/lakewik/storj-gui-client.git
+$ git clone https://github.com/lakewik/storj-gui-client.git -b develop
 $ cd storj-gui-client
 ```
 
@@ -37,12 +43,13 @@ $ cd storj-gui-client
 - [X] Improve uploader
 - [X] Improve downloader
 
-## To do:
+## To do (planned features):
 - [ ] Drag and drop feature
 - [ ] Limits for maximum connection speed
 - [ ] Multiple file uploader and downloader
 - [ ] Geolocation for nodes in mirror listing
 - [ ] Automatic file synchronization
+- [ ] Account and billing manager
 
 
 
@@ -55,7 +62,7 @@ I will be grateful for donations:
 
 - BTC and SJCX: `1LWMe1AuQSNQq6zUEtC8vMaV3LhS8r1uFw`
 - Ethereum (ETH): `0x58056c2c0e9adafe15fe20337bbcdcc1bb5dd4b5`
-- Monero (XMR): `42VP4x4CRtwf9PXD3J73ntQHb2f2BYHVR75ovjeSNWzRF4X34mdf367VWD74kD4zDT3ReY6t5uQxAC9FWCPnMQjpQ3xFsV9`.  
+- Monero {For very anonymous donations} (XMR): `42VP4x4CRtwf9PXD3J73ntQHb2f2BYHVR75ovjeSNWzRF4X34mdf367VWD74kD4zDT3ReY6t5uQxAC9FWCPnMQjpQ3xFsV9`.  
 
 *Thank you very much for your support!*
 
