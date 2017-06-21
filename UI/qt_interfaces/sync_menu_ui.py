@@ -164,13 +164,13 @@ class Ui_SyncMenu(object):
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, brush)
         SyncMenu.setPalette(palette)
         self.label_3 = QtGui.QLabel(SyncMenu)
-        self.label_3.setGeometry(QtCore.QRect(50, 10, 141, 61))
+        self.label_3.setGeometry(QtCore.QRect(60, 10, 151, 61))
         self.label_3.setText(_fromUtf8(""))
         self.label_3.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/storj-logo-horizontal.png")))
         self.label_3.setScaledContents(True)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.file_name = QtGui.QLabel(SyncMenu)
-        self.file_name.setGeometry(QtCore.QRect(240, 10, 371, 61))
+        self.file_name.setGeometry(QtCore.QRect(250, 10, 401, 41))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -391,19 +391,19 @@ class Ui_SyncMenu(object):
 "}\n"
 ""))
         self.file_sync_in_progress_count.setObjectName(_fromUtf8("file_sync_in_progress_count"))
-        self.summaty_synced_files_size = QtGui.QLabel(SyncMenu)
-        self.summaty_synced_files_size.setGeometry(QtCore.QRect(360, 330, 151, 21))
+        self.summary_synced_files_size = QtGui.QLabel(SyncMenu)
+        self.summary_synced_files_size.setGeometry(QtCore.QRect(360, 330, 151, 21))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
         font.setBold(True)
         font.setWeight(75)
-        self.summaty_synced_files_size.setFont(font)
-        self.summaty_synced_files_size.setStyleSheet(_fromUtf8("QLabel{\n"
+        self.summary_synced_files_size.setFont(font)
+        self.summary_synced_files_size.setStyleSheet(_fromUtf8("QLabel{\n"
 "color: #2683ff;\n"
 "}\n"
 ""))
-        self.summaty_synced_files_size.setObjectName(_fromUtf8("summaty_synced_files_size"))
+        self.summary_synced_files_size.setObjectName(_fromUtf8("summary_synced_files_size"))
         self.current_sync_status = QtGui.QLabel(SyncMenu)
         self.current_sync_status.setGeometry(QtCore.QRect(370, 370, 151, 21))
         font = QtGui.QFont()
@@ -417,12 +417,38 @@ class Ui_SyncMenu(object):
 "}\n"
 ""))
         self.current_sync_status.setObjectName(_fromUtf8("current_sync_status"))
+        self.file_name_8 = QtGui.QLabel(SyncMenu)
+        self.file_name_8.setGeometry(QtCore.QRect(280, 40, 131, 41))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.file_name_8.setFont(font)
+        self.file_name_8.setStyleSheet(_fromUtf8("QLabel{\n"
+"color: #2683ff;\n"
+"}\n"
+""))
+        self.file_name_8.setObjectName(_fromUtf8("file_name_8"))
+        self.sync_status = QtGui.QLabel(SyncMenu)
+        self.sync_status.setGeometry(QtCore.QRect(420, 40, 111, 41))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.sync_status.setFont(font)
+        self.sync_status.setStyleSheet(_fromUtf8("QLabel{\n"
+"color: #2683ff;\n"
+"}\n"
+""))
+        self.sync_status.setObjectName(_fromUtf8("sync_status"))
 
         self.retranslateUi(SyncMenu)
         QtCore.QMetaObject.connectSlotsByName(SyncMenu)
 
     def retranslateUi(self, SyncMenu):
-        SyncMenu.setWindowTitle(_translate("SyncMenu", "Dialog", None))
+        SyncMenu.setWindowTitle(_translate("SyncMenu", "File synchronization menu", None))
         self.file_name.setText(_translate("SyncMenu", "<html><head/><body><p><span style=\" font-size:18pt;\">Synchronization menu</span></p></body></html>", None))
         self.sync_settings_bt.setText(_translate("SyncMenu", "SYNCHRONIZATION SETTINGS", None))
         self.stop_sync_bt.setText(_translate("SyncMenu", "STOP SYNCHRONIZATION", None))
@@ -437,7 +463,9 @@ class Ui_SyncMenu(object):
         self.successfully_synced_files_count.setText(_translate("SyncMenu", "<html><head/><body><p><span style=\" font-size:14pt;\">0</span></p></body></html>", None))
         self.files_to_sync.setText(_translate("SyncMenu", "<html><head/><body><p><span style=\" font-size:14pt;\">0</span></p></body></html>", None))
         self.file_sync_in_progress_count.setText(_translate("SyncMenu", "<html><head/><body><p><span style=\" font-size:14pt;\">0</span></p></body></html>", None))
-        self.summaty_synced_files_size.setText(_translate("SyncMenu", "<html><head/><body><p><span style=\" font-size:14pt;\">0</span></p></body></html>", None))
+        self.summary_synced_files_size.setText(_translate("SyncMenu", "<html><head/><body><p><span style=\" font-size:14pt;\">0</span></p></body></html>", None))
         self.current_sync_status.setText(_translate("SyncMenu", "<html><head/><body><p><span style=\" font-size:14pt;\">0</span></p></body></html>", None))
+        self.file_name_8.setText(_translate("SyncMenu", "<html><head/><body><p><span style=\" font-size:14pt;\">Sync status:</span></p></body></html>", None))
+        self.sync_status.setText(_translate("SyncMenu", "<html><head/><body><p><span style=\" font-size:14pt; color:#ff0000;\">DISABLED</span></p></body></html>", None))
 
 import resources_rc
