@@ -1,6 +1,6 @@
 import xml.etree.cElementTree as ET
 from log_manager import logger
-from BeautifulSoup import BeautifulStoneSoup as Soup
+from bs4 import BeautifulStoneSoup as Soup
 from UI.resources.constants import DEFAULT_MAX_SHARD_SIZE, DEFAULT_SHARD_SIZE, DEFAULT_MAX_BRIDGE_REQUEST_TIMEOUT
 
 CONFIG_FILE = "storj_client_config.xml"

@@ -1,4 +1,4 @@
-BeautifulSoup
+beautifulsoup4
 click==6.7
 colorama==0.3.8
 configparser
