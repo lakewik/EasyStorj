@@ -18,7 +18,7 @@ The layout has been designed by @Davasny (https://github.com/Davasny)
  
 ## Download
 - Portable binary package for Linux: https://github.com/lakewik/storj-gui-client/releases/download/0.1.5/storj-gui-linux-0.1.5
-- Portable binary package for Windows: https://github.com/lakewik/storj-gui-client/releases/download/0.1.5/storj-gui-0.1.5.exe
+- Portable binary package for Windows: https://github.com/lakewik/storj-gui-client/releases/download/0.1.7/storj-gui-0.1.7.exe
 
 
 ## How to run (Alpha version)
@@ -44,13 +44,14 @@ $ cd storj-gui-client
 - [X] Improve downloader
 
 ## To do (planned features):
+- [ ] Working as a background service
+- [ ] Tray support and hints
 - [ ] Drag and drop feature
 - [ ] Limits for maximum connection speed
 - [ ] Multiple file uploader and downloader
 - [ ] Geolocation for nodes in mirror listing
 - [ ] Automatic file synchronization
 - [ ] Account and billing manager
-
 
 
 ## Support
