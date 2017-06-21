@@ -1,7 +1,8 @@
 import xml.etree.cElementTree as ET
 from log_manager import logger
 from bs4 import BeautifulStoneSoup as Soup
-from UI.resources.constants import DEFAULT_SHARD_SIZE, DEFAULT_MAX_BRIDGE_REQUEST_TIMEOUT
+from UI.resources.constants import DEFAULT_SHARD_SIZE, \
+    DEFAULT_MAX_BRIDGE_REQUEST_TIMEOUT
 
 CONFIG_FILE = 'storj_client_config.xml'
 
@@ -19,7 +20,6 @@ DEFAULT_CONFIG_XML_CONTENT = '<configuration><client>' \
                              '</client></configuration>'
 
 
-# Configuration backend section
 class Configuration:
 
     def __init__(self, sameFileNamePrompt=None, sameFileHashPrompt=None,
@@ -117,24 +117,29 @@ class Configuration:
 
         tree = ET.parse(CONFIG_FILE)
 
-        root = ET.fromstring(XML_conf_data)
-        doc = ET.SubElement(root, 'client')
-
         if settings_ui.max_shard_size_enabled_checkBox.isChecked():
             custom_max_shard_size_enabled_checkbox = '1'
         else:
             custom_max_shard_size_enabled_checkbox = '0'
 
-        tree.find('.//custom_max_shard_size_enabled').text = str(custom_max_shard_size_enabled_checkbox)
-        tree.find('.//max_shard_size').text = str(settings_ui.max_shard_size.text())
-        tree.find('.//max_connections_onetime').text = str(settings_ui.connections_onetime.text())
-        tree.find('.//shard_size_unit').text = str(settings_ui.shard_size_unit.currentIndex())
-        tree.find('.//max_download_bandwidth').text = str(settings_ui.max_download_bandwidth.text())
-        tree.find('.//max_upload_bandwidth').text = str(settings_ui.max_upload_bandwidth.text())
-        tree.find('.//default_file_encryption_algorithm').text = str(
-                                  settings_ui.default_crypto_algorithm.currentIndex())
-        tree.find('.//bridge_request_timeout').text = str(settings_ui.bridge_request_timeout.text())
-        tree.find('.//crypto_keys_location').text = str(settings_ui.crypto_keys_location.text())
+        tree.find('.//custom_max_shard_size_enabled').text = \
+            str(custom_max_shard_size_enabled_checkbox)
+        tree.find('.//max_shard_size').text = \
+            str(settings_ui.max_shard_size.text())
+        tree.find('.//max_connections_onetime').text = \
+            str(settings_ui.connections_onetime.text())
+        tree.find('.//shard_size_unit').text = \
+            str(settings_ui.shard_size_unit.currentIndex())
+        tree.find('.//max_download_bandwidth').text = \
+            str(settings_ui.max_download_bandwidth.text())
+        tree.find('.//max_upload_bandwidth').text = \
+            str(settings_ui.max_upload_bandwidth.text())
+        tree.find('.//default_file_encryption_algorithm').text = \
+            str(settings_ui.default_crypto_algorithm.currentIndex())
+        tree.find('.//bridge_request_timeout').text = \
+            str(settings_ui.bridge_request_timeout.text())
+        tree.find('.//crypto_keys_location').text = \
+            str(settings_ui.crypto_keys_location.text())
 
         tree.write(CONFIG_FILE)
 
@@ -143,11 +148,9 @@ class Configuration:
 
     def max_shard_size(self):
         et = None
-
         max_shard_size = DEFAULT_SHARD_SIZE
 
         try:
-
             et = ET.parse(CONFIG_FILE)
             shard_size_unit = 2
             max_shard_size_sterile = None
@@ -159,20 +162,20 @@ class Configuration:
                         shard_size_unit = int(tags3.text)
 
                     if shard_size_unit == 0:  # KB:
-                        max_shard_size = (max_shard_size_sterile * 2048)
+                        max_shard_size = (max_shard_size_sterile * 2 * 1024)
                     elif shard_size_unit == 1:  # MB:
-                        max_shard_size = (max_shard_size_sterile * 1024 * 2048)
+                        max_shard_size = (max_shard_size_sterile * 2 * 1024 ** 2)
                     elif shard_size_unit == 2:  # GB:
-                        max_shard_size = (max_shard_size_sterile * 1024 * 1024 * 2048)
+                        max_shard_size = (max_shard_size_sterile * 2 * 1024 ** 3)
                     elif shard_size_unit == 3:  # TB:
-                        max_shard_size = (max_shard_size_sterile * 1024 * 1024 * 1024 * 2048)
+                        max_shard_size = (max_shard_size_sterile * 2 * 1024 ** 4)
                 else:
                     max_shard_size = DEFAULT_SHARD_SIZE
 
         except Exception as e:
             logger.error('Unspecified XML parse error', str(e))
 
-        return (max_shard_size/2)
+        return max_shard_size / 2
 
     def get_max_bridge_request_timeout(self):
         max_bridge_request_timeout = DEFAULT_MAX_BRIDGE_REQUEST_TIMEOUT
@@ -214,7 +217,6 @@ class Configuration:
         return bridge_api_url
 
     def save_custom_temp_path(self, custom_path):
-
         with open(CONFIG_FILE, 'r') as conf_file:
             XML_conf_data = conf_file.read().replace('\n', '')
         soup = Soup(XML_conf_data)
@@ -224,7 +226,6 @@ class Configuration:
         return True
 
     def save_bridge_api_url(self, bridge_api_url):
-
         with open(CONFIG_FILE, 'r') as conf_file:
             XML_conf_data = conf_file.read().replace('\n', '')
 
