@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from functools import partial
 from sys import platform
 import os
 
@@ -42,6 +42,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_upload = Ui_SingleFileUpload()
         self.ui_single_file_upload.setupUi(self)
+        self.setAcceptDrops(True)
         # open bucket manager
         QtCore.QObject.connect(
             self.ui_single_file_upload.start_upload_bt,
@@ -63,6 +64,13 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.ui_single_file_upload.cancel_bt,
             QtCore.SIGNAL('clicked()'),
             self.handle_cancel_action)
+
+        self.ui_single_file_upload.files_queue_table_widget.setContextMenuPolicy(
+            QtCore.Qt.CustomContextMenu)
+
+        self.ui_single_file_upload.files_queue_table_widget. \
+            customContextMenuRequested.connect(
+            partial(self.display_files_table_context_menu))
 
         self.already_used_farmers_nodes = []
 
@@ -96,6 +104,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.shards_already_uploaded = 0
         self.uploaded_shards_count = 0
         self.upload_queue_progressbar_list = []
+        self.files_queue_progressbar_list = []
 
         self.connect(self, QtCore.SIGNAL('addRowToUploadQueueTable'), self.add_row_upload_queue_table)
 
@@ -116,6 +125,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('setCurrentActiveConnections'), self.set_current_active_connections)
         self.connect(self, QtCore.SIGNAL('setShardSize'), self.set_shard_size)
         self.connect(self, QtCore.SIGNAL('createShardUploadThread'), self.createNewShardUploadThread)
+        self.connect(self, QtCore.SIGNAL('droppedFileToTable'), self.append_dropped_files_to_table)
         # self.connect(self, QtCore.SIGNAL('handleCancelAction'), self.ha)
 
         # resolve buckets and put to buckets combobox
@@ -146,6 +156,41 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.current_row = 0
 
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls:
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasUrls:
+            event.setDropAction(QtCore.Qt.CopyAction)
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        if event.mimeData().hasUrls:
+            event.setDropAction(QtCore.Qt.CopyAction)
+            event.accept()
+            paths = []
+            for path in event.mimeData().urls():
+                paths.append(str(path.toLocalFile()))
+            self.emit(QtCore.SIGNAL("droppedFileToTable"), paths)
+        else:
+            event.ignore()
+
+    def resizeEvent(self, event):
+        current_window_width = self.frameGeometry().width()
+        if current_window_width < 980 and self.is_files_queue_table_visible:
+            #self.is_files_queue_table_visible = False
+            #self.ui_single_file_upload.files_list_view_bt.setPixmap(QtGui.QPixmap(":/resources/rarrow.png"))
+            print "Closed"
+        elif current_window_width > 980 and not self.is_files_queue_table_visible:
+            #self.is_files_queue_table_visible = True
+            #self.ui_single_file_upload.files_list_view_bt.setPixmap(QtGui.QPixmap(":/resources/larrow.jpg"))
+            print "Opened"
+
     def keyPressEvent(self, e):
         # copy upload queue table content to clipboard #
         if (e.modifiers() & QtCore.Qt.ControlModifier):
@@ -162,6 +207,54 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                             s += "\t"
                     s = s[:-1] + "\n"  # eliminate last '\t'
                 self.clip.setText(s)
+
+    def append_dropped_files_to_table(self, paths):
+        row_data = {}
+        for url in paths:
+            if os.path.exists(url):
+                row_data["file_path"] = str(url)
+                self.add_row_files_queue_table(row_data)
+                #print url
+        return True
+
+
+    def display_files_table_context_menu(self, position):
+        tablemodel = self.ui_single_file_upload.files_queue_table_widget.model()
+        rows = sorted(set(index.row() for index in
+                          self.ui_single_file_upload.files_queue_table_widget.
+                          selectedIndexes()))
+        i = 0
+        selected_row = 0
+        any_row_selected = False
+        for row in rows:
+            any_row_selected = True
+            filename_index = tablemodel.index(row, 0)  # get shard Index
+            # We suppose data are strings
+            self.current_selected_file_name = str(tablemodel.data(
+                filename_index).toString())
+            selected_row = row
+            i += 1
+
+        if any_row_selected:
+            menu = QtGui.QMenu()
+            fileDeleteFromTableAction = menu.addAction('Delete file from table')
+            action = menu.exec_(self.ui_single_file_upload.files_queue_table_widget.mapToGlobal(position))
+
+            if action == fileDeleteFromTableAction:
+                # ask user and delete if sure
+                msgBox = QtGui.QMessageBox(
+                    QtGui.QMessageBox.Question,
+                    'Question',
+                    'Are you sure that you want to remove file '
+                    '"%s" from upload queue?' %
+                    str(self.current_selected_file_name),
+                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+
+                result = msgBox.exec_()
+
+                if result == QtGui.QMessageBox.Yes:
+                    self.ui_single_file_upload.files_queue_table_widget.removeRow(int(selected_row))
+                    print "Delete action"
 
     def shardUploadInitThread(self, shard, chapters, frame, file_name):
         shard_upload_init_thread = threading.Thread(
@@ -190,11 +283,6 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.animation.start()
 
 
-    def hide_files_queue(self):
-
-        return True
-
-
     def prepare_files_queue_table(self):
         self.files_queue_table_header = ['File name', 'Path', 'Size', 'Progress']
         self.ui_single_file_upload.files_queue_table_widget.setColumnCount(4)
@@ -218,6 +306,30 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                 self.close()
         else:
             self.close()
+
+
+    def add_row_files_queue_table(self, row_data):
+
+
+        self.files_queue_progressbar_list.append(QtGui.QProgressBar())
+
+        self.files_queue_table_row_count = self.ui_single_file_upload.files_queue_table_widget.rowCount()
+
+        self.ui_single_file_upload.files_queue_table_widget.setRowCount(
+            self.files_queue_table_row_count + 1)
+
+        self.ui_single_file_upload.files_queue_table_widget.setItem(
+            self.files_queue_table_row_count, 0, QtGui.QTableWidgetItem(os.path.split(str(row_data['file_path']))[1]))
+        self.ui_single_file_upload.files_queue_table_widget.setItem(
+            self.files_queue_table_row_count, 1, QtGui.QTableWidgetItem(row_data['file_path']))
+
+        self.ui_single_file_upload.files_queue_table_widget.setItem(
+            self.files_queue_table_row_count, 2, QtGui.QTableWidgetItem(str(self.tools.human_size(os.path.getsize(str(row_data['file_path']))))))
+
+        self.ui_single_file_upload.files_queue_table_widget.setCellWidget(
+            self.files_queue_table_row_count, 3, self.files_queue_progressbar_list[self.files_queue_table_row_count])
+
+
 
     def show_upload_finished_message(self):
         self.is_upload_active = False

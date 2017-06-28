@@ -4,10 +4,11 @@
 import time
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
-import threading
+import threading, csv
 
 HANDLE_ON_MOVE_EVENT = True
 HANDLE_ON_DELETE_EVENT = True
+SYNC_DIRECTORIES_FILE = "storj_sync_dirs.csv"
 
 class StorjFileSynchronization():
 
@@ -56,6 +57,9 @@ class FileChangesHandler(PatternMatchingEventHandler):
         self.process(event)
 
 class SyncObserverWorker():
+    def __init__(self):
+        self.is_sync_active = False
+
     def start_observing_thread(self):
         observing_main_thread = threading.Thread(
             target=self.start_observing)
@@ -63,21 +67,34 @@ class SyncObserverWorker():
 
     def start_observing(self):
         paths_to_observe = []
+
+        with open(unicode(SYNC_DIRECTORIES_FILE), 'rb') as stream:
+            for rowdata in csv.reader(stream):
+                for column, data in enumerate(rowdata):
+                    if column == 0:
+                        paths_to_observe.append(str(data.decode('utf8')))
+                        print data.decode('utf8')
+
         paths_to_observe.append("/home/lakewik/storjsync")
         self.observer = Observer()
         for path in paths_to_observe:
             self.observer.schedule(FileChangesHandler(), path=str(path))
         self.observer.start()
         print "Synchronization directories observing started!"
+        self.is_sync_active = True
 
     def stop_observers(self):
         self.observer.stop()
+        self.is_sync_active = False
+        print "Synchronization directories observing stopped!"
         return 1
-        #try:
-         #   while True:
-          #      time.sleep(1)
-        #except KeyboardInterrupt:
-         #   observer.stop()
 
-        #observer.join()
+    def restart_observers(self):
+        self.stop_observers()
+        self.start_observing_thread()
+        return True
+
+    def is_sync_active(self):
+        return self.is_sync_active
+
 

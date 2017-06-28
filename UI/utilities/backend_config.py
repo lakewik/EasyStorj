@@ -1,7 +1,9 @@
 import xml.etree.cElementTree as ET
 from log_manager import logger
-from BeautifulSoup import BeautifulStoneSoup as Soup
-from UI.resources.constants import DEFAULT_MAX_SHARD_SIZE, DEFAULT_SHARD_SIZE, DEFAULT_MAX_BRIDGE_REQUEST_TIMEOUT
+
+from bs4 import BeautifulStoneSoup as Soup
+from UI.resources.constants import DEFAULT_SHARD_SIZE, \
+    DEFAULT_MAX_BRIDGE_REQUEST_TIMEOUT
 
 CONFIG_FILE = "storj_client_config.xml"
 
@@ -17,6 +19,7 @@ DEFAULT_CONFIG_XML_CONTENT = '<configuration><client>' \
                              '<crypto_keys_location>None</crypto_keys_location>' \
                              '<bridge_api_url url="https://api.storj.io" />' \
                              '</client></configuration>'
+
 
 
 # Configuration backend section
@@ -54,7 +57,9 @@ class Configuration:
                     self.maxDownloadChunkSize = 1024
 
     def create_genesis_configuration(self):
-        initial_config_file = open(CONFIG_FILE, "w")
+
+        initial_config_file = open(CONFIG_FILE, 'w')
+
         initial_config_file.write(DEFAULT_CONFIG_XML_CONTENT)
         initial_config_file.close()
 
@@ -108,8 +113,9 @@ class Configuration:
                     settings_ui.max_shard_size_enabled_checkBox.setChecked(False)
 
         except Exception as e:
-            logger.error("Unspecified XML parse error" + str(e))
 
+            logger.error('Unspecified XML parse error', str(e))
+  
     def save_client_configuration(self, settings_ui):
         #root = ET.Element("configuration")
         #doc = ET.SubElement(root, "client")
@@ -125,31 +131,38 @@ class Configuration:
         doc = ET.SubElement(root, "client")
 
 
-        # settings_ui = Ui_
+
+        with open(CONFIG_FILE, 'r') as conf_file:
+            XML_conf_data = conf_file.read().replace('\n', '')
+
+        tree = ET.parse(CONFIG_FILE)
+
         if settings_ui.max_shard_size_enabled_checkBox.isChecked():
             custom_max_shard_size_enabled_checkbox = '1'
         else:
             custom_max_shard_size_enabled_checkbox = '0'
 
-        #ET.SubElement(doc, "custom_max_shard_size_enabled").text = str(custom_max_shard_size_enabled_checkbox)
 
-        #a = doc.find('custom_max_shard_size_enabled')
-        #a.text = str(custom_max_shard_size_enabled_checkbox)
-        #doc.find('max_shard_size').text = str(settings_ui.max_shard_size.text())
+        tree.find('.//custom_max_shard_size_enabled').text = \
+            str(custom_max_shard_size_enabled_checkbox)
+        tree.find('.//max_shard_size').text = \
+            str(settings_ui.max_shard_size.text())
+        tree.find('.//max_connections_onetime').text = \
+            str(settings_ui.connections_onetime.text())
+        tree.find('.//shard_size_unit').text = \
+            str(settings_ui.shard_size_unit.currentIndex())
+        tree.find('.//max_download_bandwidth').text = \
+            str(settings_ui.max_download_bandwidth.text())
+        tree.find('.//max_upload_bandwidth').text = \
+            str(settings_ui.max_upload_bandwidth.text())
+        tree.find('.//default_file_encryption_algorithm').text = \
+            str(settings_ui.default_crypto_algorithm.currentIndex())
+        tree.find('.//bridge_request_timeout').text = \
+            str(settings_ui.bridge_request_timeout.text())
+        tree.find('.//crypto_keys_location').text = \
+            str(settings_ui.crypto_keys_location.text())
 
 
-        tree.find('.//custom_max_shard_size_enabled').text = str(custom_max_shard_size_enabled_checkbox)
-        tree.find('.//max_shard_size').text = str(settings_ui.max_shard_size.text())
-        tree.find('.//max_connections_onetime').text = str(settings_ui.connections_onetime.text())
-        tree.find('.//shard_size_unit').text = str(settings_ui.shard_size_unit.currentIndex())
-        tree.find('.//max_download_bandwidth').text = str(settings_ui.max_download_bandwidth.text())
-        tree.find('.//max_upload_bandwidth').text = str(settings_ui.max_upload_bandwidth.text())
-        tree.find('.//default_file_encryption_algorithm').text = str(
-                                  settings_ui.default_crypto_algorithm.currentIndex())
-        tree.find('.//bridge_request_timeout').text = str(settings_ui.bridge_request_timeout.text())
-        tree.find('.//crypto_keys_location').text = str(settings_ui.crypto_keys_location.text())
-
-        #tree = ET.ElementTree(root)
         tree.write(CONFIG_FILE)
 
         #self.save_custom_temp_path(23)
@@ -176,18 +189,21 @@ class Configuration:
                         shard_size_unit = int(tags3.text)
 
                     if shard_size_unit == 0:  # KB:
-                        max_shard_size = (max_shard_size_sterile * 2048)
+                        max_shard_size = (max_shard_size_sterile * 2 * 1024)
                     elif shard_size_unit == 1:  # MB:
-                        max_shard_size = (max_shard_size_sterile * 1024 * 2048)
+                        max_shard_size = (max_shard_size_sterile * 2 * 1024 ** 2)
                     elif shard_size_unit == 2:  # GB:
-                        max_shard_size = (max_shard_size_sterile * 1024 * 1024 * 2048)
+                        max_shard_size = (max_shard_size_sterile * 2 * 1024 ** 3)
                     elif shard_size_unit == 3:  # TB:
-                        max_shard_size = (max_shard_size_sterile * 1024 * 1024 * 1024 * 2048)
+                        max_shard_size = (max_shard_size_sterile * 2 * 1024 ** 4)
+
                 else:
                     max_shard_size = DEFAULT_SHARD_SIZE
 
         except Exception as e:
-            logger.error("Unspecified XML parse error" + str(e))
+
+            logger.error('Unspecified XML parse error', str(e))
+
 
         return (max_shard_size/2)
 
@@ -198,11 +214,12 @@ class Configuration:
 
         try:
             et = ET.parse(CONFIG_FILE)
-            for tags in et.iter(str("bridge_request_timeout")):
+
+            for tags in et.iter(str('bridge_request_timeout')):
                 max_bridge_request_timeout = int(tags.text)
 
         except Exception as e:
-            logger.error("Unspecified XML parse error" + str(e))
+            logger.error('Unspecified XML parse error', str(e))
 
         return max_bridge_request_timeout
 
@@ -233,6 +250,22 @@ class Configuration:
 
     def save_custom_temp_path(self, custom_path):
 
+
+        bridge_api_url = ''
+        try:
+            et = ET.parse(CONFIG_FILE)
+            bridge_api_url = ''
+            for tags in et.iter(str('bridge_api_url')):
+                bridge_api_url = str(tags.get('url'))
+        except BaseException:
+            logger.error('Error reading bridge api url. Using defaults')
+
+        if bridge_api_url == '':
+            bridge_api_url = 'https://api.storj.io/'
+
+        return bridge_api_url
+
+    def save_custom_temp_path(self, custom_path):
         with open(CONFIG_FILE, 'r') as conf_file:
             XML_conf_data = conf_file.read().replace('\n', '')
         soup = Soup(XML_conf_data)
@@ -251,14 +284,7 @@ class Configuration:
         b_api_url = client.find('bridge_api_url')
         b_api_url.set('url', str(bridge_api_url))
 
-        #print ET.tostring(root)
 
         tree = ET.ElementTree(root)
         tree.write(CONFIG_FILE)
-
-
-        #soup = Soup(XML_conf_data)
-        #bridge_api_url_tag = soup.configuration.client.bridge_api_url
-        #bridge_api_url_tag['url'] = str(bridge_api_url)
-
         return True

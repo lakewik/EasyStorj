@@ -101,7 +101,7 @@ class Ui_MainMenu(object):
 "}"))
         self.file_delete_bt.setObjectName(_fromUtf8("file_delete_bt"))
         self.label_4 = QtGui.QLabel(MainMenu)
-        self.label_4.setGeometry(QtCore.QRect(470, 20, 101, 16))
+        self.label_4.setGeometry(QtCore.QRect(430, 20, 141, 20))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -163,7 +163,7 @@ class Ui_MainMenu(object):
 "}"))
         self.edit_bucket_bt.setObjectName(_fromUtf8("edit_bucket_bt"))
         self.account_label = QtGui.QLabel(MainMenu)
-        self.account_label.setGeometry(QtCore.QRect(470, 40, 301, 41))
+        self.account_label.setGeometry(QtCore.QRect(450, 40, 321, 41))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -206,7 +206,7 @@ class Ui_MainMenu(object):
         font.setBold(True)
         font.setWeight(75)
         self.new_file_upload_bt.setFont(font)
-        self.new_file_upload_bt.setStyleSheet(_fromUtf8("QPushButton#pushButton:hover{\n"
+        self.new_file_upload_bt.setStyleSheet(_fromUtf8("QPushButton:hover{\n"
 "  background-color: #83bf20;\n"
 "  border-color: #83bf20;\n"
 "}\n"
@@ -248,6 +248,18 @@ class Ui_MainMenu(object):
         self.crypto_keys_manager_bt.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/keys.png")))
         self.crypto_keys_manager_bt.setScaledContents(True)
         self.crypto_keys_manager_bt.setObjectName(_fromUtf8("crypto_keys_manager_bt"))
+        self.sync_menu_bt = QtGui.QLabel(MainMenu)
+        self.sync_menu_bt.setGeometry(QtCore.QRect(660, 10, 31, 31))
+        self.sync_menu_bt.setText(_fromUtf8(""))
+        self.sync_menu_bt.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/refresh.png")))
+        self.sync_menu_bt.setScaledContents(True)
+        self.sync_menu_bt.setObjectName(_fromUtf8("sync_menu_bt"))
+        self.account_dash_bt = QtGui.QLabel(MainMenu)
+        self.account_dash_bt.setGeometry(QtCore.QRect(620, 10, 31, 31))
+        self.account_dash_bt.setText(_fromUtf8(""))
+        self.account_dash_bt.setPixmap(QtGui.QPixmap(_fromUtf8(":/resources/account.png")))
+        self.account_dash_bt.setScaledContents(True)
+        self.account_dash_bt.setObjectName(_fromUtf8("account_dash_bt"))
 
         self.retranslateUi(MainMenu)
         QtCore.QMetaObject.connectSlotsByName(MainMenu)
