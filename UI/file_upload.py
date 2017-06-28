@@ -104,6 +104,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.shards_already_uploaded = 0
         self.uploaded_shards_count = 0
         self.upload_queue_progressbar_list = []
+        self.files_queue_progressbar_list = []
 
         self.connect(self, QtCore.SIGNAL('addRowToUploadQueueTable'), self.add_row_upload_queue_table)
 
@@ -213,7 +214,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             if os.path.exists(url):
                 row_data["file_path"] = str(url)
                 self.add_row_files_queue_table(row_data)
-                print url
+                #print url
         return True
 
 
@@ -309,6 +310,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
     def add_row_files_queue_table(self, row_data):
 
+
+        self.files_queue_progressbar_list.append(QtGui.QProgressBar())
+
         self.files_queue_table_row_count = self.ui_single_file_upload.files_queue_table_widget.rowCount()
 
         self.ui_single_file_upload.files_queue_table_widget.setRowCount(
@@ -318,9 +322,12 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.files_queue_table_row_count, 0, QtGui.QTableWidgetItem(os.path.split(str(row_data['file_path']))[1]))
         self.ui_single_file_upload.files_queue_table_widget.setItem(
             self.files_queue_table_row_count, 1, QtGui.QTableWidgetItem(row_data['file_path']))
-     #   self.ui_single_file_upload.files_queue_table_widget.setItem(
-      #      self.upload_queue_table_row_count, 2, QtGui.QTableWidgetItem(
-       #         '%s:%d' % (row_data['farmer_address'], row_data['farmer_port'])))
+
+        self.ui_single_file_upload.files_queue_table_widget.setItem(
+            self.files_queue_table_row_count, 2, QtGui.QTableWidgetItem(str(self.tools.human_size(os.path.getsize(str(row_data['file_path']))))))
+
+        self.ui_single_file_upload.files_queue_table_widget.setCellWidget(
+            self.files_queue_table_row_count, 3, self.files_queue_progressbar_list[self.files_queue_table_row_count])
 
 
 
