@@ -43,6 +43,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload = Ui_SingleFileUpload()
         self.ui_single_file_upload.setupUi(self)
         self.setAcceptDrops(True)
+        self.ui_single_file_upload.file_path.setDragEnabled(True)
+        self.ui_single_file_upload.file_path.setAcceptDrops(True)
+        self.ui_single_file_upload.file_path.installEventFilter(self)
         # open bucket manager
         QtCore.QObject.connect(
             self.ui_single_file_upload.start_upload_bt,
@@ -64,6 +67,13 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.ui_single_file_upload.cancel_bt,
             QtCore.SIGNAL('clicked()'),
             self.handle_cancel_action)
+
+        QtCore.QObject.connect(
+            self.ui_single_file_upload.add_file_to_table_bt,
+            QtCore.SIGNAL('clicked()'),
+            self.insert_selected_to_files_queue_table)
+
+
 
         self.ui_single_file_upload.files_queue_table_widget.setContextMenuPolicy(
             QtCore.Qt.CustomContextMenu)
@@ -106,6 +116,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.upload_queue_progressbar_list = []
         self.files_queue_progressbar_list = []
 
+
+
         self.connect(self, QtCore.SIGNAL('addRowToUploadQueueTable'), self.add_row_upload_queue_table)
 
         self.connect(self, QtCore.SIGNAL('incrementShardsProgressCounters'), self.increment_shards_progress_counters)
@@ -141,6 +153,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         # self.initialize_shard_queue_table(file_pointers)
 
+        self.ui_single_file_upload.file_path.textChanged.connect(self.normalize_file_path)
+        #self.ui_single_file_upload.file_path.mouseReleaseEvent.connect(self.normalize_file_path)
+
         self.shard_upload_percent_list = []
 
         self.ui_single_file_upload.overall_progress.setValue(0)
@@ -155,6 +170,38 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.ui_single_file_upload.shard_queue_table_widget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
 
         self.current_row = 0
+
+    def insert_selected_to_files_queue_table(self):
+        row_data = {}
+        row_data["file_path"] = str(self.ui_single_file_upload.file_path.text())
+        if row_data["file_path"] != "":
+            self.add_row_files_queue_table(row_data)
+
+        return True
+
+    def eventFilter(self, object, event):
+        if object is self.ui_single_file_upload.file_path:
+            if event.type() == QtCore.QEvent.DragEnter:
+                if event.mimeData().hasUrls():
+                    event.accept()  # must accept the dragEnterEvent or else the dropEvent can't occur !!!
+                    print "accept"
+                else:
+                    event.ignore()
+                    print "ignore"
+            if event.type() == QtCore.QEvent.Drop:
+                if event.mimeData().hasUrls():  # if file or link is dropped
+                    urlcount = len(event.mimeData().urls())  # count number of drops
+                    url = event.mimeData().urls()[0]  # get first url
+                    object.setText(url.toString())  # assign first url to editline
+                    # event.accept()  # doesnt appear to be needed
+            return False  # lets the event continue to the edit
+        return False
+
+    def normalize_file_path(self):
+        current_recent_file_path = str(self.ui_single_file_upload.file_path.text())
+        current_recent_file_path = current_recent_file_path.replace('file:/', '')
+        self.ui_single_file_upload.file_path.setText(current_recent_file_path)
+        return True
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls:
@@ -214,6 +261,9 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             if os.path.exists(url):
                 row_data["file_path"] = str(url)
                 self.add_row_files_queue_table(row_data)
+                if url != "":
+                    self.ui_single_file_upload.file_path.setText("")
+                self.ui_single_file_upload.file_path.setText(str(url))
                 #print url
         return True
 
