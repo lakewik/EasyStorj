@@ -46,11 +46,13 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.file_path.setDragEnabled(True)
         self.ui_single_file_upload.file_path.setAcceptDrops(True)
         self.ui_single_file_upload.file_path.installEventFilter(self)
+
+        self.upload_started = False
         # open bucket manager
         QtCore.QObject.connect(
             self.ui_single_file_upload.start_upload_bt,
             QtCore.SIGNAL('clicked()'),
-            self.createNewUploadThread)
+            self.check_next_files_to_upload)
         # open file select dialog
         QtCore.QObject.connect(
             self.ui_single_file_upload.file_path_select_bt,
@@ -138,6 +140,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('setShardSize'), self.set_shard_size)
         self.connect(self, QtCore.SIGNAL('createShardUploadThread'), self.createNewShardUploadThread)
         self.connect(self, QtCore.SIGNAL('droppedFileToTable'), self.append_dropped_files_to_table)
+        self.connect(self, QtCore.SIGNAL('checkNextFilesToUpload'), self.check_next_files_to_upload)
         # self.connect(self, QtCore.SIGNAL('handleCancelAction'), self.ha)
 
         # resolve buckets and put to buckets combobox
@@ -170,6 +173,50 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.ui_single_file_upload.shard_queue_table_widget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
 
         self.current_row = 0
+
+    def check_next_files_to_upload(self):
+
+        self.upload_queue_progressbar_list = []
+
+        self.files_row_upload_state_array = []
+
+        if self.upload_started != True:
+            print "Begin upload..."
+            self.files_already_uploaded = 0
+            self.files_queue_tablemodel = self.ui_single_file_upload.files_queue_table_widget.model()
+            rows_count = self.ui_single_file_upload.files_queue_table_widget.rowCount()
+
+            self.files_to_upload = rows_count
+
+            i = 0
+            while i < rows_count:
+                self.files_row_upload_state_array.append(False)
+
+                i += 1
+
+
+
+        filepath_index = self.files_queue_tablemodel.index(self.files_already_uploaded, 1)  # get file path
+        # We suppose data are strings
+        self.current_file_path = str(self.files_queue_tablemodel.data(
+            filepath_index).toString())
+
+
+        if self.files_already_uploaded >= self.files_to_upload:
+            self.emit(QtCore.SIGNAL("showFileUploadedSuccessfully"))  # if no any file left to upload
+            self.ui_single_file_upload.file_path.setEnabled(True)
+            self.upload_started = False
+        else:
+            self.ui_single_file_upload.file_path.setText(str(self.current_file_path))
+
+            self.createNewUploadThread()
+            self.ui_single_file_upload.file_path.setDisabled(True)
+            self.upload_started = True
+
+
+
+        return True
+
 
     def insert_selected_to_files_queue_table(self):
         row_data = {}
@@ -782,6 +829,11 @@ shard at index %s' % chapters)
                         continue
 
                     else:
+                        # update progress bar in upload queue table
+                        percent_uploaded = 100
+                        self.emit(QtCore.SIGNAL("updateShardUploadProgress"), int(rowposition), percent_uploaded)
+                        self.shard_upload_percent_list[chapters] = percent_uploaded
+                        self.emit(QtCore.SIGNAL("refreshOverallProgress"), 0.1)  # update overall progress bar
                         self.current_active_connections -= 1
                         self.emit(QtCore.SIGNAL('setCurrentActiveConnections'))
                         self.emit(
@@ -927,7 +979,10 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
         if success:
             self.__logger.debug('"title": "File uploaded"')
             self.__logger.debug('"description": "File uploaded successfully!"')
-            self.emit(QtCore.SIGNAL("showFileUploadedSuccessfully"))
+            #self.emit(QtCore.SIGNAL("showFileUploadedSuccessfully"))
+            self.files_already_uploaded += 1
+            self.emit(QtCore.SIGNAL("checkNextFilesToUpload"))
+
             self.emit(QtCore.SIGNAL("setCurrentUploadState"), "File uploaded successfully!")
             self.dashboard_instance.createNewFileListUpdateThread()
 
