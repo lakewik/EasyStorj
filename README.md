@@ -65,7 +65,7 @@ Please note that this software is currently in Alpha Version.
 I will be grateful for donations:
 
 - BTC and SJCX: `1LWMe1AuQSNQq6zUEtC8vMaV3LhS8r1uFw`
-- Ethereum (ETH): `0x58056c2c0e9adafe15fe20337bbcdcc1bb5dd4b5`
+- Ethereum (ETH) and STORJ Token: `0x61688e7822327C30B6AcC26F737941Deca787033`
 - Monero {For very anonymous donations} (XMR): `42VP4x4CRtwf9PXD3J73ntQHb2f2BYHVR75ovjeSNWzRF4X34mdf367VWD74kD4zDT3ReY6t5uQxAC9FWCPnMQjpQ3xFsV9`.  
 
 *Thank you very much for your support!*
