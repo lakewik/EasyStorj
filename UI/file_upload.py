@@ -217,11 +217,13 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
     def check_next_files_to_upload(self):
 
+
         self.current_row = 0
 
         self.upload_queue_progressbar_list = []
 
         self.files_row_upload_state_array = []
+
 
         if self.upload_started != True:
             print "Begin upload..."
@@ -237,25 +239,25 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
                 i += 1
 
-
-
-        filepath_index = self.files_queue_tablemodel.index(self.files_already_uploaded, 1)  # get file path
-        # We suppose data are strings
-        self.current_file_path = str(self.files_queue_tablemodel.data(
-            filepath_index).toString())
-
-
-        if self.files_already_uploaded >= self.files_to_upload:
-            self.emit(QtCore.SIGNAL("showFileUploadedSuccessfully"))  # if no any file left to upload
-            self.ui_single_file_upload.file_path.setEnabled(True)
-            self.upload_started = False
+        if self.files_already_uploaded == 0 and self.files_to_upload == 0:
+            QtGui.QMessageBox.about(
+                self, 'Warning', 'Please add file to queue  to begin upload.')
         else:
-            self.ui_single_file_upload.file_path.setText(str(self.current_file_path))
+            filepath_index = self.files_queue_tablemodel.index(self.files_already_uploaded, 1)  # get file path
+            # We suppose data are strings
+            self.current_file_path = str(self.files_queue_tablemodel.data(
+                filepath_index).toString())
 
-            self.createNewUploadThread()
-            self.ui_single_file_upload.file_path.setDisabled(True)
-            self.upload_started = True
+            if self.files_already_uploaded >= self.files_to_upload:
+                self.emit(QtCore.SIGNAL("showFileUploadedSuccessfully"))  # if no any file left to upload
+                self.ui_single_file_upload.file_path.setEnabled(True)
+                self.upload_started = False
+            else:
+                self.ui_single_file_upload.file_path.setText(str(self.current_file_path))
 
+                self.createNewUploadThread()
+                self.ui_single_file_upload.file_path.setDisabled(True)
+                self.upload_started = True
 
 
         return True
@@ -513,7 +515,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.uploaded_shards.setText(str(self.shards_already_uploaded) + "/" + str(self.all_shards_count))
 
     def update_shard_upload_progess(self, row_position_index, value):
-        print str(row_position_index) +  "pozycja"
+        #print str(row_position_index) +  "pozycja"
         self.upload_queue_progressbar_list[row_position_index].setValue(value)
         return 1
 
