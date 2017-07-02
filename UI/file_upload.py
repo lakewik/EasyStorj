@@ -141,6 +141,12 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('createShardUploadThread'), self.createNewShardUploadThread)
         self.connect(self, QtCore.SIGNAL('droppedFileToTable'), self.append_dropped_files_to_table)
         self.connect(self, QtCore.SIGNAL('checkNextFilesToUpload'), self.check_next_files_to_upload)
+        self.connect(self, QtCore.SIGNAL('initializeUploadQueueTable'), self.initialize_upload_queue_table)
+        self.connect(self, QtCore.SIGNAL('paintFileSize'), self.paint_file_size)
+        self.connect(self, QtCore.SIGNAL('paintFrame'), self.paint_file_frame)
+        self.connect(self, QtCore.SIGNAL('paintPUSHToken'), self.paint_push_token)
+        self.connect(self, QtCore.SIGNAL('setOverallProgress'), self.paint_overall_progress)
+        self.connect(self, QtCore.SIGNAL('disableButtonsForUpload'), self.disable_buttons_for_upload)
         # self.connect(self, QtCore.SIGNAL('handleCancelAction'), self.ha)
 
         # resolve buckets and put to buckets combobox
@@ -174,7 +180,44 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.current_row = 0
 
+
+    def disable_buttons_for_upload(self):
+        self.ui_single_file_upload.connections_onetime.setEnabled(False)
+        self.ui_single_file_upload.start_upload_bt.setDisabled(True)
+        self.ui_single_file_upload.start_upload_bt.setStyleSheet(("QPushButton:hover{\n"
+                                                                  "  background-color: #8C8A87;\n"
+                                                                  "  border-color: #8C8A87;\n"
+                                                                  "}\n"
+                                                                  "QPushButton:active {\n"
+                                                                  "  background-color: #8C8A87;\n"
+                                                                  "  border-color: #8C8A87;\n"
+                                                                  "}\n"
+                                                                  "QPushButton{\n"
+                                                                  "  background-color: #8C8A87;\n"
+                                                                  "    border: 1px solid #8C8A87;\n"
+                                                                  "    color: #fff;\n"
+                                                                  "    border-radius: 7px;\n"
+                                                                  "}"))
+
+    def paint_overall_progress(self, overall_progress):
+        self.ui_single_file_upload.overall_progress.setValue(int(overall_progress))
+        return True
+
+    def paint_file_frame(self, file_frame):
+        self.ui_single_file_upload.file_frame_id.setText(str(file_frame))
+        return True
+
+    def paint_push_token(self, PUSH_token):
+        self.ui_single_file_upload.push_token.setText(str(PUSH_token))
+        return True
+
+    def paint_file_size(self, file_size):
+        self.ui_single_file_upload.file_size.setText(str(file_size))
+        return True
+
     def check_next_files_to_upload(self):
+
+        self.current_row = 0
 
         self.upload_queue_progressbar_list = []
 
@@ -470,6 +513,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.uploaded_shards.setText(str(self.shards_already_uploaded) + "/" + str(self.all_shards_count))
 
     def update_shard_upload_progess(self, row_position_index, value):
+        print str(row_position_index) +  "pozycja"
         self.upload_queue_progressbar_list[row_position_index].setValue(value)
         return 1
 
@@ -991,12 +1035,14 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
         self.semaphore = threading.BoundedSemaphore(
             int(self.ui_single_file_upload.connections_onetime.value()))
 
-        self.ui_single_file_upload.overall_progress.setValue(0)
+        self.emit(QtCore.SIGNAL("setOverallProgress"), 0)
+        #self.ui_single_file_upload.overall_progress.setValue(0)
 
         file_path = None
         self.validation = {}
 
-        self.initialize_upload_queue_table()
+        self.emit(QtCore.SIGNAL("initializeUploadQueueTable"))
+        #self.initialize_upload_queue_table()
 
         encryption_enabled = True
 
@@ -1091,27 +1137,17 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
             self.uploaded_file_size = file_size
             self.file_mime_type = file_mime_type
 
-            self.ui_single_file_upload.file_size.setText(str(self.tools.human_size(int(file_size))))
+
+            self.emit(QtCore.SIGNAL("paintFileSize"), str(self.tools.human_size(int(file_size))))
+
+            #self.ui_single_file_upload.file_size.setText(str(self.tools.human_size(int(file_size))))
 
             self.is_upload_active = True
-            self.ui_single_file_upload.connections_onetime.setEnabled(False)
-            self.ui_single_file_upload.start_upload_bt.setDisabled(True)
-            self.ui_single_file_upload.start_upload_bt.setStyleSheet(("QPushButton:hover{\n"
-                                                                      "  background-color: #8C8A87;\n"
-                                                                      "  border-color: #8C8A87;\n"
-                                                                      "}\n"
-                                                                      "QPushButton:active {\n"
-                                                                      "  background-color: #8C8A87;\n"
-                                                                      "  border-color: #8C8A87;\n"
-                                                                      "}\n"
-                                                                      "QPushButton{\n"
-                                                                      "  background-color: #8C8A87;\n"
-                                                                      "    border: 1px solid #8C8A87;\n"
-                                                                      "    color: #fff;\n"
-                                                                      "    border-radius: 7px;\n"
-                                                                      "}"))
+            self.emit(QtCore.SIGNAL("disableButtonsForUpload"))
+
 
             self.__logger.debug('PUSH token')
+
             self.emit(QtCore.SIGNAL("setCurrentUploadState"), "Resolving PUSH Token for upload...")
             self.__logger.debug('Resolving PUSH Token for upload...')
 
@@ -1131,9 +1167,9 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
                 else:
                     break
 
-
-            self.ui_single_file_upload.push_token.setText(
-                str(push_token.id))  # set the PUSH Token
+            self.emit(QtCore.SIGNAL("paintPUSHToken"), str(push_token.id))
+            #self.ui_single_file_upload.push_token.setText(
+             #   str(push_token.id))  # set the PUSH Token
 
             self.__logger.debug("PUSH Token ID: " + push_token.id)
 
@@ -1155,7 +1191,8 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
                 self.__logger.debug('"description": "Error while resolving frame for\
                     file upload..."')
 
-            self.ui_single_file_upload.file_frame_id.setText(str(frame.id))
+            self.emit(QtCore.SIGNAL("paintFrame"), str(frame.id))
+            #self.ui_single_file_upload.file_frame_id.setText(str(frame.id))
 
             self.__logger.debug('Frame ID: %s', frame.id)
             # Now encrypt file
@@ -1192,6 +1229,7 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
             chapters = 0
 
             for shard in shards_manager.shards:
+                #self.upload_queue_progressbar_list.append(QtGui.QProgressBar())
                 self.emit(QtCore.SIGNAL("setShardSize"), int(shard.size))
 
                 self.shard_upload_percent_list.append(0)
