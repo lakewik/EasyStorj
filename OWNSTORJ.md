@@ -2,6 +2,7 @@
 
 I'm started working on new feature in **Storj GUI** client called **OwnStorj**. 
 This is web interface for Storj which have more features than standard GUI client. 
+OwnStorj will be integrated with Storj GUI Client application.
 It is like OwnCloud, but storing files on Storj Distributed Storage Platform.
 It will allow to share files with other users.
 You will can run OwnStorj on your home NAS server, RaspberryPi or other hardware on any platform. 
