@@ -22,6 +22,8 @@ class Tools:
         return 1
 
     def isWritable(self, path):
+        """
+        """
         try:
             testfile = tempfile.TemporaryFile(dir=path)
             testfile.close()
@@ -40,11 +42,18 @@ class Tools:
             return True
 
     def measure_ping_latency(self, destination_host):
+        """
+        Measure ping latency of a host
+        Args:
+            destination_host (str): the ip of the host
+        Returns:
+            ():
+        """
         ping_latency = str(
             os.system('ping ' +
                       ('-n 1 ' if platform.system().lower() == 'windows'
                        else '-c 1 ') +
-                      str(destination_host)))
+                      destination_host))
 
         ping_data_parsed = pingparser.parse(ping_latency)
 
@@ -81,12 +90,23 @@ class Tools:
         return '%s %s' % (formatted_size, suffix)
 
     def get_home_user_directory(self):
-        home = expanduser('~')
-        return home
+        """
+        Get the path of current user's home folder
+        Returns:
+            (str): the extended path of the home
+        """
+        return expanduser('~')
 
     def count_directory_size(self, directory, include_subdirs):
+        """
+        Args:
+            directory (str): the directory
+            include_subdirs (bool): include subdirs or not
+        Returns:
+            total_size (int): total size of the directory
+        """
         if include_subdirs:
-            start_path = str(directory)
+            start_path = directory
             total_size = 0
             for dirpath, dirnames, filenames in os.walk(start_path):
                 for f in filenames:
@@ -99,6 +119,14 @@ class Tools:
         return total_size
 
     def count_files_in_dir(self, directory, include_subdirs=False):
-        files_count = len([name for name in os.listdir(str(directory)) if
-                           os.path.isfile(os.path.join(str(directory), name))])
+        """
+        Get the number of files in a directory
+        Args:
+            directory (str): the name of the directory
+            include_subdirs (bool): include subdirs or not
+        Returns:
+            files_count (int): number of files in dir
+        """
+        files_count = len([name for name in os.listdir(directory) if
+                           os.path.isfile(os.path.join(directory, name))])
         return files_count
