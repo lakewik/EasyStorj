@@ -47,6 +47,7 @@ class Configuration:
                     else:
                         self.maxDownloadChunkSize = 1024
             except:
+                logger.debug('Error in Configuration init')
                 logger.error('Unspecified XML parse error')
 
     def create_genesis_configuration(self):
@@ -77,54 +78,39 @@ class Configuration:
             logger.error('Unspecified error')
 
     def paint_config_to_ui(self, settings_ui):
-        et = None
-
         try:
             et = ET.parse(CONFIG_FILE)
 
-            for tags in et.iter(str('max_shard_size')):
+            for tags in et.iter('max_shard_size'):
                 settings_ui.max_shard_size.setValue(int(tags.text))
-            for tags in et.iter(str('max_connections_onetime')):
+            for tags in et.iter('max_connections_onetime'):
                 settings_ui.connections_onetime.setValue(int(tags.text))
-            for tags in et.iter(str('bridge_request_timeout')):
+            for tags in et.iter('bridge_request_timeout'):
                 settings_ui.bridge_request_timeout.setValue(int(tags.text))
-            for tags in et.iter(str('crypto_keys_location')):
+            for tags in et.iter('crypto_keys_location'):
                 settings_ui.crypto_keys_location.setText(str(tags.text))
-            for tags in et.iter(str('max_download_bandwidth')):
+            for tags in et.iter('max_download_bandwidth'):
                 settings_ui.max_download_bandwidth.setText(str(tags.text))
-            for tags in et.iter(str('max_upload_bandwidth')):
+            for tags in et.iter('max_upload_bandwidth'):
                 settings_ui.max_upload_bandwidth.setText(str(tags.text))
-            for tags in et.iter(str('default_file_encryption_algorithm')):
+            for tags in et.iter('default_file_encryption_algorithm'):
                 settings_ui.default_crypto_algorithm.setCurrentIndex(int(tags.text))
-            for tags in et.iter(str('shard_size_unit')):
+            for tags in et.iter('shard_size_unit'):
                 settings_ui.shard_size_unit.setCurrentIndex(int(tags.text))
-            for tags in et.iter(str('custom_max_shard_size_enabled')):
+            for tags in et.iter('custom_max_shard_size_enabled'):
                 if int(tags.text) == 1:
                     settings_ui.max_shard_size_enabled_checkBox.setChecked(True)
                 else:
                     settings_ui.max_shard_size_enabled_checkBox.setChecked(False)
 
         except Exception as e:
-            logger.error('Unspecified XML parse error: %s' % e)
+            logger.debug('Error in Configuration paint config to ui')
+            logger.error('Unspecified XML parse error')
+            logger.error(e)
 
     def save_client_configuration(self, settings_ui):
-        #root = ET.Element('configuration')
-        #doc = ET.SubElement(root, 'client')
-
-        #et = ET.parse(CONFIG_FILE)
-
-        with open(CONFIG_FILE, 'r') as conf_file:
-            XML_conf_data = conf_file.read().replace('\n', '')
-
-        tree = ET.parse(CONFIG_FILE)
-
-        root = ET.fromstring(XML_conf_data)
-        doc = ET.SubElement(root, 'client')
-
-
-
-        with open(CONFIG_FILE, 'r') as conf_file:
-            XML_conf_data = conf_file.read().replace('\n', '')
+        # with open(CONFIG_FILE, 'r') as conf_file:
+        #     XML_conf_data = conf_file.read().replace('\n', '')
 
         tree = ET.parse(CONFIG_FILE)
 
@@ -132,7 +118,6 @@ class Configuration:
             custom_max_shard_size_enabled_checkbox = '1'
         else:
             custom_max_shard_size_enabled_checkbox = '0'
-
 
         tree.find('.//custom_max_shard_size_enabled').text = \
             str(custom_max_shard_size_enabled_checkbox)
@@ -153,30 +138,23 @@ class Configuration:
         tree.find('.//crypto_keys_location').text = \
             str(settings_ui.crypto_keys_location.text())
 
-
         tree.write(CONFIG_FILE)
 
-        #self.save_custom_temp_path(23)
-        #self.save_bridge_api_url('https://api.storj.io2')
-
         custom_tmp_path = self.get_custom_temp_path()
-        print custom_tmp_path
+        logger.debug(custom_tmp_path)
 
     def max_shard_size(self):
-        et = None
-
         max_shard_size = DEFAULT_SHARD_SIZE
 
         try:
-
             et = ET.parse(CONFIG_FILE)
             shard_size_unit = 2
             max_shard_size_sterile = None
-            for tags in et.iter(str('custom_max_shard_size_enabled')):
+            for tags in et.iter('custom_max_shard_size_enabled'):
                 if int(tags.text) == 1:
-                    for tags2 in et.iter(str('max_shard_size')):
+                    for tags2 in et.iter('max_shard_size'):
                         max_shard_size_sterile = int(tags2.text)
-                    for tags3 in et.iter(str('shard_size_unit')):
+                    for tags3 in et.iter('shard_size_unit'):
                         shard_size_unit = int(tags3.text)
 
                     if shard_size_unit == 0:  # KB:
@@ -192,17 +170,14 @@ class Configuration:
                     max_shard_size = DEFAULT_SHARD_SIZE
 
         except Exception as e:
+            logger.debug('Error in Configuration max_shard_size')
+            logger.error('Unspecified XML parse error')
+            logger.error(e)
 
-            logger.error('Unspecified XML parse error', str(e))
-
-
-        return (max_shard_size/2)
+        return max_shard_size / 2
 
     def get_max_bridge_request_timeout(self):
         max_bridge_request_timeout = DEFAULT_MAX_BRIDGE_REQUEST_TIMEOUT
-
-        et = None
-
         try:
             et = ET.parse(CONFIG_FILE)
 
@@ -210,44 +185,31 @@ class Configuration:
                 max_bridge_request_timeout = int(tags.text)
 
         except Exception as e:
+            logger.debug('Error in Configuration get_max_bridge_request_timeout')
             logger.error('Unspecified XML parse error')
             logger.error(e)
 
         return max_bridge_request_timeout
 
-    def get_custom_temp_path(self):
-        et = ET.parse(CONFIG_FILE)
-        custom_temp_path = ''
-        for tags in et.iter(str('custom_tmp_path')):
-            custom_temp_path = str(tags.get('path'))
-
-        return custom_temp_path
-
     def get_bridge_api_url(self):
-        bridge_api_url = ''
-        try:
-            et = ET.parse(CONFIG_FILE)
-            bridge_api_url = ''
-            for tags in et.iter(str('bridge_api_url')):
-                bridge_api_url = str(tags.get('url'))
-        except BaseException:
-            print 'Error reading bridge api url. Using defaults'
-
-        if bridge_api_url == '':
-            bridge_api_url = 'https://api.storj.io/'
-
-        return bridge_api_url
-
-    def save_custom_temp_path(self, custom_path):
         bridge_api_url = 'https://api.storj.io/'
         try:
             et = ET.parse(CONFIG_FILE)
             for tags in et.iter('bridge_api_url'):
                 bridge_api_url = str(tags.get('url'))
         except BaseException:
+            logger.debug('Error in Configuration get_bridge_api_url')
             logger.error('Error reading bridge api url. Using defaults')
 
         return bridge_api_url
+
+    def get_custom_temp_path(self):
+        et = ET.parse(CONFIG_FILE)
+        custom_temp_path = ''
+        for tags in et.iter('custom_tmp_path'):
+            custom_temp_path = str(tags.get('path'))
+
+        return custom_temp_path
 
     def save_custom_temp_path(self, custom_path):
         with open(CONFIG_FILE, 'r') as conf_file:
