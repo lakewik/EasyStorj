@@ -28,8 +28,8 @@ from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP, \
     ALLOW_DOWNLOAD_FARMER_POINTER_CANCEL_BY_USER, \
     FARMER_NODES_EXCLUSION_FOR_DOWNLOAD_ENABLED, \
     MAX_DOWNLOAD_REQUEST_BLOCK_SIZE, FILE_POINTERS_ITERATION_DELAY, \
-    DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT, MAX_ALLOWED_DOWNLOAD_CONCURRENCY, \
-    MAX_POINTERS_RESOLVED_IN_ONE_PART, GET_DEFAULT_TMP_PATH_FROM_ENV_VARIABLES, \
+    DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT, MAX_ALLOWED_DOWNLOAD_CONCURRENCY,\
+    MAX_POINTERS_RESOLVED_IN_ONE_PART, GET_DEFAULT_TMP_PATH_FROM_ENV_VARIABLES,\
     GET_HOME_PATH_FROM_ENV_VARIABLES
 
 
@@ -169,7 +169,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                     temp_dir = str(os.environ['TEMP'])
                 except Exception as e:
                     temp_dir = '/tmp'
-                    print str(e)
+                    self.__logger.error(e)
             else:
                 temp_dir = '/tmp'
 
@@ -214,22 +214,23 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.clip = QtGui.QApplication.clipboard()
 
     def keyPressEvent(self, e):
-        # copy upload queue table content to clipboard #
+        # copy upload queue table content to clipboard
         if (e.modifiers() & QtCore.Qt.ControlModifier):
             selected = self.ui_single_file_download.shard_queue_table.selectedRanges()
 
             if e.key() == QtCore.Qt.Key_C:  # copy
                 s = ""
 
-                for r in xrange(selected[0].topRow(), selected[0].bottomRow() + 1):
-                    for c in xrange(selected[0].leftColumn(), selected[0].rightColumn() + 1):
+                for r in xrange(selected[0].topRow(),
+                                selected[0].bottomRow() + 1):
+                    for c in xrange(selected[0].leftColumn(),
+                                    selected[0].rightColumn() + 1):
                         try:
                             s += str(self.ui_single_file_download.shard_queue_table.item(r, c).text()) + "\t"
                         except AttributeError:
                             s += "\t"
                     s = s[:-1] + "\n"  # eliminate last '\t'
                 self.clip.setText(s)
-
 
     def display_table_context_menu(self, position):
         tablemodel = self.ui_single_file_download.shard_queue_table.model()
@@ -394,7 +395,6 @@ this window?",
 
         QtGui.QMessageBox.information(self, 'Success!',
                                       'File downloaded successfully!')
-
 
     def show_unhandled_exception(self, exception_content):
         QtGui.QMessageBox.critical(self, 'Unhandled error',
