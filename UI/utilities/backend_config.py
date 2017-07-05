@@ -21,43 +21,35 @@ DEFAULT_CONFIG_XML_CONTENT = '<configuration><client>' \
                              '</client></configuration>'
 
 
-
 # Configuration backend section
 class Configuration:
 
     def __init__(self, sameFileNamePrompt=None, sameFileHashPrompt=None,
                  load_config=False):
         if load_config:
-
-            et = None
+            logger.debug('Try to load config values')
 
             try:
                 et = ET.parse(CONFIG_FILE)
+                for tags in et.iter('same_file_name_prompt'):
+                    if tags.text == '0':
+                        self.sameFileNamePrompt = False
+                    else:
+                        self.sameFileNamePrompt = True
+                for tags in et.iter('same_file_hash_prompt'):
+                    if tags.text == '0':
+                        self.sameFileHashPrompt = False
+                    else:
+                        self.sameFileHashPrompt = True
+                for tags in et.iter('max_chunk_size_for_download'):
+                    if tags.text is not None:
+                        self.maxDownloadChunkSize = int(tags.text)
+                    else:
+                        self.maxDownloadChunkSize = 1024
             except:
-                logger.error("Unspecified XML parse error")
-
-            for tags in et.iter(str("same_file_name_prompt")):
-                if tags.text == "1":
-                    self.sameFileNamePrompt = True
-                elif tags.text == "0":
-                    self.sameFileNamePrompt = False
-                else:
-                    self.sameFileNamePrompt = True
-            for tags in et.iter(str("same_file_hash_prompt")):
-                if tags.text == "1":
-                    self.sameFileHashPrompt = True
-                elif tags.text == "0":
-                    self.sameFileHashPrompt = False
-                else:
-                    self.sameFileHashPrompt = True
-            for tags in et.iter(str("max_chunk_size_for_download")):
-                if tags.text is not None:
-                    self.maxDownloadChunkSize = int(tags.text)
-                else:
-                    self.maxDownloadChunkSize = 1024
+                logger.error('Unspecified XML parse error')
 
     def create_genesis_configuration(self):
-
         initial_config_file = open(CONFIG_FILE, 'w')
 
         initial_config_file.write(DEFAULT_CONFIG_XML_CONTENT)
@@ -113,9 +105,8 @@ class Configuration:
                     settings_ui.max_shard_size_enabled_checkBox.setChecked(False)
 
         except Exception as e:
+            logger.error('Unspecified XML parse error: %s' % e)
 
-            logger.error('Unspecified XML parse error', str(e))
-  
     def save_client_configuration(self, settings_ui):
         #root = ET.Element("configuration")
         #doc = ET.SubElement(root, "client")
@@ -215,11 +206,12 @@ class Configuration:
         try:
             et = ET.parse(CONFIG_FILE)
 
-            for tags in et.iter(str('bridge_request_timeout')):
+            for tags in et.iter('bridge_request_timeout'):
                 max_bridge_request_timeout = int(tags.text)
 
         except Exception as e:
-            logger.error('Unspecified XML parse error', str(e))
+            logger.error('Unspecified XML parse error')
+            logger.error(e)
 
         return max_bridge_request_timeout
 
@@ -231,9 +223,7 @@ class Configuration:
 
         return custom_temp_path
 
-
     def get_bridge_api_url(self):
-
         bridge_api_url = ""
         try:
             et = ET.parse(CONFIG_FILE)
@@ -249,19 +239,13 @@ class Configuration:
         return bridge_api_url
 
     def save_custom_temp_path(self, custom_path):
-
-
-        bridge_api_url = ''
+        bridge_api_url = 'https://api.storj.io/'
         try:
             et = ET.parse(CONFIG_FILE)
-            bridge_api_url = ''
-            for tags in et.iter(str('bridge_api_url')):
+            for tags in et.iter('bridge_api_url'):
                 bridge_api_url = str(tags.get('url'))
         except BaseException:
             logger.error('Error reading bridge api url. Using defaults')
-
-        if bridge_api_url == '':
-            bridge_api_url = 'https://api.storj.io/'
 
         return bridge_api_url
 
@@ -275,7 +259,6 @@ class Configuration:
         return True
 
     def save_bridge_api_url(self, bridge_api_url):
-
         with open(CONFIG_FILE, 'r') as conf_file:
             XML_conf_data = conf_file.read().replace('\n', '')
 
@@ -283,7 +266,6 @@ class Configuration:
         client = root.find('client')
         b_api_url = client.find('bridge_api_url')
         b_api_url.set('url', str(bridge_api_url))
-
 
         tree = ET.ElementTree(root)
         tree.write(CONFIG_FILE)
