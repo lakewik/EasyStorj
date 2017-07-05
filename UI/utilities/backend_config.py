@@ -69,14 +69,6 @@ class Configuration:
 
         return output
 
-    def load_config_from_xml(self):
-        try:
-            et = ET.parse(CONFIG_FILE)
-            for tags in et.iter('password'):
-                output = tags.text
-        except:
-            logger.error('Unspecified error')
-
     def paint_config_to_ui(self, settings_ui):
         try:
             et = ET.parse(CONFIG_FILE)
@@ -158,13 +150,13 @@ class Configuration:
                         shard_size_unit = int(tags3.text)
 
                     if shard_size_unit == 0:  # KB:
-                        max_shard_size = (max_shard_size_sterile * 2 * 1024)
+                        max_shard_size = max_shard_size_sterile * 2 * 1024
                     elif shard_size_unit == 1:  # MB:
-                        max_shard_size = (max_shard_size_sterile * 2 * 1024 ** 2)
+                        max_shard_size = max_shard_size_sterile * 2 * 1024 ** 2
                     elif shard_size_unit == 2:  # GB:
-                        max_shard_size = (max_shard_size_sterile * 2 * 1024 ** 3)
+                        max_shard_size = max_shard_size_sterile * 2 * 1024 ** 3
                     elif shard_size_unit == 3:  # TB:
-                        max_shard_size = (max_shard_size_sterile * 2 * 1024 ** 4)
+                        max_shard_size = max_shard_size_sterile * 2 * 1024 ** 4
 
                 else:
                     max_shard_size = DEFAULT_SHARD_SIZE
