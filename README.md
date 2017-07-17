@@ -16,6 +16,7 @@ The layout has been designed by @Davasny (https://github.com/Davasny)
  - Will Topping
  - Meije Sibbel
  - Kevin J Baird
+ - Colton Marino
 
 (list ordered by donation time)
  
