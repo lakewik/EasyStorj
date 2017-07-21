@@ -40,7 +40,7 @@ class MainUI(QtGui.QMainWindow):
 
     __logger = logging.getLogger('%s.MainUI' % __name__)
 
-    def __init__(self, parent=None, bucketid=None):
+    def __init__(self, parent=None, bucketid=None, encryption_key_seed=None):
         QtGui.QWidget.__init__(self, parent)
         self.file_manager_ui = Ui_MainMenu()
         self.file_manager_ui.setupUi(self)
@@ -149,6 +149,45 @@ class MainUI(QtGui.QMainWindow):
         self.createNewBucketResolveThread()
 
         # self.file_manager_ui.new_file_upload_bt.mouseReleaseEvent()
+
+
+    def display_files_list_context_menu(self, position):
+        tablemodel = self.ui_single_file_upload.files_queue_table_widget.model()
+        rows = sorted(set(index.row() for index in
+                          self.ui_single_file_upload.files_queue_table_widget.
+                          selectedIndexes()))
+        i = 0
+        selected_row = 0
+        any_row_selected = False
+        for row in rows:
+            any_row_selected = True
+            filename_index = tablemodel.index(row, 0)  # get shard Index
+            # We suppose data are strings
+            self.current_selected_file_name = str(tablemodel.data(
+                filename_index).toString())
+            selected_row = row
+            i += 1
+
+        if any_row_selected:
+            menu = QtGui.QMenu()
+            fileDeleteFromTableAction = menu.addAction('Delete file')
+            action = menu.exec_(self.ui_single_file_upload.files_queue_table_widget.mapToGlobal(position))
+
+            if action == fileDeleteFromTableAction:
+                # ask user and delete if sure
+                msgBox = QtGui.QMessageBox(
+                    QtGui.QMessageBox.Question,
+                    'Question',
+                    'Are you sure that you want to permanently remove file '
+                    '"%s" ?' %
+                    str(self.current_selected_file_name),
+                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+
+                result = msgBox.exec_()
+
+                if result == QtGui.QMessageBox.Yes:
+                    self.ui_single_file_upload.files_queue_table_widget.removeRow(int(selected_row))
+                    print "Delete action"
 
     def dragEnterEvent(self, event):
         print "rzucono"
