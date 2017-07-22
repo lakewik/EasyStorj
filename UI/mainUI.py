@@ -225,14 +225,17 @@ class MainUI(QtGui.QMainWindow):
                     print "Delete action"
 
     def dragEnterEvent(self, event):
-        print "rzucono"
         if event.mimeData().hasUrls:
             event.accept()
-            print "tak"
         else:
             event.ignore()
         for path in event.mimeData().urls():
-            print path
+            row_data = {}
+            row_data["file_path"] = str(event.mimeData().text()).replace("file://", "").replace('\n', "").replace('\r', "")
+            self.single_file_upload_window = SingleFileUploadUI(self, dashboard_instance=self, start=True, row_data=row_data)
+
+            self.single_file_upload_window.show()
+
         print event.mimeData().text()
 
 
