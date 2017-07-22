@@ -28,8 +28,8 @@ from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP, \
     ALLOW_DOWNLOAD_FARMER_POINTER_CANCEL_BY_USER, \
     FARMER_NODES_EXCLUSION_FOR_DOWNLOAD_ENABLED, \
     MAX_DOWNLOAD_REQUEST_BLOCK_SIZE, FILE_POINTERS_ITERATION_DELAY, \
-    DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT, MAX_ALLOWED_DOWNLOAD_CONCURRENCY,\
-    MAX_POINTERS_RESOLVED_IN_ONE_PART, GET_DEFAULT_TMP_PATH_FROM_ENV_VARIABLES,\
+    DEFAULT_MAX_FARMER_DOWNLOAD_READ_TIMEOUT, MAX_ALLOWED_DOWNLOAD_CONCURRENCY, \
+    MAX_POINTERS_RESOLVED_IN_ONE_PART, GET_DEFAULT_TMP_PATH_FROM_ENV_VARIABLES, \
     GET_HOME_PATH_FROM_ENV_VARIABLES
 
 
@@ -169,7 +169,7 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                     temp_dir = str(os.environ['TEMP'])
                 except Exception as e:
                     temp_dir = '/tmp'
-                    self.__logger.error(e)
+                    print str(e)
             else:
                 temp_dir = '/tmp'
 
@@ -214,23 +214,22 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
         self.clip = QtGui.QApplication.clipboard()
 
     def keyPressEvent(self, e):
-        # copy upload queue table content to clipboard
+        # copy upload queue table content to clipboard #
         if (e.modifiers() & QtCore.Qt.ControlModifier):
             selected = self.ui_single_file_download.shard_queue_table.selectedRanges()
 
             if e.key() == QtCore.Qt.Key_C:  # copy
                 s = ""
 
-                for r in xrange(selected[0].topRow(),
-                                selected[0].bottomRow() + 1):
-                    for c in xrange(selected[0].leftColumn(),
-                                    selected[0].rightColumn() + 1):
+                for r in xrange(selected[0].topRow(), selected[0].bottomRow() + 1):
+                    for c in xrange(selected[0].leftColumn(), selected[0].rightColumn() + 1):
                         try:
                             s += str(self.ui_single_file_download.shard_queue_table.item(r, c).text()) + "\t"
                         except AttributeError:
                             s += "\t"
                     s = s[:-1] + "\n"  # eliminate last '\t'
                 self.clip.setText(s)
+
 
     def display_table_context_menu(self, position):
         tablemodel = self.ui_single_file_download.shard_queue_table.model()
@@ -340,7 +339,7 @@ this window?",
             self.download_queue_table_row_count, 2,
             QtGui.QTableWidgetItem('%s:%s' % (
                 row_data['farmer_address'],
-                row_data['farmer_port'])))
+                row_data['farmer_port']) + "/" + row_data['farmer_id']))
         self.ui_single_file_download.shard_queue_table.setItem(
             self.download_queue_table_row_count, 3,
             QtGui.QTableWidgetItem(str(row_data['state'])))
@@ -359,6 +358,7 @@ this window?",
         tablerowdata = {}
         tablerowdata['farmer_address'] = pointers_content['farmer']['address']
         tablerowdata['farmer_port'] = pointers_content['farmer']['port']
+        tablerowdata['farmer_id'] = pointers_content['farmer']['nodeID']
         tablerowdata['hash'] = str(pointers_content['hash'])
         tablerowdata['state'] = 'Downloading...'
         tablerowdata['shard_index'] = str(chapters)
@@ -395,6 +395,7 @@ this window?",
 
         QtGui.QMessageBox.information(self, 'Success!',
                                       'File downloaded successfully!')
+
 
     def show_unhandled_exception(self, exception_content):
         QtGui.QMessageBox.critical(self, 'Unhandled error',
@@ -520,17 +521,17 @@ this window?",
             fileisencrypted = True
 
         # Join shards
-        sharding_tools = ShardingTools()
+        sharing_tools = ShardingTools()
         self.emit(QtCore.SIGNAL('setCurrentState'), 'Joining shards...')
         self.__logger.debug('Joining shards...')
 
         if fileisencrypted:
-            sharding_tools.join_shards(
+            sharing_tools.join_shards(
                 os.path.join(self.tmp_path, file_name),
                 '-',
                 '%s.encrypted' % self.destination_file_path)
         else:
-            sharding_tools.join_shards(
+            sharing_tools.join_shards(
                 os.path.join(self.tmp_path, file_name),
                 '-',
                 self.destination_file_path)
