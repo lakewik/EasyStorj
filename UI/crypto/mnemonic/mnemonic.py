@@ -76,9 +76,9 @@ class Mnemonic(object):
 
     @classmethod
     def detect_language(cls, code):
-        code = cls.normalize_string(code)
-        first = code.split(' ')[0]
-        languages = cls.list_languages()
+        #code = cls.normalize_string(code)
+        #first = code.split(' ')[0]
+        #languages = cls.list_languages()
 
         #for lang in languages:
          #   mnemo = cls(lang)
