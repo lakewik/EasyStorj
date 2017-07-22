@@ -222,7 +222,7 @@ class Ui_EnterMnemonic(object):
 ""))
         self.file_name_2.setObjectName(_fromUtf8("file_name_2"))
         self.apply_bt = QtGui.QPushButton(EnterMnemonic)
-        self.apply_bt.setGeometry(QtCore.QRect(20, 170, 541, 41))
+        self.apply_bt.setGeometry(QtCore.QRect(20, 170, 461, 41))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -244,6 +244,29 @@ class Ui_EnterMnemonic(object):
 "    border-radius: 7px;\n"
 "}"))
         self.apply_bt.setObjectName(_fromUtf8("apply_bt"))
+        self.skip_bt = QtGui.QPushButton(EnterMnemonic)
+        self.skip_bt.setGeometry(QtCore.QRect(490, 170, 71, 41))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.skip_bt.setFont(font)
+        self.skip_bt.setStyleSheet(_fromUtf8("QPushButton:hover{\n"
+"  background-color: #E8CB0C;\n"
+"  border-color: #E8CB0C;\n"
+"}\n"
+"QPushButton:active {\n"
+"  background-color: #E8CB0C;\n"
+"  border-color: #E8CB0C;\n"
+"}\n"
+"QPushButton{\n"
+"  background-color: #E8CB0C;\n"
+"    border: 1px solid #E8CB0C;\n"
+"    color: #fff;\n"
+"    border-radius: 7px;\n"
+"}"))
+        self.skip_bt.setObjectName(_fromUtf8("skip_bt"))
 
         self.retranslateUi(EnterMnemonic)
         QtCore.QMetaObject.connectSlotsByName(EnterMnemonic)
@@ -254,5 +277,6 @@ class Ui_EnterMnemonic(object):
         self.generate_key_bt.setText(_translate("EnterMnemonic", "GENERATE...", None))
         self.file_name_2.setText(_translate("EnterMnemonic", "<html><head/><body><p><span style=\" font-size:18pt;\">Please enter your encryption key</span></p></body></html>", None))
         self.apply_bt.setText(_translate("EnterMnemonic", "APPLY", None))
+        self.skip_bt.setText(_translate("EnterMnemonic", "SKIP", None))
 
 import resources_rc
