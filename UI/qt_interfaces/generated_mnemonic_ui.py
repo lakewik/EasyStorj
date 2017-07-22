@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_MnemonicGenerated(object):
     def setupUi(self, MnemonicGenerated):
         MnemonicGenerated.setObjectName(_fromUtf8("MnemonicGenerated"))
-        MnemonicGenerated.resize(831, 366)
+        MnemonicGenerated.resize(831, 353)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -170,7 +170,7 @@ class Ui_MnemonicGenerated(object):
         self.label_3.setScaledContents(True)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.file_name = QtGui.QLabel(MnemonicGenerated)
-        self.file_name.setGeometry(QtCore.QRect(210, 20, 591, 51))
+        self.file_name.setGeometry(QtCore.QRect(210, 10, 591, 61))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -182,18 +182,24 @@ class Ui_MnemonicGenerated(object):
 "}\n"
 ""))
         self.file_name.setObjectName(_fromUtf8("file_name"))
-        self.plainTextEdit = QtGui.QPlainTextEdit(MnemonicGenerated)
-        self.plainTextEdit.setGeometry(QtCore.QRect(40, 90, 751, 96))
-        self.plainTextEdit.setObjectName(_fromUtf8("plainTextEdit"))
-        self.file_delete_bt = QtGui.QPushButton(MnemonicGenerated)
-        self.file_delete_bt.setGeometry(QtCore.QRect(590, 210, 221, 41))
+        self.mnemonic_edit = QtGui.QPlainTextEdit(MnemonicGenerated)
+        self.mnemonic_edit.setGeometry(QtCore.QRect(40, 80, 751, 96))
+        font = QtGui.QFont()
+        font.setPointSize(18)
+        font.setBold(True)
+        font.setItalic(True)
+        font.setWeight(75)
+        self.mnemonic_edit.setFont(font)
+        self.mnemonic_edit.setObjectName(_fromUtf8("mnemonic_edit"))
+        self.copy_to_clipboard = QtGui.QPushButton(MnemonicGenerated)
+        self.copy_to_clipboard.setGeometry(QtCore.QRect(590, 200, 221, 41))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
-        self.file_delete_bt.setFont(font)
-        self.file_delete_bt.setStyleSheet(_fromUtf8("QPushButton {\n"
+        self.copy_to_clipboard.setFont(font)
+        self.copy_to_clipboard.setStyleSheet(_fromUtf8("QPushButton {\n"
 "    background-color: #F2C90F;\n"
 "    border: 1px solid #F2C90F;\n"
 "    color: #fff;\n"
@@ -207,9 +213,9 @@ class Ui_MnemonicGenerated(object):
 "    background-color: #F2C90F;\n"
 "    border-color: #F2C90F\n"
 "}"))
-        self.file_delete_bt.setObjectName(_fromUtf8("file_delete_bt"))
+        self.copy_to_clipboard.setObjectName(_fromUtf8("copy_to_clipboard"))
         self.file_name_2 = QtGui.QLabel(MnemonicGenerated)
-        self.file_name_2.setGeometry(QtCore.QRect(20, 210, 561, 91))
+        self.file_name_2.setGeometry(QtCore.QRect(20, 200, 561, 91))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -221,15 +227,15 @@ class Ui_MnemonicGenerated(object):
 "}\n"
 ""))
         self.file_name_2.setObjectName(_fromUtf8("file_name_2"))
-        self.start_download_bt_2 = QtGui.QPushButton(MnemonicGenerated)
-        self.start_download_bt_2.setGeometry(QtCore.QRect(20, 310, 791, 41))
+        self.apply_bt = QtGui.QPushButton(MnemonicGenerated)
+        self.apply_bt.setGeometry(QtCore.QRect(20, 300, 791, 41))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
-        self.start_download_bt_2.setFont(font)
-        self.start_download_bt_2.setStyleSheet(_fromUtf8("QPushButton:hover{\n"
+        self.apply_bt.setFont(font)
+        self.apply_bt.setStyleSheet(_fromUtf8("QPushButton:hover{\n"
 "  background-color: #83bf20;\n"
 "  border-color: #83bf20;\n"
 "}\n"
@@ -243,16 +249,16 @@ class Ui_MnemonicGenerated(object):
 "    color: #fff;\n"
 "    border-radius: 7px;\n"
 "}"))
-        self.start_download_bt_2.setObjectName(_fromUtf8("start_download_bt_2"))
-        self.start_download_bt_3 = QtGui.QPushButton(MnemonicGenerated)
-        self.start_download_bt_3.setGeometry(QtCore.QRect(590, 260, 221, 41))
+        self.apply_bt.setObjectName(_fromUtf8("apply_bt"))
+        self.generate_new_key = QtGui.QPushButton(MnemonicGenerated)
+        self.generate_new_key.setGeometry(QtCore.QRect(590, 250, 221, 41))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
-        self.start_download_bt_3.setFont(font)
-        self.start_download_bt_3.setStyleSheet(_fromUtf8("QPushButton {\n"
+        self.generate_new_key.setFont(font)
+        self.generate_new_key.setStyleSheet(_fromUtf8("QPushButton {\n"
 "    background-color: #2683ff;\n"
 "    border: 1px solid #2683ff;\n"
 "    color: #fff;\n"
@@ -266,7 +272,7 @@ class Ui_MnemonicGenerated(object):
 "  background-color: #4393ff;\n"
 "  border-color: #4393ff;\n"
 "}"))
-        self.start_download_bt_3.setObjectName(_fromUtf8("start_download_bt_3"))
+        self.generate_new_key.setObjectName(_fromUtf8("generate_new_key"))
 
         self.retranslateUi(MnemonicGenerated)
         QtCore.QMetaObject.connectSlotsByName(MnemonicGenerated)
@@ -274,9 +280,9 @@ class Ui_MnemonicGenerated(object):
     def retranslateUi(self, MnemonicGenerated):
         MnemonicGenerated.setWindowTitle(_translate("MnemonicGenerated", "Generate mnemonic key - Storj GUI Client", None))
         self.file_name.setText(_translate("MnemonicGenerated", "<html><head/><body><p><span style=\" font-size:18pt;\">Your generated encryption key - mnemonic</span></p></body></html>", None))
-        self.file_delete_bt.setText(_translate("MnemonicGenerated", "COPY TO CLIPBOARD", None))
+        self.copy_to_clipboard.setText(_translate("MnemonicGenerated", "COPY TO CLIPBOARD", None))
         self.file_name_2.setText(_translate("MnemonicGenerated", "<html><head/><body><p align=\"center\">Please save your key in secure location! </p><p align=\"center\">Without correct encryptio key your files cannot be recovered!</p><p align=\"center\"><span style=\" text-decoration: underline;\">Warning! Lost encrytpion key cannot be recovered!</span></p></body></html>", None))
-        self.start_download_bt_2.setText(_translate("MnemonicGenerated", "I SAVED MY ENCRYPTION KEY IN SECURE LOCATION, LET\'S GO!", None))
-        self.start_download_bt_3.setText(_translate("MnemonicGenerated", "GENERATE NEW KEY", None))
+        self.apply_bt.setText(_translate("MnemonicGenerated", "I SAVED MY ENCRYPTION KEY IN SECURE LOCATION, LET\'S GO!", None))
+        self.generate_new_key.setText(_translate("MnemonicGenerated", "GENERATE NEW KEY", None))
 
 import resources_rc
