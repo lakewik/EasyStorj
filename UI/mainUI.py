@@ -3,6 +3,7 @@
 
 import logging
 import threading
+from functools import partial
 
 import storj.exception as sjexc
 
@@ -150,28 +151,40 @@ class MainUI(QtGui.QMainWindow):
 
         # self.file_manager_ui.new_file_upload_bt.mouseReleaseEvent()
 
+        # Context menu policy
+
+        self.file_manager_ui.files_list_tableview.setContextMenuPolicy(
+            QtCore.Qt.CustomContextMenu)
+
+        self.file_manager_ui.files_list_tableview. \
+            customContextMenuRequested.connect(
+            partial(self.display_files_list_context_menu))
+
 
     def display_files_list_context_menu(self, position):
-        tablemodel = self.ui_single_file_upload.files_queue_table_widget.model()
+        tablemodel = self.file_manager_ui.files_list_tableview.model()
         rows = sorted(set(index.row() for index in
-                          self.ui_single_file_upload.files_queue_table_widget.
+                          self.file_manager_ui.files_list_tableview.
                           selectedIndexes()))
         i = 0
         selected_row = 0
         any_row_selected = False
         for row in rows:
             any_row_selected = True
-            filename_index = tablemodel.index(row, 0)  # get shard Index
+            fileid_index = tablemodel.index(row, 2)  # get fileid Index
+            filename_index = tablemodel.index(row, 0)  # get filename Index
             # We suppose data are strings
-            self.current_selected_file_name = str(tablemodel.data(
+            selected_file_name = str(tablemodel.data(
                 filename_index).toString())
+            selected_file_id = str(tablemodel.data(
+                fileid_index).toString())
             selected_row = row
             i += 1
 
         if any_row_selected:
             menu = QtGui.QMenu()
             fileDeleteFromTableAction = menu.addAction('Delete file')
-            action = menu.exec_(self.ui_single_file_upload.files_queue_table_widget.mapToGlobal(position))
+            action = menu.exec_(self.file_manager_ui.files_list_tableview.mapToGlobal(position))
 
             if action == fileDeleteFromTableAction:
                 # ask user and delete if sure
@@ -180,13 +193,35 @@ class MainUI(QtGui.QMainWindow):
                     'Question',
                     'Are you sure that you want to permanently remove file '
                     '"%s" ?' %
-                    str(self.current_selected_file_name),
+                    str(selected_file_name),
                     QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
 
                 result = msgBox.exec_()
 
                 if result == QtGui.QMessageBox.Yes:
-                    self.ui_single_file_upload.files_queue_table_widget.removeRow(int(selected_row))
+                    try:
+                        self.storj_engine.storj_client.file_remove(
+                            str(self.current_selected_bucket_id), str(selected_file_id))
+                        # update files list
+                        self.createNewFileListUpdateThread()
+                        QtGui.QMessageBox.about(
+                            self,
+                            'Success',
+                            'File "%s" has been deleted successfully' % selected_file_name)
+                    except sjexc.StorjBridgeApiError as e:
+                        self.__logger.error(e)
+                        QtGui.QMessageBox.about(
+                            self,
+                            'Error',
+                            'Bridge exception occured while trying to delete file: %s' % e)
+
+                    except Exception as e:
+                        self.__logger.error(e)
+                        QtGui.QMessageBox.about(
+                            self,
+                            'Error',
+                            'Unhandled exception occured while trying to delete file: %s' % e)
+
                     print "Delete action"
 
     def dragEnterEvent(self, event):
