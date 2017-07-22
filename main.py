@@ -16,7 +16,7 @@ from UI.resources.constants import SHOW_TRAY_ICON
 from UI.resources.sync_constants import SYNC_ENABLED
 from UI.utilities.synchronization_core import SyncObserverWorker
 from UI.utilities.backend_config import Configuration
-from UI.utilities.storj_synchronization_daemon import StorjSynchronizationDaemon
+#from UI.utilities.storj_synchronization_daemon import StorjSynchronizationDaemon
 from UI.utilities.storj_synchronization_background_server import start_storj_sync_server_thread
 from UI.utilities.tools import Tools
 from UI.resources.constants import RUN_IN_BACKGROUND_AFTER_CLOSE
