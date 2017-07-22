@@ -25,6 +25,7 @@ from engine import StorjEngine
 from qt_interfaces.file_upload_new import Ui_SingleFileUpload
 from utilities.backend_config import Configuration
 from utilities.tools import Tools
+from node_details import NodeDetailsUI
 
 from resources.html_strings import html_format_begin, html_format_end
 from resources.constants import MAX_RETRIES_UPLOAD_TO_SAME_FARMER, \
@@ -38,7 +39,7 @@ from resources.internal_backend_config_variables import APPLY_SELECTED_BUCKET_TO
 class SingleFileUploadUI(QtGui.QMainWindow):
     __logger = logging.getLogger('%s.SingleFileUploadUI' % __name__)
 
-    def __init__(self, parent=None, bucketid=None, fileid=None, dashboard_instance=None):
+    def __init__(self, parent=None, bucketid=None, filepath=None, start=False, dashboard_instance=None, row_data=None):
         QtGui.QWidget.__init__(self, parent)
         self.ui_single_file_upload = Ui_SingleFileUpload()
         self.ui_single_file_upload.setupUi(self)
@@ -46,6 +47,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.file_path.setDragEnabled(True)
         self.ui_single_file_upload.file_path.setAcceptDrops(True)
         self.ui_single_file_upload.file_path.installEventFilter(self)
+
+        self.first_bucket_id = bucketid
 
         self.upload_started = False
         # open bucket manager
@@ -80,11 +83,20 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.files_queue_table_widget.setContextMenuPolicy(
             QtCore.Qt.CustomContextMenu)
 
+        self.ui_single_file_upload.shard_queue_table_widget.setContextMenuPolicy(
+            QtCore.Qt.CustomContextMenu)
+
         self.ui_single_file_upload.files_queue_table_widget. \
             customContextMenuRequested.connect(
             partial(self.display_files_table_context_menu))
 
+        self.ui_single_file_upload.shard_queue_table_widget. \
+            customContextMenuRequested.connect(
+            partial(self.display_shards_queue_table_context_menu))
+
         self.already_used_farmers_nodes = []
+
+        self.configuration = Configuration()
 
         self.tools = Tools()
 
@@ -173,12 +185,27 @@ class SingleFileUploadUI(QtGui.QMainWindow):
 
         self.clip = QtGui.QApplication.clipboard()
 
+        # apply shard size from configuration to number edit field
+        self.ui_single_file_upload.max_shard_size.setMaximum(9999999)
+
+        self.ui_single_file_upload.max_shard_size.setValue(int(self.configuration.max_shard_size_united()))
+        self.ui_single_file_upload.shard_size_unit.setCurrentIndex(int(self.configuration.max_shard_size_unit()))
+
+
+
         self.ui_single_file_upload.connections_onetime.setMaximum(MAX_ALLOWED_UPLOAD_CONCURRENCY)
 
         if DATA_TABLE_EDIT_ENABLED == False:
             self.ui_single_file_upload.shard_queue_table_widget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
 
         self.current_row = 0
+
+        if start:
+            self.add_row_files_queue_table(row_data)
+            self.check_next_files_to_upload()
+            self.current_selected_bucket_id = dashboard_instance.current_selected_bucket_id
+
+
 
 
     def disable_buttons_for_upload(self):
@@ -360,6 +387,35 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         return True
 
 
+    def display_shards_queue_table_context_menu(self, position):
+        tablemodel = self.ui_single_file_upload.shard_queue_table_widget.model()
+        rows = sorted(set(index.row() for index in
+                          self.ui_single_file_upload.shard_queue_table_widget.
+                          selectedIndexes()))
+        i = 0
+        selected_row = 0
+        any_row_selected = False
+        for row in rows:
+            any_row_selected = True
+            node_index = tablemodel.index(row, 2)  # get nodeID
+            # We suppose data are strings
+            selected_node_addr = str(tablemodel.data(
+                node_index).toString())
+            selected_node_addr_parsed = selected_node_addr.split("/")
+            selected_row = row
+            i += 1
+
+        if any_row_selected:
+            menu = QtGui.QMenu()
+            nodeDetailsAction = menu.addAction('Node details...')
+            action = menu.exec_(self.ui_single_file_upload.shard_queue_table_widget.mapToGlobal(position))
+
+            if action == nodeDetailsAction:
+                self.node_details_window = NodeDetailsUI(self, selected_node_addr_parsed[1])
+                self.node_details_window.show()
+                print "Node details requested"
+
+
     def display_files_table_context_menu(self, position):
         tablemodel = self.ui_single_file_upload.files_queue_table_widget.model()
         rows = sorted(set(index.row() for index in
@@ -414,11 +470,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         # self.animation.setDuration(1000) #Default 250ms
 
         if self.is_files_queue_table_visible:
-            self.animation.setEndValue(QtCore.QSize(980, 590))
+            self.animation.setEndValue(QtCore.QSize(980, 611))
             self.is_files_queue_table_visible = False
             self.ui_single_file_upload.files_list_view_bt.setPixmap(QtGui.QPixmap(":/resources/rarrow.png"))
         else:
-            self.animation.setEndValue(QtCore.QSize(1371, 590))
+            self.animation.setEndValue(QtCore.QSize(1371, 611))
             self.is_files_queue_table_visible = True
             self.ui_single_file_upload.files_list_view_bt.setPixmap(QtGui.QPixmap(":/resources/larrow.jpg"))
 
@@ -587,7 +643,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.upload_queue_table_row_count, 1, QtGui.QTableWidgetItem(row_data['hash']))
         self.ui_single_file_upload.shard_queue_table_widget.setItem(
             self.upload_queue_table_row_count, 2, QtGui.QTableWidgetItem(
-                '%s:%d' % (row_data['farmer_address'], row_data['farmer_port'])))
+                '%s:%d' % (row_data['farmer_address'], row_data['farmer_port']) + "/" + row_data['farmer_id']))
         self.ui_single_file_upload.shard_queue_table_widget.setItem(
             self.upload_queue_table_row_count, 3, QtGui.QTableWidgetItem(
                 str(row_data['state'])))
@@ -676,6 +732,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         tablerowdata = {}
         tablerowdata['farmer_address'] = frame_content['farmer']['address']
         tablerowdata['farmer_port'] = frame_content['farmer']['port']
+        tablerowdata['farmer_id'] = frame_content['farmer']['nodeID']
         tablerowdata['hash'] = str(shard.hash)
         tablerowdata['state'] = 'Uploading...'
         tablerowdata['token'] = frame_content['token']
@@ -1052,7 +1109,6 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
         self.tmp_path = str(self.ui_single_file_upload.tmp_path.text())
         self.__logger.debug('Temporary path chosen: %s' % self.tmp_path)
 
-        self.configuration = Configuration()
 
         # TODO: redundant lines?
         # get temporary files path
@@ -1068,9 +1124,14 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
 
         if self.validation["file_path"]:
 
-            self.current_bucket_index = self.ui_single_file_upload.save_to_bucket_select.currentIndex()
-            self.current_selected_bucket_id = self.bucket_id_list[self.current_bucket_index]
+            try:
+                self.current_bucket_index = self.ui_single_file_upload.save_to_bucket_select.currentIndex()
+                self.current_selected_bucket_id = self.bucket_id_list[self.current_bucket_index]
+            except:
+                print "Error"
+
             bucket_id = str(self.current_selected_bucket_id)
+
 
             bname = os.path.split(file_path)[1]  # File name
 
@@ -1205,11 +1266,13 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
             self.__logger.debug('Sharding')
             self.__logger.debug('Splitting file to shards...')
 
-            max_shard_size_setting = self.configuration.max_shard_size()
+            max_shard_size_setting = self.tools.generate_max_shard_size(
+                max_shard_size_input=self.ui_single_file_upload.max_shard_size.value(),
+                shard_size_unit=int(self.ui_single_file_upload.shard_size_unit.currentIndex()))
             print str(max_shard_size_setting) + " max shard size"
             shards_manager = storj.model.ShardManager(filepath=file_path_ready,
                                                       tmp_path=self.tmp_path,
-                                                      max_shard_size=int(max_shard_size_setting))
+                                                      max_shard_size=int(max_shard_size_setting)/2)
             self.all_shards_count = len(shards_manager.shards)
             self.emit(QtCore.SIGNAL("updateShardUploadCounters"))
 
