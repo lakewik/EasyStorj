@@ -9,6 +9,7 @@ from PyQt4 import QtCore, QtGui
 from .mainUI import MainUI
 from .qt_interfaces.login_ui_new import Ui_Login
 from .utilities.account_manager import AccountManager
+from resources.constants import DEFAULT_BRIDGE_API_URL
 
 
 # Login section
@@ -16,7 +17,7 @@ class LoginUI(QtGui.QMainWindow):
 
     __logger = logging.getLogger('%s.LoginUI' % __name__)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, init_window=None):
         QtGui.QWidget.__init__(self, parent)
 
         # Login UI
@@ -26,6 +27,8 @@ class LoginUI(QtGui.QMainWindow):
         # Account manager
         self.login_ui.password.setEchoMode(QtGui.QLineEdit.Password)
 
+        self.login_ui.bridge_url.setText(DEFAULT_BRIDGE_API_URL)
+
         QtCore.QObject.connect(self.login_ui.login_bt,
                                QtCore.SIGNAL('clicked()'),
                                self.login)  # Take login action
@@ -34,6 +37,10 @@ class LoginUI(QtGui.QMainWindow):
         # Take login action
         self.email = str(self.login_ui.email.text()).strip()
         self.password = str(self.login_ui.password.text()).strip()
+        self.bridge_api_url = str(self.login_ui.bridge_url.text()).strip()  # get bridge api url
+
+        if self.bridge_api_url == "":
+            self.bridge_api_url = DEFAULT_BRIDGE_API_URL
 
         self.storj_client = storj.Client(email=self.email,
                                          password=self.password)
