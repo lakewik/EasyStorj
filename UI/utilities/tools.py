@@ -5,6 +5,9 @@ import pingparser
 from os.path import expanduser
 import tempfile
 import errno
+import hashlib
+import requests
+SYNC_SERVER_URL = "http://localhost:8234"
 
 class Tools:
     def encrypt_file_name(self):
@@ -37,6 +40,13 @@ class Tools:
             return True
 
     def measure_ping_latency(self, destination_host):
+        """
+                Measure ping latency of a host
+                Args:
+                    destination_host (str): the ip of the host
+                Returns:
+                    ():
+        """
         ping_latency = str(os.system(
             "ping " + ("-n 1 " if platform.system().lower() == "windows" else "-c 1 ") + str(destination_host)))
 
@@ -71,11 +81,22 @@ class Tools:
         return "%s %s" % (formatted_size, suffix)
 
     def get_home_user_directory(self):
+        """
+               Get the path of current user's home folder
+               Returns:
+                   (str): the extended path of the home
+        """
         home = expanduser("~")
         return str(home)
 
     def count_directory_size(self, directory, include_subdirs):
-
+        """
+               Args:
+                   directory (str): the directory
+                   include_subdirs (bool): include subdirs or not
+               Returns:
+                   total_size (int): total size of the directory
+        """
         if include_subdirs:
             start_path = str(directory)
             total_size = 0
@@ -89,6 +110,41 @@ class Tools:
         return total_size
 
     def count_files_in_dir(self, directory, include_subdirs=False):
+        """
+        Get the number of files in a directory
+        Args:
+            directory (str): the name of the directory
+            include_subdirs (bool): include subdirs or not
+        Returns:
+            files_count (int): number of files in dir
+        """
         files_count = len([name for name in os.listdir(str(directory)) if os.path.isfile(os.path.join(str(directory), name))])
         return files_count
+
+    def start_synchronization_observer(self):
+        data = "start_sync_observer"
+
+        return requests.post(SYNC_SERVER_URL, data=data).text
+
+    def stop_synchronization_observer(self):
+        data = "stop_sync_observer"
+
+        return requests.post(SYNC_SERVER_URL, data=data).text
+
+    def is_sync_observer_active(self):
+        data = "is_sync_active"
+
+        return requests.post(SYNC_SERVER_URL, data=data).text
+
+    def generate_max_shard_size(self, max_shard_size_input, shard_size_unit):
+        if shard_size_unit == 0:  # KB:
+            max_shard_size = (max_shard_size_input * 2048)
+        elif shard_size_unit == 1:  # MB:
+            max_shard_size = (max_shard_size_input * 1024 * 2048)
+        elif shard_size_unit == 2:  # GB:
+            max_shard_size = (max_shard_size_input * 1024 * 1024 * 2048)
+        elif shard_size_unit == 3:  # TB:
+            max_shard_size = (max_shard_size_input * 1024 * 1024 * 1024 * 2048)
+
+        return max_shard_size
 

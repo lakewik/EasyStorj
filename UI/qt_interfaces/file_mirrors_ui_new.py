@@ -117,7 +117,7 @@ class Ui_FileMirrorsList(object):
         self.available_mirrors_count.setFont(font)
         self.available_mirrors_count.setObjectName(_fromUtf8("available_mirrors_count"))
         self.mirror_details_bt = QtGui.QPushButton(FileMirrorsList)
-        self.mirror_details_bt.setGeometry(QtCore.QRect(190, 450, 271, 31))
+        self.mirror_details_bt.setGeometry(QtCore.QRect(110, 450, 271, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -141,7 +141,7 @@ class Ui_FileMirrorsList(object):
         self.mirror_details_bt.setObjectName(_fromUtf8("mirror_details_bt"))
         self.mirror_details_bt_2 = QtGui.QPushButton(FileMirrorsList)
         self.mirror_details_bt_2.setEnabled(True)
-        self.mirror_details_bt_2.setGeometry(QtCore.QRect(790, 450, 291, 31))
+        self.mirror_details_bt_2.setGeometry(QtCore.QRect(910, 450, 291, 31))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(12)
@@ -192,6 +192,52 @@ class Ui_FileMirrorsList(object):
         self.loading_img.setText(_fromUtf8(""))
         self.loading_img.setScaledContents(True)
         self.loading_img.setObjectName(_fromUtf8("loading_img"))
+        self.contract_details_bt = QtGui.QPushButton(FileMirrorsList)
+        self.contract_details_bt.setGeometry(QtCore.QRect(390, 450, 221, 31))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.contract_details_bt.setFont(font)
+        self.contract_details_bt.setStyleSheet(_fromUtf8("QPushButton:hover{\n"
+"  background-color: #83bf20;\n"
+"  border-color: #83bf20;\n"
+"}\n"
+"QPushButton:active {\n"
+"  background-color: #93cc36;\n"
+"  border-color: #93cc36;\n"
+"}\n"
+"QPushButton{\n"
+"  background-color: #88c425;\n"
+"    border: 1px solid #88c425;\n"
+"    color: #fff;\n"
+"    border-radius: 7px;\n"
+"}"))
+        self.contract_details_bt.setObjectName(_fromUtf8("contract_details_bt"))
+        self.contract_details_bt_2 = QtGui.QPushButton(FileMirrorsList)
+        self.contract_details_bt_2.setGeometry(QtCore.QRect(680, 450, 221, 31))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.contract_details_bt_2.setFont(font)
+        self.contract_details_bt_2.setStyleSheet(_fromUtf8("QPushButton:hover{\n"
+"  background-color: #83bf20;\n"
+"  border-color: #83bf20;\n"
+"}\n"
+"QPushButton:active {\n"
+"  background-color: #93cc36;\n"
+"  border-color: #93cc36;\n"
+"}\n"
+"QPushButton{\n"
+"  background-color: #88c425;\n"
+"    border: 1px solid #88c425;\n"
+"    color: #fff;\n"
+"    border-radius: 7px;\n"
+"}"))
+        self.contract_details_bt_2.setObjectName(_fromUtf8("contract_details_bt_2"))
 
         self.retranslateUi(FileMirrorsList)
         QtCore.QMetaObject.connectSlotsByName(FileMirrorsList)
@@ -211,5 +257,7 @@ class Ui_FileMirrorsList(object):
         self.mirror_details_bt.setText(_translate("FileMirrorsList", "MORE MIRROR DETAILS", None))
         self.mirror_details_bt_2.setText(_translate("FileMirrorsList", "MORE MIRROR DETAILS", None))
         self.quit_bt.setText(_translate("FileMirrorsList", "CLOSE", None))
+        self.contract_details_bt.setText(_translate("FileMirrorsList", "CONTRACT DETAILS", None))
+        self.contract_details_bt_2.setText(_translate("FileMirrorsList", "CONTRACT DETAILS", None))
 
 import resources_rc

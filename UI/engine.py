@@ -16,11 +16,10 @@ class StorjEngine:
             # initialize Storj
             max_bridge_request_timeout = self.conf_manager.get_max_bridge_request_timeout()
             bridge_api_url = self.conf_manager.get_bridge_api_url()
-            print "Using Bridge timeout: " + str(max_bridge_request_timeout)
             self.storj_client = storj.Client(email=self.email,
                                              password=self.password,
                                              do_hashing=False,
                                              timeout=max_bridge_request_timeout,
                                              storj_bridge=bridge_api_url)
-            logger.debug("Login from credentials xml file")
-        logger.debug("testlogin, StorjEngine")
+            logger.debug('Login from credentials xml file')
+        logger.debug('testlogin, StorjEngine')

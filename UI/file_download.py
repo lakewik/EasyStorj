@@ -32,6 +32,7 @@ from .resources.constants import USE_USER_ENV_PATH_FOR_TEMP, \
     MAX_POINTERS_RESOLVED_IN_ONE_PART, GET_DEFAULT_TMP_PATH_FROM_ENV_VARIABLES, \
     GET_HOME_PATH_FROM_ENV_VARIABLES
 
+from node_details import NodeDetailsUI
 
 queue = Queue.Queue()
 row_lock = threading.Lock()
@@ -238,13 +239,29 @@ class SingleFileDownloadUI(QtGui.QMainWindow):
                           selectedIndexes()))
         i = 0
         selected_row = 0
+        any_row_selected = False
         for row in rows:
+            any_row_selected = True
             index = tablemodel.index(row, 4)  # get shard Index
+            farmer_addr_index = tablemodel.index(row, 2)  # get Farmer Address index
             # We suppose data are strings
             self.current_selected_shard_index = str(tablemodel.data(
                 index).toString())
+            selected_node_addr = str(tablemodel.data(
+                farmer_addr_index).toString())
+            selected_node_addr_parsed = selected_node_addr.split("/")
             selected_row = row
             i += 1
+
+        if any_row_selected:
+            menu = QtGui.QMenu()
+            nodeDetailsAction = menu.addAction('Node details...')
+            action = menu.exec_(self.ui_single_file_download.shard_queue_table.mapToGlobal(position))
+
+            if action == nodeDetailsAction:
+                self.node_details_window = NodeDetailsUI(self, selected_node_addr_parsed[1])
+                self.node_details_window.show()
+                print "Node details requested"
 
         # Check if checked and if it is in progress
         if ALLOW_DOWNLOAD_FARMER_POINTER_CANCEL_BY_USER and i == 1\
@@ -339,7 +356,7 @@ this window?",
             self.download_queue_table_row_count, 2,
             QtGui.QTableWidgetItem('%s:%s' % (
                 row_data['farmer_address'],
-                row_data['farmer_port'])))
+                row_data['farmer_port']) + "/" + row_data['farmer_id']))
         self.ui_single_file_download.shard_queue_table.setItem(
             self.download_queue_table_row_count, 3,
             QtGui.QTableWidgetItem(str(row_data['state'])))
@@ -358,6 +375,7 @@ this window?",
         tablerowdata = {}
         tablerowdata['farmer_address'] = pointers_content['farmer']['address']
         tablerowdata['farmer_port'] = pointers_content['farmer']['port']
+        tablerowdata['farmer_id'] = pointers_content['farmer']['nodeID']
         tablerowdata['hash'] = str(pointers_content['hash'])
         tablerowdata['state'] = 'Downloading...'
         tablerowdata['shard_index'] = str(chapters)
@@ -520,17 +538,17 @@ this window?",
             fileisencrypted = True
 
         # Join shards
-        sharding_tools = ShardingTools()
+        sharing_tools = ShardingTools()
         self.emit(QtCore.SIGNAL('setCurrentState'), 'Joining shards...')
         self.__logger.debug('Joining shards...')
 
         if fileisencrypted:
-            sharding_tools.join_shards(
+            sharing_tools.join_shards(
                 os.path.join(self.tmp_path, file_name),
                 '-',
                 '%s.encrypted' % self.destination_file_path)
         else:
-            sharding_tools.join_shards(
+            sharing_tools.join_shards(
                 os.path.join(self.tmp_path, file_name),
                 '-',
                 self.destination_file_path)

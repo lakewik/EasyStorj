@@ -3,6 +3,7 @@
 
 import logging
 import threading
+from functools import partial
 
 import storj.exception as sjexc
 
@@ -40,7 +41,7 @@ class MainUI(QtGui.QMainWindow):
 
     __logger = logging.getLogger('%s.MainUI' % __name__)
 
-    def __init__(self, parent=None, bucketid=None):
+    def __init__(self, parent=None, bucketid=None, encryption_key_seed=None):
         QtGui.QWidget.__init__(self, parent)
         self.file_manager_ui = Ui_MainMenu()
         self.file_manager_ui.setupUi(self)
@@ -150,15 +151,91 @@ class MainUI(QtGui.QMainWindow):
 
         # self.file_manager_ui.new_file_upload_bt.mouseReleaseEvent()
 
+        # Context menu policy
+
+        self.file_manager_ui.files_list_tableview.setContextMenuPolicy(
+            QtCore.Qt.CustomContextMenu)
+
+        self.file_manager_ui.files_list_tableview. \
+            customContextMenuRequested.connect(
+            partial(self.display_files_list_context_menu))
+
+
+    def display_files_list_context_menu(self, position):
+        tablemodel = self.file_manager_ui.files_list_tableview.model()
+        rows = sorted(set(index.row() for index in
+                          self.file_manager_ui.files_list_tableview.
+                          selectedIndexes()))
+        i = 0
+        selected_row = 0
+        any_row_selected = False
+        for row in rows:
+            any_row_selected = True
+            fileid_index = tablemodel.index(row, 2)  # get fileid Index
+            filename_index = tablemodel.index(row, 0)  # get filename Index
+            # We suppose data are strings
+            selected_file_name = str(tablemodel.data(
+                filename_index).toString())
+            selected_file_id = str(tablemodel.data(
+                fileid_index).toString())
+            selected_row = row
+            i += 1
+
+        if any_row_selected:
+            menu = QtGui.QMenu()
+            fileDeleteFromTableAction = menu.addAction('Delete file')
+            action = menu.exec_(self.file_manager_ui.files_list_tableview.mapToGlobal(position))
+
+            if action == fileDeleteFromTableAction:
+                # ask user and delete if sure
+                msgBox = QtGui.QMessageBox(
+                    QtGui.QMessageBox.Question,
+                    'Question',
+                    'Are you sure that you want to permanently remove file '
+                    '"%s" ?' %
+                    str(selected_file_name),
+                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+
+                result = msgBox.exec_()
+
+                if result == QtGui.QMessageBox.Yes:
+                    try:
+                        self.storj_engine.storj_client.file_remove(
+                            str(self.current_selected_bucket_id), str(selected_file_id))
+                        # update files list
+                        self.createNewFileListUpdateThread()
+                        QtGui.QMessageBox.about(
+                            self,
+                            'Success',
+                            'File "%s" has been deleted successfully' % selected_file_name)
+                    except sjexc.StorjBridgeApiError as e:
+                        self.__logger.error(e)
+                        QtGui.QMessageBox.about(
+                            self,
+                            'Error',
+                            'Bridge exception occured while trying to delete file: %s' % e)
+
+                    except Exception as e:
+                        self.__logger.error(e)
+                        QtGui.QMessageBox.about(
+                            self,
+                            'Error',
+                            'Unhandled exception occured while trying to delete file: %s' % e)
+
+                    print "Delete action"
+
     def dragEnterEvent(self, event):
-        print "rzucono"
         if event.mimeData().hasUrls:
             event.accept()
-            print "tak"
         else:
             event.ignore()
         for path in event.mimeData().urls():
-            print path
+            row_data = {}
+            row_data["file_path"] = str(event.mimeData().text()).replace("file://", "").replace('\n', "").replace('\r', "")
+            self.single_file_upload_window = SingleFileUploadUI(self, dashboard_instance=self, start=True, row_data=row_data)
+
+            self.single_file_upload_window.show()
+
         print event.mimeData().text()
 
 

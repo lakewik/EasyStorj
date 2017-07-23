@@ -25,6 +25,7 @@ except AttributeError:
 class Ui_NodeDetails(object):
     def setupUi(self, NodeDetails):
         NodeDetails.setObjectName(_fromUtf8("NodeDetails"))
+        NodeDetails.setEnabled(True)
         NodeDetails.resize(661, 397)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
@@ -46,6 +47,7 @@ class Ui_NodeDetails(object):
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Window, brush)
         NodeDetails.setPalette(palette)
+        NodeDetails.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
         NodeDetails.setAutoFillBackground(False)
         NodeDetails.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.ok_bt = QtGui.QPushButton(NodeDetails)
@@ -294,12 +296,34 @@ class Ui_NodeDetails(object):
         font.setWeight(75)
         self.label_23.setFont(font)
         self.label_23.setObjectName(_fromUtf8("label_23"))
+        self.label_34 = QtGui.QLabel(NodeDetails)
+        self.label_34.setGeometry(QtCore.QRect(20, 350, 101, 21))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_34.setFont(font)
+        self.label_34.setObjectName(_fromUtf8("label_34"))
+        self.last_seen_label = QtGui.QLabel(NodeDetails)
+        self.last_seen_label.setGeometry(QtCore.QRect(130, 350, 401, 20))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.last_seen_label.setFont(font)
+        self.last_seen_label.setStyleSheet(_fromUtf8("QLabel{\n"
+"color: #2683ff;\n"
+"}\n"
+""))
+        self.last_seen_label.setObjectName(_fromUtf8("last_seen_label"))
 
         self.retranslateUi(NodeDetails)
         QtCore.QMetaObject.connectSlotsByName(NodeDetails)
 
     def retranslateUi(self, NodeDetails):
-        NodeDetails.setWindowTitle(_translate("NodeDetails", "Mirror node details - Storj GUI", None))
+        NodeDetails.setWindowTitle(_translate("NodeDetails", "Farmer node details - Storj GUI", None))
         self.ok_bt.setText(_translate("NodeDetails", "CLOSE", None))
         self.label_15.setText(_translate("NodeDetails", "<html><head/><body><p><span style=\" color:#555555;\">NODE ID:</span></p></body></html>", None))
         self.timeout_rate_label.setText(_translate("NodeDetails", "<html><head/><body><p><span style=\" color:#2683ff;\">0.00002</span></p></body></html>", None))
@@ -321,4 +345,6 @@ class Ui_NodeDetails(object):
         self.node_id_label.setText(_translate("NodeDetails", "<html><head/><body><p><span style=\" color:#2683ff;\">489BH9UIREVFNJDV3U84IREKD0OXUFLJ67TY</span></p></body></html>", None))
         self.ping_label.setText(_translate("NodeDetails", "<html><head/><body><p><span style=\" color:#2683ff;\">N/A</span></p></body></html>", None))
         self.label_23.setText(_translate("NodeDetails", "<html><head/><body><p><span style=\" color:#555555;\">PING:</span></p></body></html>", None))
+        self.label_34.setText(_translate("NodeDetails", "<html><head/><body><p><span style=\" color:#555555;\">LAST SEEN:</span></p></body></html>", None))
+        self.last_seen_label.setText(_translate("NodeDetails", "<html><head/><body><p><span style=\" color:#2683ff;\">01.01.2025T11:11:11.ZZZZ</span></p></body></html>", None))
 
