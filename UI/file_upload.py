@@ -159,6 +159,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.connect(self, QtCore.SIGNAL('paintPUSHToken'), self.paint_push_token)
         self.connect(self, QtCore.SIGNAL('setOverallProgress'), self.paint_overall_progress)
         self.connect(self, QtCore.SIGNAL('disableButtonsForUpload'), self.disable_buttons_for_upload)
+        self.connect(self, QtCore.SIGNAL('updateOngoingBridgeRequests'), self.update_ongoing_bridge_requests)
+
         # self.connect(self, QtCore.SIGNAL('handleCancelAction'), self.ha)
 
         # resolve buckets and put to buckets combobox
@@ -191,7 +193,7 @@ class SingleFileUploadUI(QtGui.QMainWindow):
         self.ui_single_file_upload.max_shard_size.setValue(int(self.configuration.max_shard_size_united()))
         self.ui_single_file_upload.shard_size_unit.setCurrentIndex(int(self.configuration.max_shard_size_unit()))
 
-
+        self.ongoing_bridge_requests = 0
 
         self.ui_single_file_upload.connections_onetime.setMaximum(MAX_ALLOWED_UPLOAD_CONCURRENCY)
 
@@ -206,7 +208,8 @@ class SingleFileUploadUI(QtGui.QMainWindow):
             self.current_selected_bucket_id = dashboard_instance.current_selected_bucket_id
 
 
-
+    def update_ongoing_bridge_requests(self):
+        self.ui_single_file_upload.ongoing_bridge_requests.setText(str(self.ongoing_bridge_requests))
 
     def disable_buttons_for_upload(self):
         self.ui_single_file_upload.connections_onetime.setEnabled(False)
@@ -744,9 +747,11 @@ class SingleFileUploadUI(QtGui.QMainWindow):
                      with: "' +
                             str(frame_content["farmer"]["address"]) + ":" +
                             str(frame_content["farmer"]["port"]))
+        self.ongoing_bridge_requests -= 1
 
         # add row to table
         self.emit(QtCore.SIGNAL('addRowToUploadQueueTable'), tablerowdata)
+        self.emit(QtCore.SIGNAL('updateOngoingBridgeRequests'))
 
         rowcount = self.ui_single_file_upload.shard_queue_table_widget.rowCount()
         return rowcount
@@ -799,10 +804,14 @@ shard at index %s' % chapters)
                     QtCore.SIGNAL('setCurrentUploadState'),
                     'Trying to negotiate storage contract for shard at index %s... Retry %s... ' % (
                         str(chapters), contract_negotiation_tries))
+                self.ongoing_bridge_requests += 1
+                self.emit(QtCore.SIGNAL('updateOngoingBridgeRequests'))
             else:
                 self.emit(
                     QtCore.SIGNAL('setCurrentUploadState'),
                     'Trying to negotiate storage contract for shard at index %s...' % str(chapters))
+                self.ongoing_bridge_requests += 1
+                self.emit(QtCore.SIGNAL('updateOngoingBridgeRequests'))
 
             try:
                 if FARMER_NODES_EXCLUSION_FOR_UPLOAD_ENABLED:
@@ -992,6 +1001,8 @@ shard at index %s' % chapters)
                 self.__logger.error('Bridge exception')
                 self.__logger.error('Exception raised while trying \
 to negotiate storage contract for shard at index %s' % chapters)
+                self.ongoing_bridge_requests -= 1
+                self.emit(QtCore.SIGNAL('updateOngoingBridgeRequests'))
                 continue
 
             except Exception as e:
@@ -1015,6 +1026,8 @@ to upload shard or negotiate contract for shard at index %s. Retrying...' % str(
                     QtCore.SIGNAL('setCurrentUploadState'),
                     'Sending Exchange Report for shard %s' % str(chapters + 1))
                 # self.storj_engine.storj_client.send_exchange_report(exchange_report) # send exchange report
+                self.ongoing_bridge_requests -= 1
+                self.emit(QtCore.SIGNAL('updateOngoingBridgeRequests'))
                 continue
 
             # uploaded with success
