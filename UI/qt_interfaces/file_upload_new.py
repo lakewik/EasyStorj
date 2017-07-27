@@ -202,7 +202,7 @@ class Ui_SingleFileUpload(object):
         self.tmp_path.setGeometry(QtCore.QRect(130, 100, 801, 31))
         self.tmp_path.setObjectName(_fromUtf8("tmp_path"))
         self.encrypt_files_checkbox = QtGui.QCheckBox(SingleFileUpload)
-        self.encrypt_files_checkbox.setGeometry(QtCore.QRect(20, 140, 171, 41))
+        self.encrypt_files_checkbox.setGeometry(QtCore.QRect(390, 140, 141, 41))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(11)
@@ -436,6 +436,28 @@ class Ui_SingleFileUpload(object):
         self.shard_size_unit.addItem(_fromUtf8(""))
         self.shard_size_unit.addItem(_fromUtf8(""))
         self.shard_size_unit.addItem(_fromUtf8(""))
+        self.label_19 = QtGui.QLabel(SingleFileUpload)
+        self.label_19.setGeometry(QtCore.QRect(20, 150, 261, 20))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_19.setFont(font)
+        self.label_19.setObjectName(_fromUtf8("label_19"))
+        self.ongoing_bridge_requests = QtGui.QLabel(SingleFileUpload)
+        self.ongoing_bridge_requests.setGeometry(QtCore.QRect(280, 150, 101, 16))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(11)
+        font.setBold(True)
+        font.setWeight(75)
+        self.ongoing_bridge_requests.setFont(font)
+        self.ongoing_bridge_requests.setStyleSheet(_fromUtf8("QLabel{\n"
+"color: #2683ff;\n"
+"}\n"
+""))
+        self.ongoing_bridge_requests.setObjectName(_fromUtf8("ongoing_bridge_requests"))
 
         self.retranslateUi(SingleFileUpload)
         self.shard_size_unit.setCurrentIndex(0)
@@ -483,5 +505,7 @@ class Ui_SingleFileUpload(object):
         self.shard_size_unit.setItemText(2, _translate("SingleFileUpload", "GB", None))
         self.shard_size_unit.setItemText(3, _translate("SingleFileUpload", "TB", None))
         self.shard_size_unit.setItemText(4, _translate("SingleFileUpload", "PB", None))
+        self.label_19.setText(_translate("SingleFileUpload", "<html><head/><body><p><span style=\" color:#555555;\">ONGOING BRIDGE REQUESTS:</span></p></body></html>", None))
+        self.ongoing_bridge_requests.setText(_translate("SingleFileUpload", "<html><head/><body><p><span style=\" color:#2683ff;\">0</span></p></body></html>", None))
 
 import resources_rc
