@@ -7,6 +7,7 @@ import tempfile
 import errno
 import hashlib
 import requests
+import miniupnpc
 SYNC_SERVER_URL = "http://localhost:8234"
 
 class Tools:
@@ -147,4 +148,17 @@ class Tools:
             max_shard_size = (max_shard_size_input * 1024 * 1024 * 1024 * 2048)
 
         return max_shard_size
+
+    # NETWORK
+
+    def map_port_UPnP(self, port, description):
+        upnp = miniupnpc.UPnP()
+
+        upnp.discoverdelay = 10
+        upnp.discover()
+
+        upnp.selectigd()
+
+        upnp.addportmapping(port, 'TCP', upnp.lanaddr, port, description, '')
+
 
