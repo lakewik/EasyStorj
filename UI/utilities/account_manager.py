@@ -46,8 +46,15 @@ class AccountManager:
         return logged_in == '1'
 
     def logout(self):
-        self.__logger.debug('TODO')
-        self.__logger.debug('1')
+        print "Log out action"
+        root = ET.Element("account")
+        doc = ET.SubElement(root, "credentials")
+        ET.SubElement(doc, "login_email").text = "0"
+        ET.SubElement(doc, "password").text = "0"
+        ET.SubElement(doc, "logged_in").text = "0"
+        tree = ET.ElementTree(root)
+        tree.write(ACCOUNT_FILE)
+        return True
 
     def get_user_password(self):
         password = ""
