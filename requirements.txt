@@ -2,10 +2,13 @@ beautifulsoup4
 click==6.7
 colorama==0.3.8
 configparser
+cryptography
 ecdsa>=0.13
 ipwhois
 libmagic
 lxml
+pbkdf2
+pyaes
 python-magic
 pycountry
 pycrypto>=2.6.1
@@ -20,5 +23,9 @@ ws4py>=0.3.4
 pycoin>=0.62
 base58>=0.2.4
 logger
+miniupnpc<2.0.1 # <2.0.1 because 2.0.1 does not work on MacOS
+watchdog
 # NOTE: PyQt4 must be install separately.
 # On Debian, this is possible via `sudo apt install python-qt4`
+# On Mac, this is possible via `brew install cartr/qt4/pyqt@4`
+# On Mac, it is recommended to install these requirements with `pip install --user -r requirements.txt` to ensure requirements are installed with your local user to avoid system integrity protection issues
