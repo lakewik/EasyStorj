@@ -75,3 +75,13 @@ class AccountManager:
             self.__logger.error('Credentials file not existing')
 
         return email
+
+    def validate_password_local(self, password):
+        password_hashed = str(hashlib.sha256(password.encode('ascii')).hexdigest())
+        password_from_config = self.get_user_password()
+
+        if password_from_config == password_hashed:
+            return True
+        else:
+            return False
+
