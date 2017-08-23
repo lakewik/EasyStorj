@@ -5,7 +5,7 @@ from threading import Thread
 from ipwhois import IPWhois
 
 from ...ownstorj import app
-#from ...ownstorj import socketio
+# from ...ownstorj import socketio
 
 from ...ownstorj.models.buckets import OwnStorjBuckets
 from ...ownstorj.models.files import OwnStorjFilesManager
@@ -26,11 +26,13 @@ from decimal import *
 import configparser
 import hashlib
 
+
 storj_engine = StorjEngine()  # init StorjEngine
 storj_account_manager = AccountManager()
 
 OwnStorjBucketsManager = OwnStorjBuckets()
 OwnStorjDownloadEngine = OwnStorjDownloadEngine()
+
 
 def initSession():
   try:
@@ -42,7 +44,6 @@ def initSession():
     a = session['logged_in']
   except BaseException:
     session['logged_in'] = False
-
 
 
 def generate_menus_data():
@@ -79,8 +80,6 @@ def login_view():
         return render_template('login.html')
 
 
-
-
 @app.route('/')
 @app.route('/dashboard')
 def dashboard_view():
@@ -96,7 +95,7 @@ def dashboard_view():
 def buckets_list_view(reinfo):
     initSession()
     if session['logged_in']:
-        if reinfo == None:
+        if reinfo is None:
             reinfo = ""
 
         if reinfo == "bucket_created":
@@ -131,7 +130,7 @@ def bucket_add_view(reinfo):
     initSession()
 
     if session['logged_in']:
-        if reinfo == None:
+        if reinfo is None:
             reinfo = ""
 
         if reinfo == "bucket_created":
@@ -143,13 +142,14 @@ def bucket_add_view(reinfo):
     else:
         return make_response(redirect("/login"))
 
+
 @app.route('/files_manager/', defaults={'bucket_id': None})
 @app.route('/files_manager/<bucket_id>')
 def files_manager_view(bucket_id):
     initSession()
 
     if session['logged_in']:
-        if bucket_id != None:
+        if bucket_id is not None:
             bucket_name = OwnStorjBucketsManager.get_bucket_name(bucket_id=bucket_id)
             return render_template('files_manager.html', menu_data=generate_menus_data(), bucket_id=bucket_id,
                                    bucket_name=bucket_name)
@@ -157,6 +157,7 @@ def files_manager_view(bucket_id):
             return redirect("/buckets_list", 301)
     else:
         return make_response(redirect("/login"))
+
 
 @app.route('/files_table/<bucket_id>')
 def files_table_view(bucket_id):
@@ -181,6 +182,7 @@ def settings_view():
     else:
         return make_response(redirect("/login"))
 
+
 @app.route('/sync_settings')
 def sync_settings_view():
     initSession()
@@ -191,6 +193,7 @@ def sync_settings_view():
     else:
         return make_response(redirect("/login"))
 
+
 @app.route('/sync_statistics')
 def sync_statistics_view():
     initSession()
@@ -200,6 +203,7 @@ def sync_statistics_view():
     else:
         return make_response(redirect("/login"))
 
+
 @app.route('/tags_labels_manager')
 def tags_labels_manager_view():
     initSession()
@@ -208,6 +212,7 @@ def tags_labels_manager_view():
         return render_template('tags_labels_manager.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
+
 
 @app.route('/single_file_upload')
 def upload_view():
@@ -228,6 +233,7 @@ def download_view():
     else:
         return make_response(redirect("/login"))
 
+
 @app.route('/favorites')
 def favorites_view():
     initSession()
@@ -247,6 +253,7 @@ def file_mirrors_view(filebucket_id):
     else:
         return make_response(redirect("/login"))
 
+
 @app.route('/established_file_mirrors/<filebucket_id>')
 def established_mirrors_view(filebucket_id):
     initSession()
@@ -265,7 +272,7 @@ def established_mirrors_view(filebucket_id):
         table_break_positions = []
         countries_codes_list = []
         country_codes_array = {}
-        i = 0;
+        i = 0
 
         for file_mirror in temp:
             for mirror in file_mirror.established:
@@ -290,9 +297,11 @@ def established_mirrors_view(filebucket_id):
         print i
         print ownstorj_mirrors.calculate_geodistribution(countries_array=countries_codes_list)
 
-        return render_template('established_mirrors_data.html', table_break_positions=table_break_positions,
-                               established_mirrors_shards_count=established_mirrors_shards_count
-                               , mirrors_data=mirrors_data, mirrors_data_2=mirrors_data_2,
+        return render_template('established_mirrors_data.html',
+                               table_break_positions=table_break_positions,
+                               established_mirrors_shards_count=established_mirrors_shards_count,
+                               mirrors_data=mirrors_data,
+                               mirrors_data_2=mirrors_data_2,
                                established_mirrors_total_nodes_count=established_mirrors_total_nodes_count,
                                country_codes_array=country_codes_array)
     else:
@@ -316,7 +325,7 @@ def available_mirrors_view(filebucket_id):
         available_mirrors_total_nodes_count = 0
         table_break_positions = []
         country_codes_array = {}
-        i = 0;
+        i = 0
 
         for file_mirror in temp:
             for mirror in file_mirror.available:
@@ -342,14 +351,15 @@ def available_mirrors_view(filebucket_id):
                 recent_shard_hash = mirror['shardHash']
         print i
 
-        return render_template('available_mirrors_data.html', table_break_positions=table_break_positions,
-                               available_mirrors_shards_count=available_mirrors_shards_count
-                               , mirrors_data=mirrors_data, mirrors_data_2=mirrors_data_2,
+        return render_template('available_mirrors_data.html',
+                               table_break_positions=table_break_positions,
+                               available_mirrors_shards_count=available_mirrors_shards_count,
+                               mirrors_data=mirrors_data,
+                               mirrors_data_2=mirrors_data_2,
                                available_mirrors_total_nodes_count=available_mirrors_total_nodes_count,
                                country_codes_array=country_codes_array)
     else:
         return make_response(redirect("/login"))
-
 
 
 @app.route('/mirrors_geodistribution/<filebucket_id>')
@@ -400,8 +410,7 @@ def mirrors_geodistribution_view(filebucket_id):
         return make_response(redirect("/login"))
 
 
-def whois_lookup_country (address):
-
+def whois_lookup_country(address):
     IP_addr = socket.gethostbyname(str(address))
     obj = IPWhois(IP_addr)
     res = obj.lookup_whois()
@@ -409,8 +418,9 @@ def whois_lookup_country (address):
 
     return country
 
+
 @app.route('/node_details', methods=['GET'])
-#@app.route('/node_details?nodeID=<nodeID>')
+# @app.route('/node_details?nodeID=<nodeID>')
 def node_details_view():
     initSession()
 
@@ -418,6 +428,7 @@ def node_details_view():
         return render_template('node_details.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
+
 
 @app.route('/node_details_data/<nodeID>')
 def node_details_data_view(nodeID):
@@ -450,6 +461,7 @@ def billing_view():
     else:
         return make_response(redirect("/login"))
 
+
 @app.route('/account_stats')
 def account_stats_view():
     initSession()
@@ -460,29 +472,24 @@ def account_stats_view():
         return make_response(redirect("/login"))
 
 
-
-
 # Public Download Gateway
-
 @app.route('/public_download_gateway/<download_id>')
 def public_download_gateway_endpoint(download_id):
     public_file_sharing_manager = OwnStorjPublicFileSharingManager()
     download_indicators = public_file_sharing_manager.get_public_download_indicators(public_download_hash_url=download_id)
 
-    pointer = OwnStorjDownloadEngine.get_pointer_for_single_shard_download(bucket_id="ef92512a30fab77facaf334a", file_id="3deb3890a445279c648d17a0")
+    pointer = OwnStorjDownloadEngine.get_pointer_for_single_shard_download(
+        bucket_id="ef92512a30fab77facaf334a", file_id="3deb3890a445279c648d17a0")
     ready_farmer_url = 'http://%s:%s/shards/%s?token=%s' % (
-                pointer.get('farmer')['address'],
-                str(pointer.get('farmer')['port']),
-                pointer['hash'],
-                pointer['token'])
+        pointer.get('farmer')['address'],
+        str(pointer.get('farmer')['port']),
+        pointer['hash'],
+        pointer['token'])
 
     return redirect(ready_farmer_url)
-    #return render_template('public_download_gateway_screen.html')
-
 
 
 # actions handling
-
 @app.route('/buckets/new', methods=['POST'])
 def add_bucket():
     initSession()
@@ -494,7 +501,7 @@ def add_bucket():
             bucket_name = request.form['bucket_name']
         print bucket_name
 
-        if bucket_name != None:
+        if bucket_name is not None:
             try:
                 storj_engine.storj_client.bucket_create(name=bucket_name, transfer=1, storage=1)
                 success = True
@@ -512,7 +519,6 @@ def add_bucket():
         return response
     else:
         return make_response(redirect("/login"))
-
 
 
 @app.route('/synchronization/settings/save', methods=['POST'])
