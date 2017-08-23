@@ -186,7 +186,8 @@ def sync_settings_view():
     initSession()
 
     if session['logged_in']:
-        return render_template('sync_settings.html', menu_data=generate_menus_data()
+        return render_template('sync_settings.html',
+                               menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
 
