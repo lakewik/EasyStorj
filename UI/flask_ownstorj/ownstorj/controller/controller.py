@@ -35,15 +35,14 @@ OwnStorjDownloadEngine = OwnStorjDownloadEngine()
 
 
 def initSession():
-  try:
-    session['counter'] += 1
-  except KeyError:
-    session['counter'] = 1
-
-  try:
-    a = session['logged_in']
-  except BaseException:
-    session['logged_in'] = False
+    try:
+        session['counter'] += 1
+    except KeyError:
+        session['counter'] = 1
+    try:
+        a = session['logged_in']
+    except BaseException:
+        session['logged_in'] = False
 
 
 def generate_menus_data():
