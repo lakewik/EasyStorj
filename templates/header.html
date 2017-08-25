@@ -1,0 +1,59 @@
+<header class="header">
+                    <div class="header-block header-block-collapse hidden-lg-up"> <button class="collapse-btn" id="sidebar-collapse-btn">
+    			<i class="fa fa-bars"></i>
+    		</button> </div>
+                    <div class="header-block header-block-search hidden-sm-down">
+                        <form role="search">
+                            <div class="input-container"> <i class="fa fa-search"></i> <input type="search" placeholder="Search files & buckets" style="min-width: 100%;">
+                                <div class="underline"></div>
+                            </div>
+                        </form>
+                    </div>
+                    <a href="" class="btn btn-sm header-btn">
+    			 <button type="button" class="btn btn-primary btn-lg" style="margin-top: 10px;"><em class="fa fa-plus"></em> Upload file</button></a>
+
+
+                    <div class="header-block header-block-nav">
+                        <ul class="nav-profile">
+                            <li class="notifications new"> <a href="" data-toggle="dropdown">
+    			    <i class="fa fa-bell-o"></i>
+    			    <sup>
+    			      <span class="counter">0</span>
+    			    </sup>
+    			  </a>
+                                <div class="dropdown-menu notifications-dropdown-menu">
+                                    <ul class="notifications-container">
+
+                                    </ul>
+                                    <footer>
+                                        <ul>
+                                            <li> <a href="">
+    			            View All
+    			          </a> </li>
+                                        </ul>
+                                    </footer>
+                                </div>
+                            </li>
+                            <li class="profile dropdown">
+                                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                                    <div class="img" style="background-image: url('')"> </div> <span class="name">
+    			     {{ menu_data["account_name"] }}
+    			    </span> </a>
+                                <div class="dropdown-menu profile-dropdown-menu" aria-labelledby="dropdownMenu1"> <a class="dropdown-item" href="#">
+    			      <i class="fa fa-user icon"></i>
+    			      Profile
+    			    </a> <a class="dropdown-item" href="#">
+    			      <i class="fa fa-bell icon"></i>
+    			      Notifications
+    			    </a> <a class="dropdown-item" href="#">
+    			      <i class="fa fa-gear icon"></i>
+    			      Settings
+    			    </a>
+                                    <div class="dropdown-divider"></div> <a class="dropdown-item" href="/logout">
+    			      <i class="fa fa-power-off icon"></i>
+    			      Logout
+    			    </a> </div>
+                            </li>
+                        </ul>
+                    </div>
+                </header>
