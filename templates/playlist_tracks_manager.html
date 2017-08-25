@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %} Playlist tracks manager {% endblock %}
+{% set active_page = "playlist_tracks_manager" %}
+
+
+{% block content %}
+
+
+<article class="content item-editor-page">
+                    <div class="title-block">
+                        <h3 class="title"> Playlist tracks manager <span class="sparkline bar" data-type="bar"></span> </h3>
+<hr>
+                        <a style="color: white;" onclick="export_playlist('pls');" class="btn btn-info btn-sm rounded" style="margin-top: 5px;">
+            				Export playlist to *.PLS file
+            			</a>&nbsp;
+                         <a style="color: white;" onclick="export_playlist('m3u');" class="btn btn-info btn-sm rounded" style="margin-top: 5px;">
+            				Export playlist to *.M3U file
+            			</a>
+                        &nbsp;
+                         <a style="color: white;" onclick="export_playlist('xspf');" class="btn btn-info btn-sm rounded" style="margin-top: 5px;">
+            				Export playlist to *.XSPF file
+            			</a>
+                        &nbsp;
+                         <a style="color: white;" onclick="export_playlist('asx');" class="btn btn-info btn-sm rounded" style="margin-top: 5px;">
+            				Export playlist to *.ASX file
+            			</a>
+
+                    </div>
+
+    <div id="track_play_div">
+
+
+    </div>
+
+       <div id="track_add_existing_file">
+       <div id="bucket_select_area" onload="">
+
+
+   </div>
+
+           <div id="options_area">
+<hr>
+               <button type="button" class="btn btn-primary" onclick="make_all_files_public(document.getElementById('bucket_select_optionlist').value, refresh_files_list_call);">Make all files public</button>
+ <button type="button" class="btn btn-primary" onclick="insert_all_files_to_playlist(document.getElementById('bucket_select_optionlist').value, window.location.pathname.split('playlist_tracks_manager/')[1], refresh_tracks_list)">Add all files to playlist</button>
+
+               <br>
+               <hr>
+
+
+
+
+   </div>
+
+
+
+      <div id="files_list_table_content">
+
+
+
+                    </div>
+
+             </div>
+
+                    <div id="playlist_tracks_table_area">
+
+                          <center> <img src="/static/assets/loader1.gif"> </center>
+
+                    </div>
+
+
+
+
+                </article>
+
+  <script src="/static/js/sweetalert-dev.js"></script>
+  <script src="/static/js/swal-forms.js"></script>
+  <link rel="stylesheet" href="/static/css/sweetalert_normal.css">
+  <link rel="stylesheet" href="/static/css/swal-forms.css">
+
+<script>
+
+
+function open_track_edit_window(track_name, track_author="", track_length="", track_description="") {
+
+swal.withFormAsync({
+  title: "Edit track details",
+  text: '',
+  type: "info",
+  showCancelButton: true,
+  closeOnConfirm: false,
+  showLoaderOnConfirm: true,
+  html: true,
+   formFields: [
+       { id: 'name', placeholder:'<font color="red">*</font>Track name', required: true, value: track_name },
+       { id: 'author', placeholder:'Track author:', value: track_author },
+       { id: 'length', placeholder:'Track length (in seconds)', value: track_length },
+       { id: 'description', placeholder:'Track description', value: track_description }
+   ]
+}).then(function (context) {
+    console.log(context._isConfirm);
+    if (context._isConfirm) {
+
+
+      console.log(context.swalForm);
+
+
+httpGet_async("/playlist/new?playlist_name="+context.swalForm.name+"&playlist_description="+context.swalForm.description+"&playlist_category="+context.swalForm.category, function(x) {
+
+//callback();
+
+refresh_playlists_list();
+swal("Success", "Playlist created successfully!", "success");
+
+
+});
+
+
+
+
+    }
+
+  });
+
+}
+
+function refresh_files_list_call() {
+
+refresh_files_list(document.getElementById('bucket_select_optionlist').value, 3);
+
+}
+
+function eject_bucket_select_form() {
+
+
+httpGet_async("/buckets_optionlist", function(x) {
+
+document.getElementById('bucket_select_area').innerHTML = x;
+refresh_files_list_call();
+
+
+});
+
+//$("#bucket_select_area").load("/buckets_optionlist");
+
+
+
+
+}
+
+
+
+function add_existing_file_to_playlist() {
+
+    eject_bucket_select_form();
+
+
+}
+
+function insert_file_to_playlist_db(public_file_hash, bucket_id="") {
+
+var splitted = window.location.pathname.split('playlist_tracks_manager/');
+
+playlist_id = splitted[1];
+
+httpGet_async("/insert_file_to_playlist/"+public_file_hash+"/"+playlist_id, function(x) {
+
+refresh_tracks_list();
+
+});
+
+
+
+}
+
+
+function refresh_tracks_list() {
+
+var splitted = window.location.pathname.split('playlist_tracks_manager/');
+
+    $("#playlist_tracks_table_area").load("/playlist_tracks_table_data/" + splitted[1]);
+
+}
+
+
+function play_track(url="", public_local_file_hash="" ) {
+
+
+var track_play_div = document.getElementById("track_play_div");
+
+track_play_div.innerHTML = '<embed id="embed_player" src="'+url+'" autostart="true" hidden="false"></embed>';
+
+}
+
+
+</script>
+{% endblock %}
