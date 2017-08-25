@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% set active_page = "dashboard" %}
+
+
+{% block content %}
+
+    <article class="content dashboard-page">
+                    <section class="section">
+
+                        <div class="row sameheight-container">
+                            <div class="col col-xs-12 col-sm-12 col-md-6 col-xl-5 stats-col">
+                                <div class="card sameheight-item stats" data-exclude="xs">
+                                    <div class="card-block">
+                                        <div class="title-block">
+                                            <h4 class="title"> Your account statistics </h4>
+                                            <p class="title-description"> Statistics since </p>
+                                        </div>
+                                        <div class="row row-sm stats-container">
+                                            <div class="col-xs-12 col-sm-6 stat-col">
+                                                <div class="stat-icon"> <i class="fa fa-rocket"></i> </div>
+                                                <div class="stat">
+                                                    <div class="value"> {{ files_count }} </div>
+                                                    <div class="name"> Files count </div>
+                                                </div> <progress class="progress stat-progress" value="100" max="100">
+            					<div class="progress">
+            						<span class="progress-bar" style="width: 75%;"></span>
+            					</div>
+            				</progress> </div>
+                                            <div class="col-xs-12 col-sm-6 stat-col">
+                                                <div class="stat-icon"> <i class="fa fa-shopping-cart"></i> </div>
+                                                <div class="stat">
+                                                    <div class="value">  {{ buckets_count }}  </div>
+                                                    <div class="name"> Buckets count </div>
+                                                </div> <progress class="progress stat-progress" value="100" max="100">
+            					<div class="progress">
+            						<span class="progress-bar" style="width: 25%;"></span>
+            					</div>
+            				</progress> </div>
+                                            <div class="col-xs-12 col-sm-6  stat-col">
+                                                <div class="stat-icon"> <i class="fa fa-line-chart"></i> </div>
+                                                <div class="stat">
+                                                    <div class="value">  {{ total_files_size }}  </div>
+                                                    <div class="name"> Total files size </div>
+                                                </div> <progress class="progress stat-progress" value="60" max="100">
+            					<div class="progress">
+            						<span class="progress-bar" style="width: 60%;"></span>
+            					</div>
+            				</progress> </div>
+                                            <div class="col-xs-12 col-sm-6  stat-col">
+                                                <div class="stat-icon"> <i class="fa fa-users"></i> </div>
+                                                <div class="stat">
+                                                    <div class="value">  {{ transfer_used }}  </div>
+                                                    <div class="name"> Transfer used </div>
+                                                </div> <progress class="progress stat-progress" value="34" max="100">
+            					<div class="progress">
+            						<span class="progress-bar" style="width: 34%;"></span>
+            					</div>
+            				</progress> </div>
+
+
+
+
+                                            <div class="col-xs-12 col-sm-6  stat-col">
+                                                <div class="stat-icon"> <i class="fa fa-list-alt"></i> </div>
+                                                <div class="stat">
+                                                    <div class="value">  {{ favorites_count }}  </div>
+                                                    <div class="name"> Favorites </div>
+                                                </div> <progress class="progress stat-progress" value="100" max="100">
+            					<div class="progress">
+            						<span class="progress-bar" style="width: 49%;"></span>
+            					</div>
+            				</progress> </div>
+                                            <div class="col-xs-12 col-sm-6 stat-col">
+                                                <div class="stat-icon"> <i class="fa fa-dollar"></i> </div>
+                                                <div class="stat">
+                                                    <div class="value">  {{ downloads_count }}  </div>
+                                                    <div class="name"> Downloads count </div>
+                                                </div> <progress class="progress stat-progress" value="100" max="100">
+            					<div class="progress">
+            						<span class="progress-bar" style="width: 15%;"></span>
+            					</div>
+            				</progress> </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col col-xs-12 col-sm-12 col-md-6 col-xl-7 ">
+                                <div class="card sameheight-item" data-exclude="xs" style="padding: 10px;">
+                                    <center>
+                                       <img src="/static/assets/storj-logo.png" style="height: 75px;"><hr>
+                                 <h1>OwnStorj</h1>
+                                    <br>
+                                    </center>
+
+                                </div>
+                            </div>
+                            <div class="col col-xs-12 col-sm-12 col-md-12 col-xl-12 ">
+                                <div class="card sameheight-item" data-exclude="xs" style="padding: 10px;">
+                                    <center>
+                                 <h3>Get node details</h3>                                    </center>
+
+                                    <hr>
+                                        <form action="/node_details" method="GET">
+                                        <input type="text" class="form-control boxed" name="nodeID" placeholder="Type node ID...">
+                                            <br>
+                                            <button class="btn btn-primary" type="submit">Check</button>
+                                   </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                </article>
+
+{% endblock %}
