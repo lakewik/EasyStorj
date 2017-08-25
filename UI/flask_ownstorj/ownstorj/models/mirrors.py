@@ -1,5 +1,5 @@
-from storj_gui_client.UI.utilities import account_manager
-from storj_gui_client.UI.engine import StorjEngine
+from UI.utilities import account_manager
+from UI.engine import StorjEngine
 
 # Module for mirrors for OwnStorj
 
@@ -32,3 +32,23 @@ class OwnStorjMirrors:
                     divider = divider + 1
 
                 recent_shard_hash = mirror['shardHash']
+
+    def get_mirrors_array(self):
+        return self.mirrors_data
+
+    def calculate_geodistribution(self, countries_array):
+
+        total_countries = len(countries_array)
+
+        country_counting_array = {}
+        country_percent_array = {}
+        countries_array_deduplicated = list(set(countries_array))
+        for country_code in countries_array_deduplicated:
+            country_counting_array[country_code] = countries_array.count(country_code)
+            country_percent_array[country_code] = countries_array.count(country_code) / total_countries
+
+        return country_counting_array, country_percent_array
+
+
+
+
