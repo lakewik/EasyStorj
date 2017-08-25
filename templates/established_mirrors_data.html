@@ -1,0 +1,128 @@
+
+{% set divider = 0 %}
+
+{% set established_mirrors_count_for_file = 0 %}
+{% set active = "active" %}
+
+
+
+
+
+
+
+                                                <p class="title-description"> Established mirrors shards count: {{ established_available_mirrors_shards_count }}</p>
+                                                <p class="title-description"> Established mirrors total nodes count: {{ established_mirrors_total_nodes_count }}</p>
+
+                                                <div class="col-xl-12">
+                                <div class="card sameheight-item">
+                                    <div class="card-block">
+                                        <div class="card-title-block">
+
+                                        </div>
+                                        <!-- Nav tabs -->
+                                        <ul class="nav nav-pills">
+                                              {% set cnt = [0] %}
+                                              {% set recent_shard_hash = [0] %}
+
+                                            {%  for file_mirror in mirrors_data %}
+
+                                              {% for mirror in file_mirror.established %}
+
+             {%  if mirror['shardHash'] not in recent_shard_hash %}
+                                             {% if cnt.append(cnt.pop() + 1) %}{% endif %}
+
+
+             <li class="nav-item">
+                   {% if cnt[0] == 1 %}
+                 {%  set active2 = "active" %}
+            {% else %}
+                 {%  set active2 = "" %}
+                    {% endif %}
+
+                    <a href="" class="nav-link {{ active2 }}" data-target="#shard_{{ mirror['shardHash'] }}" aria-controls="home-pills" data-toggle="tab" role="tab">
+                Shard #{{ cnt[0] }}</a> </li>
+
+{% endif %}
+{% if recent_shard_hash.append(mirror['shardHash']) %}{% endif %}
+{% endfor %}
+{% endfor %}
+
+
+                                        </ul>
+									<hr>
+                                        <!-- Tab panes -->
+                                        <div class="tab-content">
+
+                                                {% set cnt = [0] %}
+                                                {% set cnt3 = [0] %}
+                                             {% set recent_shard_hash_2 = [0] %}
+
+
+{%  for file_mirror in mirrors_data_2 %}
+
+                                              {% for mirror in file_mirror.established %}
+ {% if cnt3.append(cnt3.pop() + 1) %}{% endif %}
+             {%   if mirror['shardHash'] not in recent_shard_hash_2 %}
+                                            {% if cnt.append(cnt.pop() + 1) %}{% endif %}
+                                              {% if recent_shard_hash_2.append(mirror['shardHash']) %}{% endif %}
+
+
+
+                                            <div class="tab-pane fade in active" id="shard_{{ mirror['shardHash'] }}">
+                                                <h5>Shard hash: <b>{{ mirror['shardHash'] }} #{{ cnt[0] }}</b></h5>
+                                                <hr>
+                                                <section class="example">
+                                            <div class="table-flip-scroll">
+                                                <table class="table table-striped table-bordered table-hover flip-content">
+                                                    <thead class="flip-header">
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Node address</th>
+                                                            <th>Node ID</th>
+                                                            <th>...</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% endif %}
+
+                                                        <tr class="odd gradeX">
+                                                            <td>1</td>
+                                                            <td><img height="25" src="/static/assets/countries\{{ country_codes_array[mirror['contact']['address']].lower() }}.png">&nbsp;&nbsp;{{ mirror['contact']['address'] }}:{{ mirror['contact']['port'] }}</td>
+                                                            <td>{{ mirror['contact']['nodeID'] }}</td>
+                                                                                 <td><button type="button" class="btn btn-sm" onclick="open_contract_details('{{ mirror['contract']['payment_destination'] }}',
+                                                            '{{ mirror['contract']['renter_id'] }}', '{{ mirror['contract']['data_hash'] }}', '{{ mirror['contract']['payment_storage_price'] }}',
+                                                            '{{ mirror['contract']['store_end'] }}', '{{ mirror['contract']['renter_hd_key'] }}', '{{ mirror['contract']['renter_signature'] }}'
+                                                            , '{{ mirror['contract']['store_begin'] }}' , '{{ mirror['contract']['data_size'] }}' , '{{ mirror['contract']['farmer_id'] }}'
+                                                            , '{{ mirror['contract']['payment_download_price'] }}', '{{ mirror['contract']['version'] }}', '{{ mirror['contract']['renter_hd_key'] }}'
+                                                            , '{{ mirror['contract']['farmer_signature'] }}', '{{ mirror['contract']['audit_count'] }}');
+
+
+" data-dismiss="modal" style="width: 49%; background: #743BED; color: white;">    			<i class="fa fa-bars"></i> Contract</button>
+                                                            <button type="button" class="btn btn-sm" data-dismiss="modal" style="width: 49%; background: #EBC807;">    			<i class="fa fa-book"></i> Node</button></td>
+                                                        </tr>
+
+                                                    {%    if cnt3[0] in table_break_positions %}
+
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </section>
+                                            </div>
+
+                                             {% endif %}
+
+
+                                            {% endfor %}
+                                {% endfor %}
+
+                                        </div>
+                                    </div>
+                                    <!-- /.card-block -->
+                                </div>
+                                <!-- /.card -->
+                            </div>
+
+
+
