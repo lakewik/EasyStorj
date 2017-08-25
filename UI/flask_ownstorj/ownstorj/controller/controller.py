@@ -1,11 +1,12 @@
 import collections
+import json
 import socket
 from threading import Thread
 
 from ipwhois import IPWhois
 
 from ...ownstorj import app
-# from ...ownstorj import socketio
+#from ...ownstorj import socketio
 
 from ...ownstorj.models.buckets import OwnStorjBuckets
 from ...ownstorj.models.files import OwnStorjFilesManager
@@ -13,6 +14,7 @@ from ...ownstorj.models.download import OwnStorjDownloadEngine
 from ...ownstorj.models.public_sharing_manager import OwnStorjPublicFileSharingManager
 from ...ownstorj.models.node import OwnStorjNodeDetails
 from ...ownstorj.models.mirrors import OwnStorjMirrors
+from ...ownstorj.models.playlist_manager import OwnStorjPlaylistManager
 from UI.engine import StorjEngine
 from UI.utilities.account_manager import AccountManager
 import base64
@@ -26,29 +28,29 @@ from decimal import *
 import configparser
 import hashlib
 
-
 storj_engine = StorjEngine()  # init StorjEngine
 storj_account_manager = AccountManager()
 
 OwnStorjBucketsManager = OwnStorjBuckets()
 OwnStorjDownloadEngine = OwnStorjDownloadEngine()
 
-
 def initSession():
-    try:
-        session['counter'] += 1
-    except KeyError:
-        session['counter'] = 1
-    try:
-        a = session['logged_in']
-    except BaseException:
-        session['logged_in'] = False
+  try:
+    session['counter'] += 1
+  except KeyError:
+    session['counter'] = 1
+
+  try:
+    a = session['logged_in']
+  except KeyError:
+    session['logged_in'] = False
 
 
 def generate_menus_data():
     user_email = storj_account_manager.get_user_email()
     menus_data = {}
     menus_data["account_name"] = user_email
+    menus_data["display_logout_button"] = True
     return menus_data
 
 
@@ -79,11 +81,14 @@ def login_view():
         return render_template('login.html')
 
 
+
+
 @app.route('/')
 @app.route('/dashboard')
 def dashboard_view():
     initSession()
-    if session['logged_in']:
+    login_local_without_auth = True
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and login_local_without_auth):
         return render_template('dashboard.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -94,7 +99,7 @@ def dashboard_view():
 def buckets_list_view(reinfo):
     initSession()
     if session['logged_in']:
-        if reinfo is None:
+        if reinfo == None:
             reinfo = ""
 
         if reinfo == "bucket_created":
@@ -129,7 +134,7 @@ def bucket_add_view(reinfo):
     initSession()
 
     if session['logged_in']:
-        if reinfo is None:
+        if reinfo == None:
             reinfo = ""
 
         if reinfo == "bucket_created":
@@ -144,11 +149,12 @@ def bucket_add_view(reinfo):
 
 @app.route('/files_manager/', defaults={'bucket_id': None})
 @app.route('/files_manager/<bucket_id>')
-def files_manager_view(bucket_id):
+@app.route('/files_manager/<bucket_id>/<extra_params>')
+def files_manager_view(bucket_id, extra_params=""):
     initSession()
 
     if session['logged_in']:
-        if bucket_id is not None:
+        if bucket_id != None:
             bucket_name = OwnStorjBucketsManager.get_bucket_name(bucket_id=bucket_id)
             return render_template('files_manager.html', menu_data=generate_menus_data(), bucket_id=bucket_id,
                                    bucket_name=bucket_name)
@@ -157,17 +163,31 @@ def files_manager_view(bucket_id):
     else:
         return make_response(redirect("/login"))
 
-
-@app.route('/files_table/<bucket_id>')
-def files_table_view(bucket_id):
+@app.route('/files_table/<bucket_id>', defaults={'extra_params': None})
+@app.route('/files_table/<bucket_id>/<extra_params>')
+def files_table_view(bucket_id, extra_params):
     initSession()
+    ownstorj_public_file_sharing_manager = OwnStorjPublicFileSharingManager()
+    if extra_params == "3": # public features and playlist features
+        are_public_features_enabled = True
+        are_playlist_features_enabled = True
+    elif extra_params == "4": # public features
+        are_public_features_enabled = True
+        are_playlist_features_enabled = False
+    else:
+        are_public_features_enabled = False
+        are_playlist_features_enabled = False
+
 
     if session['logged_in']:
         files_manager = OwnStorjFilesManager(str(bucket_id))
         files_list = files_manager.get_files_list()
         # for file in files_list:
         # print file["size"]
-        return render_template('files_table.html', files_list=files_list, bucket_id=bucket_id)
+        return render_template('files_table.html', files_list=files_list, bucket_id=bucket_id,
+                               public_features_enabled=are_public_features_enabled,
+                               public_file_sharing_manager=ownstorj_public_file_sharing_manager,
+                               playlist_features_enabled=are_playlist_features_enabled)
     else:
         return make_response(redirect("/login"))
 
@@ -181,17 +201,14 @@ def settings_view():
     else:
         return make_response(redirect("/login"))
 
-
 @app.route('/sync_settings')
 def sync_settings_view():
     initSession()
 
     if session['logged_in']:
-        return render_template('sync_settings.html',
-                               menu_data=generate_menus_data())
+        return render_template('sync_settings.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
-
 
 @app.route('/sync_statistics')
 def sync_statistics_view():
@@ -202,7 +219,6 @@ def sync_statistics_view():
     else:
         return make_response(redirect("/login"))
 
-
 @app.route('/tags_labels_manager')
 def tags_labels_manager_view():
     initSession()
@@ -211,7 +227,6 @@ def tags_labels_manager_view():
         return render_template('tags_labels_manager.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
-
 
 @app.route('/single_file_upload')
 def upload_view():
@@ -232,7 +247,6 @@ def download_view():
     else:
         return make_response(redirect("/login"))
 
-
 @app.route('/favorites')
 def favorites_view():
     initSession()
@@ -252,7 +266,6 @@ def file_mirrors_view(filebucket_id):
     else:
         return make_response(redirect("/login"))
 
-
 @app.route('/established_file_mirrors/<filebucket_id>')
 def established_mirrors_view(filebucket_id):
     initSession()
@@ -271,7 +284,7 @@ def established_mirrors_view(filebucket_id):
         table_break_positions = []
         countries_codes_list = []
         country_codes_array = {}
-        i = 0
+        i = 0;
 
         for file_mirror in temp:
             for mirror in file_mirror.established:
@@ -293,14 +306,10 @@ def established_mirrors_view(filebucket_id):
                     print e
 
                 recent_shard_hash = mirror['shardHash']
-        print i
-        print ownstorj_mirrors.calculate_geodistribution(countries_array=countries_codes_list)
 
-        return render_template('established_mirrors_data.html',
-                               table_break_positions=table_break_positions,
-                               established_mirrors_shards_count=established_mirrors_shards_count,
-                               mirrors_data=mirrors_data,
-                               mirrors_data_2=mirrors_data_2,
+        return render_template('established_mirrors_data.html', table_break_positions=table_break_positions,
+                               established_mirrors_shards_count=established_mirrors_shards_count
+                               , mirrors_data=mirrors_data, mirrors_data_2=mirrors_data_2,
                                established_mirrors_total_nodes_count=established_mirrors_total_nodes_count,
                                country_codes_array=country_codes_array)
     else:
@@ -324,7 +333,7 @@ def available_mirrors_view(filebucket_id):
         available_mirrors_total_nodes_count = 0
         table_break_positions = []
         country_codes_array = {}
-        i = 0
+        i = 0;
 
         for file_mirror in temp:
             for mirror in file_mirror.available:
@@ -350,11 +359,9 @@ def available_mirrors_view(filebucket_id):
                 recent_shard_hash = mirror['shardHash']
         print i
 
-        return render_template('available_mirrors_data.html',
-                               table_break_positions=table_break_positions,
-                               available_mirrors_shards_count=available_mirrors_shards_count,
-                               mirrors_data=mirrors_data,
-                               mirrors_data_2=mirrors_data_2,
+        return render_template('available_mirrors_data.html', table_break_positions=table_break_positions,
+                               available_mirrors_shards_count=available_mirrors_shards_count
+                               , mirrors_data=mirrors_data, mirrors_data_2=mirrors_data_2,
                                available_mirrors_total_nodes_count=available_mirrors_total_nodes_count,
                                country_codes_array=country_codes_array)
     else:
@@ -409,7 +416,8 @@ def mirrors_geodistribution_view(filebucket_id):
         return make_response(redirect("/login"))
 
 
-def whois_lookup_country(address):
+def whois_lookup_country (address):
+
     IP_addr = socket.gethostbyname(str(address))
     obj = IPWhois(IP_addr)
     res = obj.lookup_whois()
@@ -417,9 +425,8 @@ def whois_lookup_country(address):
 
     return country
 
-
 @app.route('/node_details', methods=['GET'])
-# @app.route('/node_details?nodeID=<nodeID>')
+#@app.route('/node_details?nodeID=<nodeID>')
 def node_details_view():
     initSession()
 
@@ -427,7 +434,6 @@ def node_details_view():
         return render_template('node_details.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
-
 
 @app.route('/node_details_data/<nodeID>')
 def node_details_data_view(nodeID):
@@ -460,7 +466,6 @@ def billing_view():
     else:
         return make_response(redirect("/login"))
 
-
 @app.route('/account_stats')
 def account_stats_view():
     initSession()
@@ -470,25 +475,207 @@ def account_stats_view():
     else:
         return make_response(redirect("/login"))
 
+@app.route('/playlist_manager')
+def playlist_manager_view():
+    initSession()
+
+    if session['logged_in']:
+        return render_template('playlist_manager.html', menu_data=generate_menus_data())
+    else:
+        return make_response(redirect("/login"))
+
+@app.route('/playlist_table_data')
+def playlist_table_data_view():
+    initSession()
+    ownstorj_playlist_manager = OwnStorjPlaylistManager()
+    playlists_array = ownstorj_playlist_manager.get_playlists_list()
+    playlist_tracks_count = []
+
+    # Now we need to count tracks in each playlist
+    for playlist in playlists_array:
+        playlist_tracks_count.append(ownstorj_playlist_manager.count_tracks_in_playlist(playlist.eid))
+
+    if session['logged_in']:
+        return render_template('playlist_table_data.html', playlists_array=playlists_array, playlist_tracks_count=playlist_tracks_count)
+    else:
+        return make_response(redirect("/login"))
+
 
 # Public Download Gateway
-@app.route('/public_download_gateway/<download_id>')
-def public_download_gateway_endpoint(download_id):
+
+@app.route('/public_download_gateway/<download_id>', defaults={'download_type': None})
+@app.route('/public_download_gateway/<download_id>/<download_type>')
+def public_download_gateway_endpoint(download_id, download_type):
+
+    ready_download_id = download_id
+
+    print download_type
+
+    if download_type != None:
+        public_download_type = int(download_type)
+    else:
+        public_download_type = 2
+
+    if public_download_type == 1:
+        public_file_sharing_manager = OwnStorjPublicFileSharingManager()
+        download_indicators = public_file_sharing_manager.get_public_download_indicators(
+            public_download_hash_url=ready_download_id)
+
+        pointer = OwnStorjDownloadEngine.get_pointer_for_single_shard_download(bucket_id=download_indicators[0]['bucket_id'],
+                                                                               file_id=download_indicators[0]['file_id'])
+        ready_farmer_url = 'http://%s:%s/shards/%s?token=%s' % (
+            pointer.get('farmer')['address'],
+            str(pointer.get('farmer')['port']),
+            pointer['hash'],
+            pointer['token'])
+
+        return redirect(ready_farmer_url)
+    else:
+        return render_template('public_download_gateway.html')
+
+@app.route('/public_download_get_farmers/<download_id>')
+def public_download_get_farmers(download_id):
     public_file_sharing_manager = OwnStorjPublicFileSharingManager()
-    download_indicators = public_file_sharing_manager.get_public_download_indicators(public_download_hash_url=download_id)
+    download_indicators = public_file_sharing_manager.get_public_download_indicators(
+        public_download_hash_url=download_id)
 
     pointer = OwnStorjDownloadEngine.get_pointer_for_single_shard_download(
-        bucket_id="ef92512a30fab77facaf334a", file_id="3deb3890a445279c648d17a0")
+        bucket_id=download_indicators[0]['bucket_id'],
+        file_id=download_indicators[0]['file_id'])
+
     ready_farmer_url = 'http://%s:%s/shards/%s?token=%s' % (
         pointer.get('farmer')['address'],
         str(pointer.get('farmer')['port']),
         pointer['hash'],
         pointer['token'])
 
-    return redirect(ready_farmer_url)
+    return ready_farmer_url
+
+@app.route('/public_download_get_shard/<download_id>/<shard_number>')
+def public_download_get_shard(download_id, shard_number):
+    public_file_sharing_manager = OwnStorjPublicFileSharingManager()
+    download_indicators = public_file_sharing_manager.get_public_download_indicators(
+        public_download_hash_url=download_id)
+
+    pointer = OwnStorjDownloadEngine.get_pointer_for_single_shard_download(
+        bucket_id=download_indicators[0]['bucket_id'],
+        file_id=download_indicators[0]['file_id'])
+
+    ready_farmer_url = 'http://%s:%s/shards/%s?token=%s' % (
+        pointer.get('farmer')['address'],
+        str(pointer.get('farmer')['port']),
+        pointer['hash'],
+        pointer['token'])
+
+    return ready_farmer_url
+
+
+@app.route('/get_public_file_properties/<download_id>')
+def get_public_file_properties(download_id):
+    public_file_sharing_manager = OwnStorjPublicFileSharingManager()
+    download_indicators = public_file_sharing_manager.get_public_download_indicators(
+        public_download_hash_url=download_id)
+    #print download_indicators
+
+    download_indicators_json = json.dumps(download_indicators).replace("[", "").replace("]", "")
+
+    return download_indicators_json
+
+
+# Playlists tracks section #
+@app.route('/playlist_tracks_manager/<playlist_id>')
+def playlist_tracks_manager_view(playlist_id):
+    initSession()
+
+    if session['logged_in']:
+        return render_template('playlist_tracks_manager.html', menu_data=generate_menus_data())
+    else:
+        return make_response(redirect("/login"))
+
+@app.route('/playlist_tracks_table_data/<playlist_id>')
+def playlist_tracks_table_data_view(playlist_id):
+    initSession()
+    ownstorj_playlist_manager = OwnStorjPlaylistManager()
+    playlist_tracks_array = ownstorj_playlist_manager.get_playlist_tracks_list(playlist_id=playlist_id)
+    playlist_tracks_count = len(playlist_tracks_array)
+
+
+    if session['logged_in']:
+        return render_template('playlist_tracks_table_data.html', playlist_tracks_array=playlist_tracks_array, playlist_tracks_count=playlist_tracks_count)
+    else:
+        return make_response(redirect("/login"))
+
+
+@app.route('/buckets_optionlist')
+def buckets_optionlist_view():
+    initSession()
+
+
+    if session['logged_in']:
+        buckets_array = OwnStorjBucketsManager.get_buckets_array()
+        return render_template('buckets_optionlist.html', buckets=buckets_array)
+    else:
+        return make_response(redirect("/login"))
+
+@app.route('/make_all_files_public/<bucket_id>')
+def make_all_files_public(bucket_id):
+    initSession()
+
+    config_array = {}
+    config_array["wait_time"] = 1
+    config_array["max_allowed_from_one_ip"] = 1
+    config_array["mode"] = 1
+
+    if session['logged_in']:
+        public_file_sharing_manager = OwnStorjPublicFileSharingManager()
+        files_manager = OwnStorjFilesManager(str(bucket_id))
+        files_list = files_manager.get_files_list()
+
+        for file in files_list:
+            if not public_file_sharing_manager.is_file_public(bucket_id=bucket_id, file_id=file["id"]):
+                public_file_hash = public_file_sharing_manager.generate_public_file_hash(
+                    input_string=bucket_id + "_" + file["id"] + file["filename"] + str(file["size"]) + file["created"])
+
+                public_file_sharing_manager.save_public_file_to_db(bucket_id,  file["id"], public_file_hash,
+                                                                   public_file_hash,
+                                                                   config_array, file["size"], file["filename"],
+                                                                   file["created"])
+        return "SUCCESS", 200
+    else:
+        return make_response(redirect("/login"))
+
+@app.route('/insert_all_files_to_playlist/<bucket_id>/<playlist_id>')
+def insert_all_files_to_playlist(bucket_id, playlist_id):
+    initSession()
+
+    config_array = {}
+    config_array["wait_time"] = 1
+    config_array["max_allowed_from_one_ip"] = 1
+    config_array["mode"] = 1
+
+    if session['logged_in']:
+        public_file_sharing_manager = OwnStorjPublicFileSharingManager()
+        playlist_manager = OwnStorjPlaylistManager()
+        make_all_files_public(bucket_id)
+        files_manager = OwnStorjFilesManager(str(bucket_id))
+        files_list = files_manager.get_files_list()
+
+        for file in files_list:
+            local_file_id_hash = public_file_sharing_manager.get_public_file_hash(bucket_id=bucket_id, file_id=file["id"])
+            if not playlist_manager.is_file_in_playlist(local_file_id=local_file_id_hash):
+                public_file_details = public_file_sharing_manager.get_public_file_details_by_local_hash(
+                    local_file_id_hash)
+
+                playlist_manager.insert_track(track_name=public_file_details[0]["file_name"]
+                                             ,track_local_file_id=local_file_id_hash
+                                              ,playlist_id=playlist_id)
+        return "SUCCESS", 200
+    else:
+        return make_response(redirect("/login"))
 
 
 # actions handling
+
 @app.route('/buckets/new', methods=['POST'])
 def add_bucket():
     initSession()
@@ -500,7 +687,7 @@ def add_bucket():
             bucket_name = request.form['bucket_name']
         print bucket_name
 
-        if bucket_name is not None:
+        if bucket_name != None:
             try:
                 storj_engine.storj_client.bucket_create(name=bucket_name, transfer=1, storage=1)
                 success = True
@@ -520,6 +707,46 @@ def add_bucket():
         return make_response(redirect("/login"))
 
 
+@app.route('/playlist/new', methods=['GET'])
+def add_playlist():
+    initSession()
+
+    if session['logged_in']:
+        playlist_name = None
+        playlist_category = None
+        playlist_description = None
+        success = False
+        if request.method == 'GET':
+            playlist_name = request.args.get('playlist_name')
+            playlist_category = request.args.get('playlist_category')
+            playlist_description = request.args.get('playlist_description')
+
+
+        if playlist_name != None:
+            ownstorj_playlist_manager = OwnStorjPlaylistManager()
+            ownstorj_playlist_manager.add_new_playlist(playlist_name=playlist_name,
+                                                       playlist_description=playlist_description,
+                                                       playlist_category=playlist_category)
+
+        return "SUCCESS", 200
+    else:
+        return make_response(redirect("/login"))
+
+@app.route('/playlist/delete/<playlist_id>', methods=['GET'])
+def delete_playlist(playlist_id):
+    initSession()
+
+    if session['logged_in']:
+        if playlist_id != None:
+            ownstorj_playlist_manager = OwnStorjPlaylistManager()
+            ownstorj_playlist_manager.remove_playlist(playlist_id=playlist_id)
+
+        return "SUCCESS", 200
+    else:
+        return make_response(redirect("/login"))
+
+
+
 @app.route('/synchronization/settings/save', methods=['POST'])
 def save_sync_settings():
     initSession()
@@ -534,6 +761,52 @@ def save_sync_settings():
     else:
         return make_response(redirect("/login"))
 
+@app.route('/make_file_public')
+def make_file_public():
+    initSession()
+
+    if session['logged_in']:
+        ownstorj_public_file_sharing_manager = OwnStorjPublicFileSharingManager()
+
+        bucket_id = request.args.get('bucket_id')
+        file_id = request.args.get('file_id')
+        file_name = request.args.get('file_name')
+        file_size = request.args.get('file_size')
+        file_upload_date = request.args.get('file_upload_date')
+
+        config_array = {}
+        config_array["wait_time"] = 1
+        config_array["max_allowed_from_one_ip"] = 1
+        config_array["mode"] = 1
+
+        public_file_hash = ownstorj_public_file_sharing_manager.generate_public_file_hash(
+            input_string=bucket_id+"_"+file_id+file_name+file_size+file_upload_date)
+
+        ownstorj_public_file_sharing_manager.save_public_file_to_db(bucket_id, file_id, public_file_hash, public_file_hash,
+                                                                    config_array, file_size, file_name, file_upload_date)
+
+        return '{result: "success"}', 200  # return the HTTP 200 statuss code - OK
+    else:
+        return '{result: "unauthorized"}', 401
+
+@app.route('/insert_file_to_playlist/<file_local_public_hash>/<playlist_id>')
+def insert_file_to_playlist_endpoint(file_local_public_hash, playlist_id):
+    initSession()
+
+    ownstorj_playlist_manager = OwnStorjPlaylistManager()
+    ownstorj_public_file_sharing_manager = OwnStorjPublicFileSharingManager()
+
+    if session['logged_in']:
+        if file_local_public_hash != "":
+            public_file_details = ownstorj_public_file_sharing_manager.get_public_file_details_by_local_hash(file_local_public_hash)
+            ownstorj_playlist_manager.insert_track(track_name=public_file_details[0]["file_name"]
+                                                   , track_local_file_id=file_local_public_hash
+                                                   , playlist_id=playlist_id)
+
+        return '{result: "success"}', 200  # return the HTTP 200 statuss code - OK
+    else:
+        return '{result: "unauthorized"}', 401
+
 
 
 # SOCKET.IO HANDLERS
@@ -545,18 +818,4 @@ def save_sync_settings():
 #@socketio.on('my event')
 #def handle_my_custom_event(json):
 #    print('received json: ' + str(json))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
