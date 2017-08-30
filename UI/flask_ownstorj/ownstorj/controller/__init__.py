@@ -1,4 +1,4 @@
-from ownstorj import app
-
-from flask import render_template
-import ownstorj.controller.controller
+# from ownstorj import app
+#
+# from flask import render_template
+# import ownstorj.controller.controller
