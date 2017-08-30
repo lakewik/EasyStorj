@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Files{% endblock %}
+{% set active_page = "files_manager" %}
+
+
+{% block content %}
+
+
+
+ <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+
+<script>
+
+
+
+
+
+</script>
+
+<article class="content responsive-tables-page">
+                    <div class="title-block">
+                        <h1 class="title"> Files manager </h1>
+                        <p class="title">Bucket name: {{ bucket_name }}</p>
+                    </div>
+
+              <section class="section">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-block">
+                                        <div class="card-title-block">
+                                            <h3 class="title"> Files &nbsp;&nbsp;&nbsp;<a href="/bucket_add" class="btn btn-primary btn-sm rounded">
+            				+ Upload new file to this bucket
+            			</a> </h3>
+                                        </div>
+                                        <section id="files_list_table_content">
+                                           <center> <img src="/static/assets/loader1.gif"> </center>
+                                        </section>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+     </article>
+
+
+<script>
+    $(document).ready(function() {
+    $('#files_list').DataTable();
+} );
+
+
+
+
+
+</script>
+
+{% endblock %}
