@@ -1,0 +1,241 @@
+ <div class="card card-block">
+                           Node:<b> http://{{ node_details_array["address"] }}:{{ node_details_array["port"] }}/{{ node_details_array["nodeID"] }}</b>
+     <hr>
+
+                            <div class="card items">
+                        <ul class="item-list striped">
+                            <li class="item item-list-header hidden-sm-down">
+                                <div class="item-row">
+
+     <div class="item-col item-col-header item-col-title">
+         <div> <span>Parametr</span> </div>
+                                    </div>
+                                    <div class="item-col item-col-header item-col-title">
+                                        <div> <span>Value</span> </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li class="item">
+                                <div class="item-row">
+
+
+                                   <div class="item-col item-col-date">
+                                        <div class="item-heading">Node ID</div>
+                                        <div class="no-overflow"> Node ID</div>
+                                    </div>
+
+                                    <div class="item-col item-col-date">
+                                        <div class="item-heading"> Node ID</div>
+                                        <div class="no-overflow"> {{ node_details_array["nodeID"] }}</div>
+                                    </div>
+
+                                </div>
+
+
+                            </li>
+
+                            <li class="item">
+                                <div class="item-row">
+
+
+                                   <div class="item-col item-col-date">
+                                        <div class="item-heading">Timeout rate</div>
+                                        <div class="no-overflow"> Timeout rate</div>
+                                    </div>
+
+                                    <div class="item-col item-col-date">
+                                        <div class="item-heading">Timeout rate</div>
+                                        <div class="no-overflow">{{ node_details_array["timeoutRate"] }}</div>
+                                    </div>
+
+                                </div>
+
+
+                            </li>
+                            <li class="item">
+
+                                   <div class="item-row">
+
+
+                                   <div class="item-col item-col-date">
+                                        <div class="item-heading">Response time</div>
+                                        <div class="no-overflow"> Response time</div>
+                                    </div>
+
+                                    <div class="item-col item-col-date">
+                                        <div class="item-heading">Response time</div>
+                                        <div class="no-overflow">{{ node_details_array["responseTime"] }} </div>
+                                    </div>
+
+                                </div>
+                                                        </li>
+                            <li class="item">
+
+                                   <div class="item-row">
+
+
+                                   <div class="item-col item-col-date">
+                                        <div class="item-heading">Last timeout</div>
+                                        <div class="no-overflow"> Last timeout</div>
+                                    </div>
+
+                                    <div class="item-col item-col-date">
+                                        <div class="item-heading">Last timeout</div>
+                                        <div class="no-overflow">{{ node_details_array["lastTimeout"] }} </div>
+                                    </div>
+
+                                </div>
+                                                        </li>
+                            <li class="item">
+
+                                   <div class="item-row">
+
+
+                                   <div class="item-col item-col-date">
+                                        <div class="item-heading">Ping</div>
+                                        <div class="no-overflow"> Ping</div>
+                                    </div>
+
+                                    <div class="item-col item-col-date">
+                                        <div class="item-heading">Ping</div>
+                                        <div class="no-overflow">{{ node_details_array["ping"] }}</div>
+                                    </div>
+
+                                </div>
+
+                                                        </li>
+                            <li class="item">
+
+                             <div class="item-row">
+
+
+                                   <div class="item-col item-col-date">
+                                        <div class="item-heading">Address</div>
+                                        <div class="no-overflow"> Address </div>
+                                    </div>
+
+                                    <div class="item-col item-col-date">
+                                        <div class="item-heading">Address </div>
+                                        <div class="no-overflow" id="node_address">{{ node_details_array["address"] }} </div>
+                                    </div>
+
+                                </div>
+                                                        </li>
+                             <li class="item">
+
+                             <div class="item-row">
+
+
+                                   <div class="item-col item-col-date">
+                                        <div class="item-heading">Port</div>
+                                        <div class="no-overflow"> Port </div>
+                                    </div>
+
+                                    <div class="item-col item-col-date">
+                                        <div class="item-heading">Port </div>
+                                        <div class="no-overflow">{{ node_details_array["port"] }} </div>
+                                    </div>
+
+                                </div>
+                                                        </li>
+
+                              <li class="item">
+
+                             <div class="item-row">
+
+
+                                   <div class="item-col item-col-date">
+                                        <div class="item-heading">User agent</div>
+                                        <div class="no-overflow"> User agent</div>
+                                    </div>
+
+                                    <div class="item-col item-col-date">
+                                        <div class="item-heading">User agent</div>
+                                        <div class="no-overflow">{{ node_details_array["userAgent"] }}</div>
+                                    </div>
+
+                                </div>
+                                                        </li>
+
+                            <li class="item">
+
+                             <div class="item-row">
+
+
+                                   <div class="item-col item-col-date">
+                                        <div class="item-heading">Last seen</div>
+                                        <div class="no-overflow"> Last seen</div>
+                                    </div>
+
+                                    <div class="item-col item-col-date">
+                                        <div class="item-heading">Last seen</div>
+                                        <div class="no-overflow">{{ node_details_array["lastSeen"] }}</div>
+                                    </div>
+
+                                </div>
+                                                        </li>
+
+
+
+                              <li class="item">
+
+                             <div class="item-row">
+
+
+                                   <div class="item-col item-col-date">
+                                        <div class="item-heading">Protocol version</div>
+                                        <div class="no-overflow"> Protocol version</div>
+                                    </div>
+
+                                    <div class="item-col item-col-date">
+                                        <div class="item-heading">Protocol version</div>
+                                        <div class="no-overflow">{{ node_details_array["protocol"] }}</div>
+                                    </div>
+
+                                </div>
+                                                        </li>
+
+                            <li class="item">
+
+                             <div class="item-row">
+
+
+                                   <div class="item-col item-col-date">
+                                        <div class="item-heading">Country</div>
+                                       <div class="no-overflow"> Country</div>
+
+                                    </div>
+
+                                    <div class="item-col item-col-date">
+                                        <div class="item-heading">Country</div>
+                                        <div class="no-overflow"><img height="25" src="/static/assets/countries\{{ node_details_array['country_code'].lower() }}.png">&nbsp;&nbsp;&nbsp;{{ node_details_array["country_full_name"] }}</div>
+                                    </div>
+
+                                </div>
+                                                        </li>
+
+
+
+
+
+
+                        </ul>
+                    </div>
+
+      <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-block">
+                                        <div class="card-title-block">
+                                            <h3 class="title"> Node ping chart </h3>
+                                        </div>
+                                        <section class="example">
+                                            <div class="flot-chart">
+                                                <div style="width: 50px; height: 50px;" class="flot-chart-content" id="live-node-ping-chart"></div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
