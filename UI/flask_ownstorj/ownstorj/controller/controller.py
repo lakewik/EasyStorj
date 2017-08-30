@@ -34,6 +34,9 @@ storj_account_manager = AccountManager()
 OwnStorjBucketsManager = OwnStorjBuckets()
 OwnStorjDownloadEngine = OwnStorjDownloadEngine()
 
+def can_login_local_without_auth():
+    return True
+
 def initSession():
   try:
     session['counter'] += 1
@@ -87,8 +90,8 @@ def login_view():
 @app.route('/dashboard')
 def dashboard_view():
     initSession()
-    login_local_without_auth = True
-    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and login_local_without_auth):
+
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('dashboard.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -98,7 +101,7 @@ def dashboard_view():
 @app.route('/buckets_list/<reinfo>')
 def buckets_list_view(reinfo):
     initSession()
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         if reinfo == None:
             reinfo = ""
 
@@ -114,7 +117,7 @@ def buckets_list_view(reinfo):
 def buckets_list_table():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         buckets_array = OwnStorjBucketsManager.get_buckets_array()
         buckets_array2 = buckets_array
         # buckets_details_array = OwnStorjBucketsManager.calculate_bucket_stats(buckets_array2)
@@ -133,7 +136,7 @@ def buckets_list_table():
 def bucket_add_view(reinfo):
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         if reinfo == None:
             reinfo = ""
 
@@ -153,7 +156,7 @@ def bucket_add_view(reinfo):
 def files_manager_view(bucket_id, extra_params=""):
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         if bucket_id != None:
             bucket_name = OwnStorjBucketsManager.get_bucket_name(bucket_id=bucket_id)
             return render_template('files_manager.html', menu_data=generate_menus_data(), bucket_id=bucket_id,
@@ -179,7 +182,7 @@ def files_table_view(bucket_id, extra_params):
         are_playlist_features_enabled = False
 
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         files_manager = OwnStorjFilesManager(str(bucket_id))
         files_list = files_manager.get_files_list()
         # for file in files_list:
@@ -196,7 +199,7 @@ def files_table_view(bucket_id, extra_params):
 def settings_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('settings.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -205,7 +208,7 @@ def settings_view():
 def sync_settings_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('sync_settings.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -214,7 +217,7 @@ def sync_settings_view():
 def sync_statistics_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('sync_statistics.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -223,7 +226,7 @@ def sync_statistics_view():
 def tags_labels_manager_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('tags_labels_manager.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -232,7 +235,7 @@ def tags_labels_manager_view():
 def upload_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('single_file_upload.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -242,7 +245,7 @@ def upload_view():
 def download_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('single_file_download.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -251,7 +254,7 @@ def download_view():
 def favorites_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('favorites.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -261,7 +264,7 @@ def favorites_view():
 def file_mirrors_view(filebucket_id):
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('file_mirrors.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -270,7 +273,7 @@ def file_mirrors_view(filebucket_id):
 def established_mirrors_view(filebucket_id):
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         splitted_ids = filebucket_id.split("_")
         ownstorj_mirrors = OwnStorjMirrors(bucket_id=splitted_ids[0], file_id=splitted_ids[1])
         mirrors_data = ownstorj_mirrors.get_mirrors_array()
@@ -320,7 +323,7 @@ def established_mirrors_view(filebucket_id):
 def available_mirrors_view(filebucket_id):
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         splitted_ids = filebucket_id.split("_")
         ownstorj_mirrors = OwnStorjMirrors(bucket_id=splitted_ids[0], file_id=splitted_ids[1])
         mirrors_data = ownstorj_mirrors.get_mirrors_array()
@@ -372,7 +375,7 @@ def available_mirrors_view(filebucket_id):
 def mirrors_geodistribution_view(filebucket_id):
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         splitted_ids = filebucket_id.split("_")
         ownstorj_mirrors = OwnStorjMirrors(bucket_id=splitted_ids[0], file_id=splitted_ids[1])
         mirrors_data = ownstorj_mirrors.get_mirrors_array()
@@ -430,7 +433,7 @@ def whois_lookup_country (address):
 def node_details_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('node_details.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -439,7 +442,7 @@ def node_details_view():
 def node_details_data_view(nodeID):
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         ownstorj_node_details = OwnStorjNodeDetails()
         node_details_array = ownstorj_node_details.node_details(nodeID)
         return render_template('node_details_data.html', node_details_array=node_details_array)
@@ -451,7 +454,7 @@ def node_details_data_view(nodeID):
 def contract_details_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('contract_details.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -461,7 +464,7 @@ def contract_details_view():
 def billing_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('billing.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -470,7 +473,7 @@ def billing_view():
 def account_stats_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('account_stats.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -479,7 +482,7 @@ def account_stats_view():
 def playlist_manager_view():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('playlist_manager.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -495,7 +498,7 @@ def playlist_table_data_view():
     for playlist in playlists_array:
         playlist_tracks_count.append(ownstorj_playlist_manager.count_tracks_in_playlist(playlist.eid))
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('playlist_table_data.html', playlists_array=playlists_array, playlist_tracks_count=playlist_tracks_count)
     else:
         return make_response(redirect("/login"))
@@ -587,7 +590,7 @@ def get_public_file_properties(download_id):
 def playlist_tracks_manager_view(playlist_id):
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('playlist_tracks_manager.html', menu_data=generate_menus_data())
     else:
         return make_response(redirect("/login"))
@@ -600,7 +603,7 @@ def playlist_tracks_table_data_view(playlist_id):
     playlist_tracks_count = len(playlist_tracks_array)
 
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         return render_template('playlist_tracks_table_data.html', playlist_tracks_array=playlist_tracks_array, playlist_tracks_count=playlist_tracks_count)
     else:
         return make_response(redirect("/login"))
@@ -611,7 +614,7 @@ def buckets_optionlist_view():
     initSession()
 
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         buckets_array = OwnStorjBucketsManager.get_buckets_array()
         return render_template('buckets_optionlist.html', buckets=buckets_array)
     else:
@@ -626,7 +629,7 @@ def make_all_files_public(bucket_id):
     config_array["max_allowed_from_one_ip"] = 1
     config_array["mode"] = 1
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         public_file_sharing_manager = OwnStorjPublicFileSharingManager()
         files_manager = OwnStorjFilesManager(str(bucket_id))
         files_list = files_manager.get_files_list()
@@ -653,7 +656,7 @@ def insert_all_files_to_playlist(bucket_id, playlist_id):
     config_array["max_allowed_from_one_ip"] = 1
     config_array["mode"] = 1
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         public_file_sharing_manager = OwnStorjPublicFileSharingManager()
         playlist_manager = OwnStorjPlaylistManager()
         make_all_files_public(bucket_id)
@@ -680,7 +683,7 @@ def insert_all_files_to_playlist(bucket_id, playlist_id):
 def add_bucket():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         bucket_name = None
         success = False
         if request.method == 'POST':
@@ -711,7 +714,7 @@ def add_bucket():
 def add_playlist():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         playlist_name = None
         playlist_category = None
         playlist_description = None
@@ -736,7 +739,7 @@ def add_playlist():
 def delete_playlist(playlist_id):
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         if playlist_id != None:
             ownstorj_playlist_manager = OwnStorjPlaylistManager()
             ownstorj_playlist_manager.remove_playlist(playlist_id=playlist_id)
@@ -746,12 +749,11 @@ def delete_playlist(playlist_id):
         return make_response(redirect("/login"))
 
 
-
 @app.route('/synchronization/settings/save', methods=['POST'])
 def save_sync_settings():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         if request.method == 'POST':
             bucket_name = request.form['bucket_name']
 
@@ -765,7 +767,7 @@ def save_sync_settings():
 def make_file_public():
     initSession()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         ownstorj_public_file_sharing_manager = OwnStorjPublicFileSharingManager()
 
         bucket_id = request.args.get('bucket_id')
@@ -796,7 +798,7 @@ def insert_file_to_playlist_endpoint(file_local_public_hash, playlist_id):
     ownstorj_playlist_manager = OwnStorjPlaylistManager()
     ownstorj_public_file_sharing_manager = OwnStorjPublicFileSharingManager()
 
-    if session['logged_in']:
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
         if file_local_public_hash != "":
             public_file_details = ownstorj_public_file_sharing_manager.get_public_file_details_by_local_hash(file_local_public_hash)
             ownstorj_playlist_manager.insert_track(track_name=public_file_details[0]["file_name"]
@@ -807,7 +809,31 @@ def insert_file_to_playlist_endpoint(file_local_public_hash, playlist_id):
     else:
         return '{result: "unauthorized"}', 401
 
+@app.route('/download_playlist_export_file/<playlist_id>/<export_file_type>')
+def download_playlist_export_file_endpoint(playlist_id, export_file_type):
+    initSession()
 
+    ownstorj_playlist_manager = OwnStorjPlaylistManager()
+
+    if session['logged_in'] or (request.remote_addr == "127.0.0.1" and can_login_local_without_auth()):
+        if playlist_id != "" and export_file_type != "":
+            playlist_export_file_content = ownstorj_playlist_manager.generate_playlist_export_file(
+                file_type=export_file_type,
+                playlist_id=playlist_id,
+                ownstorj_source_address="http://localhost:5000")
+
+            playlist_data = ownstorj_playlist_manager.get_playlist_details(playlist_id)
+
+            response = make_response(playlist_export_file_content)
+            response.headers["Content-Disposition"] = "attachment; filename=" + playlist_data['name'] + "." + str(export_file_type)
+
+            return response, 200  # return the HTTP 200 statuss code - OK
+
+        else:
+            return '{result: "missing_arguments"}', 503
+
+    else:
+        return '{result: "unauthorized"}', 401
 
 # SOCKET.IO HANDLERS
 #
@@ -818,4 +844,18 @@ def insert_file_to_playlist_endpoint(file_local_public_hash, playlist_id):
 #@socketio.on('my event')
 #def handle_my_custom_event(json):
 #    print('received json: ' + str(json))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
