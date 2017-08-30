@@ -11,11 +11,11 @@ storj_gui_config_manager = Configuration()
 ownstorj_port_settings = \
     storj_gui_config_manager.get_config_parametr_value('ownstorj_port')
 
-if ownstorj_port_settings is False:
+if not ownstorj_port_settings or ownstorj_port_settings is None:
     ownstorj_port_settings = 5000
 
 
-def flaskrun(default_host='0.0.0.0', default_port=ownstorj_port_settings):
+def flaskrun(default_host='0.0.0.0', default_port=int(ownstorj_port_settings)):
 
     parser = optparse.OptionParser()
     parser.add_option("-H", "--host",
