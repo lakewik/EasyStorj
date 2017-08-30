@@ -3,6 +3,7 @@ click==6.7
 colorama==0.3.8
 configparser
 ecdsa>=0.13
+Flask
 ipwhois
 libmagic
 lxml
