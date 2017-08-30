@@ -1,26 +1,29 @@
-
-from ownstorj import app
 import optparse
+
 from OpenSSL import SSL
+from ownstorj import app
+from six import _print
 from UI.utilities.backend_config import Configuration
+
 
 storj_gui_config_manager = Configuration()
 
-ownstorj_port_settings = storj_gui_config_manager.get_config_parametr_value("ownstorj_port")
+ownstorj_port_settings = \
+    storj_gui_config_manager.get_config_parametr_value('ownstorj_port')
 
-if ownstorj_port_settings == False:
-    ownstorj_port_settings = "5000"
+if ownstorj_port_settings is False:
+    ownstorj_port_settings = 5000
 
-def flaskrun(default_host="0.0.0.0",
-                  default_port=str(ownstorj_port_settings)):
+
+def flaskrun(default_host='0.0.0.0', default_port=ownstorj_port_settings):
 
     parser = optparse.OptionParser()
     parser.add_option("-H", "--host",
-                      help="Hostname/IP of OwnStorj " + \
+                      help="Hostname/IP of OwnStorj " +
                            "[default %s]" % default_host,
                       default=default_host)
     parser.add_option("-P", "--port",
-                      help="Port for the OwnStorj " + \
+                      help="Port for the OwnStorj " +
                            "[default %s]" % default_port,
                       default=default_port)
     parser.add_option("-d", "--debug",
@@ -31,10 +34,10 @@ def flaskrun(default_host="0.0.0.0",
 
     try:
         context = SSL.Context(SSL.SSLv23_METHOD)
-        #context.use_privatekey_file('server.key')
-        #context.use_certificate_file('server.crt')
+        # context.use_privatekey_file('server.key')
+        # context.use_certificate_file('server.crt')
     except BaseException as e:
-        print e
+        _print(e)
 
     app.run(
         debug=options.debug,
@@ -45,8 +48,10 @@ def flaskrun(default_host="0.0.0.0",
 
 
 class OwnStorjFlaskServer():
+
     def run(self):
         flaskrun()
+
 
 if __name__ == '__main__':
     flaskrun()
