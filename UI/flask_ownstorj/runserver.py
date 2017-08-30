@@ -49,4 +49,4 @@ class OwnStorjFlaskServer():
         flaskrun()
 
 if __name__ == '__main__':
-flaskrun()
+    flaskrun()
