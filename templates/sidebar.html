@@ -1,0 +1,191 @@
+
+{% set dashboard_active = "" %}
+{% set buckets_list_active = "" %}
+{% set buckets_tab_active_open = "" %}
+{% set buckets_add_active = "" %}
+{% set files_manager_tab_active = "" %}
+{% set favorites_tab_active = "" %}
+{% set sync_statistics_tab_active = "" %}
+{% set sync_settings_tab_active = "" %}
+{% set account_stats_tab_active = "" %}
+{% set billing_tab_active = "" %}
+{% set tags_labels_tab_active = "" %}
+{% set account_overview_tab_active = "" %}
+{% set sync_tab_active = "" %}
+{% set playlist_manager_tab_active = "" %}
+
+
+{% if active_page == "dashboard" %}
+    {% set dashboard_active = "active" %}
+{% elif active_page == "buckets_list" %}
+    {% set buckets_list_active = "active" %}
+    {% set buckets_tab_active_open = "active open" %}
+{% elif active_page == "bucket_add" %}
+    {% set buckets_add_active = "active" %}
+    {% set buckets_tab_active_open = "active open" %}
+{% elif active_page == "settings" %}
+    {% set buckets_list_active = "active" %}
+{% elif active_page == "favorites" %}
+    {% set favorites_tab_active = "active" %}
+{% elif active_page == "files_manager" %}
+    {% set files_manager_tab_active = "active" %}
+{% elif active_page == "sync_settings" %}
+    {% set sync_settings_tab_active = "active" %}
+    {% set sync_tab_active = "active open" %}
+{% elif active_page == "sync_statistics" %}
+    {% set sync_statistics_tab_active = "active" %}
+    {% set sync_tab_active = "active open" %}
+{% elif active_page == "billing" %}
+    {% set billing_tab_active = "active" %}
+    {% set account_overview_tab_active = "active open" %}
+{% elif active_page == "account_stats" %}
+    {% set account_stats_tab_active = "active" %}
+    {% set account_overview_tab_active = "active open" %}
+{% elif active_page == "tags_labels_manager" %}
+    {% set tags_labels_tab_active = "active" %}
+{% elif active_page == "playlist_manager" %}
+    {% set playlist_manager_tab_active = "active" %}
+{% endif %}
+                        <aside class="sidebar">
+                    <div class="sidebar-container">
+                        <div class="sidebar-header">
+                            <div class="brand">
+                                <img src="/static/assets/storj-logo.png" style="height: 45px;">&nbsp;&nbsp;<b>OwnStorj</b> Web </div>
+                        </div>
+                        <nav class="menu">
+                            <ul class="nav metismenu" id="sidebar-menu">
+                                <li  class="{{ dashboard_active }}"> <a href="/dashboard">
+    						<i class="fa fa-home"></i> Dashboard
+    					</a> </li>
+
+						      <li class="{{ files_manager_tab_active }}"> <a href="/files_manager">
+    						<i class="fa fa-pencil-square-o"></i> Files manager
+    					</a> </li>
+
+						 <li class="{{ buckets_tab_active_open }}"> <a href="">
+    						<i class="fa fa-bar-chart"></i> Buckets manager
+    						<i class="fa arrow"></i>
+    					</a>
+                                    <ul>
+                                        <li class="{{ buckets_list_active }}"> <a href="/buckets_list">
+    								Your buckets
+    							</a> </li>
+                                        <li class="{{ buckets_add_active }}"> <a href="/bucket_add">
+    								+ Add new bucket
+    							</a> </li>
+                                    </ul>
+                                </li>
+
+
+
+                                <li  class="{{ account_overview_tab_active }}"> <a href="">
+    						<i class="fa fa-th-large"></i> Account overview
+    						<i class="fa arrow"></i>
+    					</a>
+                                    <ul>
+                                        <li  class="{{ account_stats_tab_active }}"> <a href="/account_stats">
+    								Usage statistics
+    							</a> </li>
+                                        <li  class="{{ billing_tab_active }}"> <a href="/billing">
+    								Billing
+    							</a> </li>
+                                    </ul>
+                                </li>
+
+                                <li  class="{{ sync_tab_active }}"> <a href="">
+    						<i class="fa fa-table"></i> Synchronization
+    						<i class="fa arrow"></i>
+    					</a>
+                                    <ul>
+                                        <li  class="{{ sync_statistics_tab_active }}"> <a href="/sync_statistics">
+    								Statistics
+    							</a> </li>
+                                        <li  class="{{ sync_settings_tab_active }}"> <a href="/sync_settings">
+    								Settings
+    							</a> </li>
+                                    </ul>
+                                </li>
+
+								  <li  class="{{ favorites_tab_active }}"> <a href="/favorites">
+    						<i class="fa fa-pencil-square-o"></i> Favorites
+    					</a> </li>
+
+						  <li class="{{ tags_labels_tab_active }}"> <a href="/tags_labels_manager">
+    						<i class="fa fa-pencil-square-o"></i> Tags and labels
+    					</a> </li>
+
+                                 <li class="{{ playlist_manager_tab_active }}"> <a href="/playlist_manager">
+    						<i class="fa fa-pencil-square-o"></i> Playlist manager
+    					</a> </li>
+
+                            </ul>
+                        </nav>
+                    </div>
+                    <footer class="sidebar-footer">
+                        <ul class="nav metismenu" id="customize-menu">
+                            <li>
+                                <ul>
+                                    <li class="customize">
+                                        <div class="customize-item">
+                                            <div class="row customize-header">
+                                                <div class="col-xs-4"> </div>
+                                                <div class="col-xs-4"> <label class="title">fixed</label> </div>
+                                                <div class="col-xs-4"> <label class="title">static</label> </div>
+                                            </div>
+                                            <div class="row hidden-md-down">
+                                                <div class="col-xs-4"> <label class="title">Sidebar:</label> </div>
+                                                <div class="col-xs-4"> <label>
+    				                        <input class="radio" type="radio" name="sidebarPosition" value="sidebar-fixed" >
+    				                        <span></span>
+    				                    </label> </div>
+                                                <div class="col-xs-4"> <label>
+    				                        <input class="radio" type="radio" name="sidebarPosition" value="">
+    				                        <span></span>
+    				                    </label> </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-xs-4"> <label class="title">Header:</label> </div>
+                                                <div class="col-xs-4"> <label>
+    				                        <input class="radio" type="radio" name="headerPosition" value="header-fixed">
+    				                        <span></span>
+    				                    </label> </div>
+                                                <div class="col-xs-4"> <label>
+    				                        <input class="radio" type="radio" name="headerPosition" value="">
+    				                        <span></span>
+    				                    </label> </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-xs-4"> <label class="title">Footer:</label> </div>
+                                                <div class="col-xs-4"> <label>
+    				                        <input class="radio" type="radio" name="footerPosition" value="footer-fixed">
+    				                        <span></span>
+    				                    </label> </div>
+                                                <div class="col-xs-4"> <label>
+    				                        <input class="radio" type="radio" name="footerPosition" value="">
+    				                        <span></span>
+    				                    </label> </div>
+                                            </div>
+                                        </div>
+                                        <div class="customize-item">
+                                            <ul class="customize-colors">
+                                                <li> <span class="color-item color-red" data-theme="red"></span> </li>
+                                                <li> <span class="color-item color-orange" data-theme="orange"></span> </li>
+                                                <li> <span class="color-item color-green active" data-theme=""></span> </li>
+                                                <li> <span class="color-item color-seagreen" data-theme="seagreen"></span> </li>
+                                                <li> <span class="color-item color-blue" data-theme="blue"></span> </li>
+                                                <li> <span class="color-item color-purple" data-theme="purple"></span> </li>
+                                            </ul>
+                                        </div>
+
+										  <center>
+										<a href="/settings" style="background: none; width: 0%;">
+    			 <button type="button" class="btn btn-primary"  style="width: 90%; text-align: center;">More settings</button></a>
+</center>
+
+                                    </li>
+                                </ul> <a href="">
+    					<i class="fa fa-cog"></i> Settings
+    				</a> </li>
+                        </ul>
+                    </footer>
+                </aside>
