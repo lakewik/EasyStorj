@@ -16,6 +16,7 @@ DEFAULT_CONFIG_XML_CONTENT = '<configuration><client>' \
                              '<default_file_encryption_algorithm>0</default_file_encryption_algorithm>' \
                              '<bridge_request_timeout>90</bridge_request_timeout>' \
                              '<crypto_keys_location>None</crypto_keys_location>' \
+                             '<ownstorj_port>5000</ownstorj_port>' \
                              '<bridge_api_url url="https://api.storj.io" />' \
                              '</client></configuration>'
 
@@ -65,16 +66,20 @@ class Configuration:
 
         return True
 
+    def autosave_config_defaults(self):
+        if os.path.isfile(CONFIG_FILE) != True:
+            self.create_genesis_configuration()
+
     def get_config_parametr_value(self, parametr):
         output = ""
         try:
             et = ET.parse(CONFIG_FILE)
             for tags in et.iter(str(parametr)):
                 output = tags.text
+                return output
         except:
             logger.error("Unspecified error")
 
-        return output
 
     def load_config_from_xml(self):
         try:
@@ -92,6 +97,8 @@ class Configuration:
 
             for tags in et.iter(str("max_shard_size")):
                 settings_ui.max_shard_size.setValue(int(tags.text))
+            for tags in et.iter(str("ownstorj_port")):
+                settings_ui.ownstorj_port.setValue(int(tags.text))
             for tags in et.iter(str("max_connections_onetime")):
                 settings_ui.connections_onetime.setValue(int(tags.text))
             for tags in et.iter(str("bridge_request_timeout")):
@@ -153,6 +160,7 @@ class Configuration:
                                   settings_ui.default_crypto_algorithm.currentIndex())
         tree.find('.//bridge_request_timeout').text = str(settings_ui.bridge_request_timeout.text())
         tree.find('.//crypto_keys_location').text = str(settings_ui.crypto_keys_location.text())
+        tree.find('.//ownstorj_port').text = str(settings_ui.ownstorj_port.text())
 
         #tree = ET.ElementTree(root)
         tree.write(CONFIG_FILE)
@@ -308,4 +316,7 @@ class Configuration:
         #bridge_api_url_tag = soup.configuration.client.bridge_api_url
         #bridge_api_url_tag['url'] = str(bridge_api_url)
 
+        return True
+
+    def save_config_parametr_value(self, parametr, value):
         return True
