@@ -1,8 +1,17 @@
 from ownstorj import app
 import optparse
+from OpenSSL import SSL
+from UI.utilities.backend_config import Configuration
 
-def flaskrun(default_host="localhost",
-                  default_port="5000"):
+storj_gui_config_manager = Configuration()
+
+ownstorj_port_settings = storj_gui_config_manager.get_config_parametr_value("ownstorj_port")
+
+if ownstorj_port_settings == False:
+    ownstorj_port_settings = "5000"
+
+def flaskrun(default_host="0.0.0.0",
+                  default_port=str(ownstorj_port_settings)):
 
     parser = optparse.OptionParser()
     parser.add_option("-H", "--host",
@@ -19,6 +28,13 @@ def flaskrun(default_host="localhost",
 
     options, _ = parser.parse_args()
 
+    try:
+        context = SSL.Context(SSL.SSLv23_METHOD)
+        #context.use_privatekey_file('server.key')
+        #context.use_certificate_file('server.crt')
+    except BaseException as e:
+        print e
+
     app.run(
         debug=options.debug,
         host=options.host,
@@ -26,6 +42,10 @@ def flaskrun(default_host="localhost",
         threaded=True
     )
 
+
+class OwnStorjFlaskServer():
+    def run(self):
+        flaskrun()
 
 if __name__ == '__main__':
     flaskrun()
