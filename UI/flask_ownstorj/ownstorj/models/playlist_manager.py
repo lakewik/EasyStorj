@@ -56,8 +56,12 @@ class OwnStorjPlaylistManager:
         return playlists_list
 
     def get_playlist_details(self, playlist_id):
-        playlist_details = self.tracks_table.get(eid=playlist_id)
+        playlist_details = self.playlists_table.get(eid=int(playlist_id))
         return playlist_details
+
+    def get_track_details(self, track_id):
+        track_details = self.tracks_table.get(eid=int(track_id))
+        return track_details
 
     def count_tracks_in_playlist(self, playlist_id):
         playlist_tracks_list = self.tracks_table.search(where('playlist_id') == str(playlist_id))
@@ -71,6 +75,8 @@ class OwnStorjPlaylistManager:
         playlist_tracks_list = self.get_playlist_tracks_list(playlist_id=playlist_id)
         tracks_count = len(playlist_tracks_list)
         output_playlist_file_content = "" # init variable
+
+        file_type = file_type.upper()
 
         if file_type == "PLS":
             output_playlist_file_content = '[playlist] \n' \
