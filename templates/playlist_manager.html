@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %} Playlist manager {% endblock %}
+{% set active_page = "playlist_manager" %}
+
+
+{% block content %}
+
+
+<article class="content item-editor-page">
+                    <div class="title-block">
+                        <h3 class="title"> Playlist manager <span class="sparkline bar" data-type="bar"></span> </h3>
+                    </div>
+
+                    <div id="playlist_table_area">
+
+                          <center> <img src="/static/assets/loader1.gif"> </center>
+
+                    </div>
+
+                </article>
+
+  <script src="/static/js/sweetalert-dev.js"></script>
+  <script src="/static/js/swal-forms.js"></script>
+  <link rel="stylesheet" href="/static/css/sweetalert_normal.css">
+  <link rel="stylesheet" href="/static/css/swal-forms.css">
+
+swal({
+  title: "Error!",
+  text: "Here's my error message!",
+  type: "error",
+  confirmButtonText: "Cool"
+});
+
+<li class="custom-icon">
+		<div class="ui">
+			<p>A message with a custom icon</p>
+			<button onclick='function(){
+
+};'>Try me!</button>
+		</div>
+		<pre><span class="attr">swal</span>({
+&nbsp;&nbsp;title: <span class="str">"Sweet!"</span>,
+&nbsp;&nbsp;text: <span class="str">"Here's a custom image."</span>,
+&nbsp;&nbsp;imageUrl: <span class="str">"images/thumbs-up.jpg"</span>
+});</pre>
+	</li>
+
+<script>
+
+function open_playlist_add_window() {
+
+swal.withFormAsync({
+  title: "Create new playlist",
+  text: '',
+  type: "info",
+  showCancelButton: true,
+  closeOnConfirm: false,
+  showLoaderOnConfirm: true,
+  html: true,
+   formFields: [
+       { id: 'name', placeholder:'<font color="red">*</font>Playlist name', required: true },
+       { id: 'description', placeholder:'Playlist description' },
+       { id: 'category',
+        type: 'select',
+        placeholder:'Playlist category',
+        options: [
+          {value: 'Rock', text: 'Rock'},
+          {value: 'HipHop', text: 'HipHop'}
+
+        ]}
+   ]
+}).then(function (context) {
+    console.log(context._isConfirm);
+    if (context._isConfirm) {
+
+
+      console.log(context.swalForm);
+
+
+httpGet_async("/playlist/new?playlist_name="+context.swalForm.name+"&playlist_description="+context.swalForm.description+"&playlist_category="+context.swalForm.category, function(x) {
+
+//callback();
+
+refresh_playlists_list();
+swal("Success", "Playlist created successfully!", "success");
+
+
+});
+
+
+
+
+    }
+
+  });
+
+
+//function(){
+  //setTimeout(function(){
+  //  swal("Ajax request finished!");
+ // }, 2000);
+//}
+
+
+
+
+
+}
+
+
+function refresh_playlists_list() {
+
+$("#playlist_table_area").load("/playlist_table_data");
+
+}
+
+function delete_playlist(playlist_id, playlist_name="") {
+
+swal({
+  title: "Are you sure?",
+  text: "You will not be able to recover this playlist and its tracks list!",
+  type: "warning",
+  showCancelButton: true,
+  confirmButtonColor: "#DD6B55",
+  confirmButtonText: "Yes, delete it!",
+  closeOnConfirm: false,
+  html: true
+},
+function(){
+
+
+httpGet_async("/playlist/delete/"+playlist_id, function(x) {
+
+
+refresh_playlists_list();
+swal({
+  title: "Deleted!",
+  type: "success",
+  text: "Playlist <b>"+playlist_name+"</b> have been deleted.",
+  html: true
+});
+
+
+
+});
+
+
+});
+
+
+}
+</script>
+{% endblock %}

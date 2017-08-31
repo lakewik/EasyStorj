@@ -1,0 +1,96 @@
+<div class="row sameheight-container">
+                            <div class="col-xl-12">
+
+     <div class="card sameheight-item items" data-exclude="xs,sm,lg">
+                                    <div class="card-header bordered">
+                                        <div class="header-block">
+                                            <h3 class="title"> Tracks in playlist </h3>&nbsp;&nbsp;<a style="color: white;" onclick="upload_track_to_playlist();" class="btn btn-primary btn-sm rounded">
+            				+ Upload track to this playlist
+            			</a>&nbsp;&nbsp;<a style="color: white;" onclick="add_existing_file_to_playlist();" class="btn btn-primary btn-sm rounded" style="margin-top: 5px;">
+            				+ Add existing file to this playlist
+            			</a></div>
+                                        <div class="header-block pull-right">
+<a style="color: white;" onclick="remove_playlist();" class="btn btn-danger btn-sm rounded">
+            				- Remove this playlist
+            			</a>
+                                        </div>
+                                    </div>
+                                    <ul class="item-list striped">
+                                        <li class="item item-list-header hidden-sm-down">
+                                            <div class="item-row">
+                                                <div class="item-col item-col-header fixed item-col-img xs">#</div>
+                                                <div class="item-col item-col-header item-col-title">
+                                                    <div> <span>Name</span> </div>
+                                                </div>
+                                                <div class="item-col item-col-header item-col-sales">
+                                                    <div> <span>Author</span> </div>
+                                                </div>
+                                                 <div class="item-col item-col-header item-col-stats">
+                                                    <div class="no-overflow"> <span>Length</span> </div>
+                                                </div>
+                                                <div class="item-col item-col-header item-col-stats">
+                                                    <div class="no-overflow"> <span>Description</span> </div>
+                                                </div>
+                                                 <div class="item-col item-col-header item-col-date">
+                                                    <div> <span>...</span> </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                         {% set i = [0] %}
+                                         {% for track in playlist_tracks_array %}
+                                         {% if i.append(i.pop() + 1) %}{% endif %}
+
+                                        <li class="item">
+                                            <div class="item-row">
+                                                <div class="item-col fixed item-col-img xs">
+                                                   {{ i[0] }}
+
+                                                </div>
+                                                <div class="item-col item-col-title no-overflow">
+                                                    <div>
+                                                        <a href="#" onclick="play_track(`http://localhost:5000/public_download_gateway/{{ track['local_file_id'] }}/1`)" class="">
+                                                            <h4 class="item-title no-wrap"> {{ track["name"] }} </h4>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="item-col item-col-sales">
+                                                    <div class="item-heading">Category</div>
+                                                    <div> {{ track["author"] }} </div>
+                                                </div>
+                                                <div class="item-col item-col-sales">
+                                                    <div class="item-heading">Tracks count</div>
+                                                    <div> {{ playlist_tracks_count[i[0]-1] }} </div>
+                                                </div>
+                                                <div class="item-col item-col-date">
+                                                    <div class="item-heading">Created</div>
+                                                    <div> </div>
+                                                </div>
+                                                <div class="item-col">
+                                                    <div class="item-heading">Options</div>
+                                                    <div>
+
+                                                            <a href="#" onclick="play_track(`http://localhost:5000/public_download_gateway/{{ track['local_file_id'] }}/1`)" class="btn btn-warning btn-sm rounded" style="width: 24%;">
+            				<em class="fa fa-play"></em></a>
+
+
+                                                        <a href="#" class="btn btn-primary btn-sm rounded" style="width: 23%;"><em class="fa fa-download"></em></a>
+
+
+                                                          <a href="#" onclick="open_track_edit_window(`{{ track['name'] }}`, `{{ track['author'] }}`, `{{ track['length'] }}`, `{{ track['description'] }}`);" class="btn btn-info btn-sm rounded" style="width: 23%;">
+            				<em class="fa fa-pencil"></em>
+            			</a>
+
+                                                             <a href="item-editor.html" class="btn btn-danger btn-sm rounded" style="width: 24%;">
+            				<em class="fa fa-times"></em>
+            			</a> </div>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+    </div>
+
+                        </div>

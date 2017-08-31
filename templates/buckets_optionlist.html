@@ -1,0 +1,11 @@
+	<div class="col-sm-12"> <label for="bucket_select_optionlist"><b>Select bucket</b></label>
+								
+								
+ <select class="form-control" id="bucket_select_optionlist" name="bucket_select_optionlist" onchange="refresh_files_list(this.value, 3);">
+
+						      {% for bucket in buckets %}
+														<option value="{{ bucket.id }}"> {{ bucket.name }} </option>
+
+	                          {% endfor %}
+
+ </select><br> </div>

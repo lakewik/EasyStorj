@@ -3,6 +3,7 @@
 
 
 import sys, collections, threading, os
+from engineio import async_threading
 #sys.path.append("/home/lakewik/PycharmProjects/storjguibeta/4/storj_gui_client")
 print(os.path.dirname(os.path.realpath(__file__)))
 import requests.packages.urllib3.packages.ordered_dict
@@ -22,8 +23,8 @@ from UI.utilities.tools import Tools
 from UI.resources.constants import RUN_IN_BACKGROUND_AFTER_CLOSE
 from UI.enter_mnemonic import EnterMnemonicUI
 from UI.generated_mnemonic import MnemonicGeneratedUI
-#from UI.flask_ownstorj.runserver import OwnStorjFlaskServer
 
+from UI.flask_ownstorj.runserver import OwnStorjFlaskServer
 
 
 if __name__ == "__main__":
@@ -32,19 +33,35 @@ if __name__ == "__main__":
     app.setQuitOnLastWindowClosed(False) # app can run in background
 
     tools = Tools()
+    storj_gui_config_manager = Configuration()
 
     locale = QtCore.QLocale.system().name()
     qtTranslator = QtCore.QTranslator()
     # try to load translation
 
+    storj_gui_config_manager.autosave_config_defaults()
+
     if qtTranslator.load("" + locale, ":tra/"):
         app.installTranslator(qtTranslator)
 
     account_manager = AccountManager()
+
+
+    def run_ownstorj():
+        #tools.map_port_UPnP(5000, "OwnStorj Home Server")
+
+        own_storj_init = OwnStorjFlaskServer()
+        own_storj_init.run()
+
+    def init_ownstorj():
+        shard_upload_init_thread = threading.Thread(
+            target=run_ownstorj
+        )
+        shard_upload_init_thread.start()
+
     if account_manager.if_logged_in():
-        #own_storj_init = OwnStorjFlaskServer()
-        #own_storj_init.run()
         #myapp = MainUI()
+        init_ownstorj()
         myapp = EnterMnemonicUI()
         #myapp = MnemonicGeneratedUI()
         #start_storj_sync_server_thread()

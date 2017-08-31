@@ -1,0 +1,536 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title> OwnStorj - Login </title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+        <link rel="stylesheet" href="/static/css/vendor.css">
+
+        <!-- Theme initialization -->
+        <script>//download.js v4.2, by dandavis; 2008-2016. [CCBY2] see http://danml.com/download.html for tests/usage
+// v1 landed a FF+Chrome compat way of downloading strings to local un-named files, upgraded to use a hidden frame and optional mime
+// v2 added named files via a[download], msSaveBlob, IE (10+) support, and window.URL support for larger+faster saves than dataURLs
+// v3 added dataURL and Blob Input, bind-toggle arity, and legacy dataURL fallback was improved with force-download mime and base64 support. 3.1 improved safari handling.
+// v4 adds AMD/UMD, commonJS, and plain browser support
+// v4.1 adds url download capability via solo URL argument (same domain/CORS only)
+// v4.2 adds semantic variable names, long (over 2MB) dataURL support, and hidden by default temp anchors
+// https://github.com/rndme/download
+
+(function (root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		// AMD. Register as an anonymous module.
+		define([], factory);
+	} else if (typeof exports === 'object') {
+		// Node. Does not work with strict CommonJS, but
+		// only CommonJS-like environments that support module.exports,
+		// like Node.
+		module.exports = factory();
+	} else {
+		// Browser globals (root is window)
+		root.download = factory();
+  }
+}(this, function () {
+
+	return function download(data, strFileName, strMimeType) {
+
+		var self = window, // this script is only for browsers anyway...
+			defaultMime = "application/octet-stream", // this default mime also triggers iframe downloads
+			mimeType = strMimeType || defaultMime,
+			payload = data,
+			url = !strFileName && !strMimeType && payload,
+			anchor = document.createElement("a"),
+			toString = function(a){return String(a);},
+			myBlob = (self.Blob || self.MozBlob || self.WebKitBlob || toString),
+			fileName = strFileName || "download",
+			blob,
+			reader;
+			myBlob= myBlob.call ? myBlob.bind(self) : Blob ;
+
+		if(String(this)==="true"){ //reverse arguments, allowing download.bind(true, "text/xml", "export.xml") to act as a callback
+			payload=[payload, mimeType];
+			mimeType=payload[0];
+			payload=payload[1];
+		}
+
+
+		if(url && url.length< 2048){ // if no filename and no mime, assume a url was passed as the only argument
+			fileName = url.split("/").pop().split("?")[0];
+			anchor.href = url; // assign href prop to temp anchor
+		  	if(anchor.href.indexOf(url) !== -1){ // if the browser determines that it's a potentially valid url path:
+        		var ajax=new XMLHttpRequest();
+        		ajax.open( "GET", url, true);
+        		ajax.responseType = 'blob';
+        		ajax.onload= function(e){
+				  download(e.target.response, fileName, defaultMime);
+				};
+        		setTimeout(function(){ ajax.send();}, 0); // allows setting custom ajax headers using the return:
+			    return ajax;
+			} // end if valid url?
+		} // end if url?
+
+
+		//go ahead and download dataURLs right away
+		if(/^data\:[\w+\-]+\/[\w+\-]+[,;]/.test(payload)){
+
+			if(payload.length > (1024*1024*1.999) && myBlob !== toString ){
+				payload=dataUrlToBlob(payload);
+				mimeType=payload.type || defaultMime;
+			}else{
+				return navigator.msSaveBlob ?  // IE10 can't do a[download], only Blobs:
+					navigator.msSaveBlob(dataUrlToBlob(payload), fileName) :
+					saver(payload) ; // everyone else can save dataURLs un-processed
+			}
+
+		}//end if dataURL passed?
+
+		blob = payload instanceof myBlob ?
+			payload :
+			new myBlob([payload], {type: mimeType}) ;
+
+
+		function dataUrlToBlob(strUrl) {
+			var parts= strUrl.split(/[:;,]/),
+			type= parts[1],
+			decoder= parts[2] == "base64" ? atob : decodeURIComponent,
+			binData= decoder( parts.pop() ),
+			mx= binData.length,
+			i= 0,
+			uiArr= new Uint8Array(mx);
+
+			for(i;i<mx;++i) uiArr[i]= binData.charCodeAt(i);
+
+			return new myBlob([uiArr], {type: type});
+		 }
+
+		function saver(url, winMode){
+
+			if ('download' in anchor) { //html5 A[download]
+				anchor.href = url;
+				anchor.setAttribute("download", fileName);
+				anchor.className = "download-js-link";
+				anchor.innerHTML = "downloading...";
+				anchor.style.display = "none";
+				document.body.appendChild(anchor);
+				setTimeout(function() {
+					anchor.click();
+					document.body.removeChild(anchor);
+					if(winMode===true){setTimeout(function(){ self.URL.revokeObjectURL(anchor.href);}, 250 );}
+				}, 66);
+				return true;
+			}
+
+			// handle non-a[download] safari as best we can:
+			if(/(Version)\/(\d+)\.(\d+)(?:\.(\d+))?.*Safari\//.test(navigator.userAgent)) {
+				url=url.replace(/^data:([\w\/\-\+]+)/, defaultMime);
+				if(!window.open(url)){ // popup blocked, offer direct download:
+					if(confirm("Displaying New Document\n\nUse Save As... to download, then click back to return to this page.")){ location.href=url; }
+				}
+				return true;
+			}
+
+			//do iframe dataURL download (old ch+FF):
+			var f = document.createElement("iframe");
+			document.body.appendChild(f);
+
+			if(!winMode){ // force a mime that will download:
+				url="data:"+url.replace(/^data:([\w\/\-\+]+)/, defaultMime);
+			}
+			f.src=url;
+			setTimeout(function(){ document.body.removeChild(f); }, 333);
+
+		}//end saver
+
+
+
+
+		if (navigator.msSaveBlob) { // IE10+ : (has Blob, but not a[download] or URL)
+			return navigator.msSaveBlob(blob, fileName);
+		}
+
+		if(self.URL){ // simple fast and modern way using Blob and URL:
+			saver(self.URL.createObjectURL(blob), true);
+		}else{
+			// handle non-Blob()+non-URL browsers:
+			if(typeof blob === "string" || blob.constructor===toString ){
+				try{
+					return saver( "data:" +  mimeType   + ";base64,"  +  self.btoa(blob)  );
+				}catch(y){
+					return saver( "data:" +  mimeType   + "," + encodeURIComponent(blob)  );
+				}
+			}
+
+			// Blob but not URL support:
+			reader=new FileReader();
+			reader.onload=function(e){
+				saver(this.result);
+			};
+			reader.readAsDataURL(blob);
+		}
+		return true;
+	}; /* end download() */
+}));</script>
+        <script>
+            var themeSettings = (localStorage.getItem('themeSettings')) ? JSON.parse(localStorage.getItem('themeSettings')) :
+            {};
+            var themeName = themeSettings.themeName || '';
+            if (themeName)
+            {
+                document.write('<link rel="stylesheet" id="theme-style" href="/static/css/app-' + themeName + '.css">');
+            }
+            else
+            {
+                document.write('<link rel="stylesheet" id="theme-style" href="/static/css/app.css">');
+            }
+
+
+            </script>
+
+        <style>
+        #downloadbt {
+               background: #1761d8;
+               border-color: #1761d8;
+            }
+           #downloadbt:hover {
+                background: #3d84f7;
+                border-color: #3d84f7;
+            }
+
+            #previewbt {
+               background: #99ef21;
+               border-color: #99ef21;
+            }
+           #previewbt:hover {
+                background: #b2f751;
+                border-color: #b2f751;
+            }
+
+
+        </style>
+    </head>
+    <body>
+        <div class="auth" style="background: #1761d8;" style="height: 100%; width: 100%;">
+            <div class="auth-container" style="height: 90%; width: 95%;">
+                <div class="card" >
+                    <center>
+<br>
+                            <div class="logo">
+                                <img src="/static/assets/storj-logo.png" style="height: 50px;">
+                            </div><h1 class="auth-title"> OwnStorj </h1>
+
+                        </center>
+                    <hr size="10" style="background:  #1761d8; height: 5px;">
+
+                    <div class="auth-content">
+                        <h1 class="text-xs-center">Download public file</h1>
+                        <form id="login-form" action="/login" method="POST" novalidate="">
+                           <h3>Filename: <b id="file_name_label">a.jpg</b></h3>
+                           <h3>File size: <b id="file_size_label">6MB</b>&nbsp;<div id="file_size_bytes_label" style="display: inline-block;">(67698 bytes)</div></h3>
+                           <h3>File upload date: <b id="file_upload_date_label">6MB</b></h3>
+<br>
+                             <button type="button" onclick="begin_file_downloading()" class="btn btn-primary btn-lg btn-block" id="downloadbt" style="width: 100%; ">Download file</button>
+                             <button type="button" class="btn btn-primary btn-lg btn-block" id="previewbt" style=" width: 100%; ">Preview</button>
+<div id="download_details_area" style="display: block;">
+                            <div id="download_progress">
+                                <hr>
+                                 <h3><b>Download progress:</b></h3><br>
+      <progress class="progress" id="download_progressbar" style="width: 100%;" value="0" max="100"></progress><p style="font-weight: bold;" id="download_progress_percent">0%</p> <p style="font-weight: bold; display: inline-block;" id="download_status_indicator">Waiting for user...</p><p style="font-weight: bold; display: inline-block; float: right;" id="download_speed_remaining">...</p>
+</div>
+
+    <div id="download_from_farmer">
+        <hr>
+        <h3><b>Downloading from farmer:</b></h3><br>
+        <h3>Address:&nbsp;<b id="farmer_url">storj://127.0.0.1:4000/abcde</b></h3><br>
+        <h3>Country:&nbsp;<b id="farmer_country">Poland</b></h3><br>
+        <h3 style="display: none;">ISP:&nbsp;<b id="farmer_isp"></b></h3><br>
+
+    </div>
+
+    </div>
+
+                        </form>
+                    </div>
+                </div>
+                <div class="text-xs-center">
+
+                </div>
+            </div>
+        </div>
+<div id="shard_download_div"></div>
+
+        <script src="/static/js/vendor.js"></script>
+        <script src="/static/js/app.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-animate.js"></script>
+
+                <script src="https://rawgit.com/eligrey/FileSaver.js/master/FileSaver.js" type="text/javascript"></script>
+
+
+    <script>
+            document.getElementById('downloadbt').disabled = true;
+             document.getElementById('previewbt').disabled = true;
+
+
+    var fileSizeBytes;
+
+    window.onload = function WindowLoad(event) {
+    //alert("Page is loaded");
+    initFileProperties();
+}
+
+           function httpGet_async(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.addEventListener("load", function(event) {
+
+ //something_async(function(responseText) {
+        callback(xmlHttp.responseText);
+  //  });
+
+
+
+}, false);
+    xmlHttp.open( "GET", theUrl, true ); // false for synchronous request
+    xmlHttp.send( null );
+   // return xmlHttp.responseText;
+}
+
+function setCurrentDownloadStatus(download_status) {
+    var downloadStatusIndicator = document.getElementById("download_status_indicator");
+    downloadStatusIndicator.innerHTML = download_status;
+}
+
+function updateSourceFarmerDetails(farmerUrl) {
+
+    farmerUrlExploded1 = farmerUrl.split(":");
+    farmerIPDomain = farmerUrlExploded1[1].replace("//", "");
+
+    console.log(farmerIPDomain);
+
+    farmerFullStorjAddress = farmerUrl.replace("http://", "storj://").split("/shards")[0];
+
+    console.log(farmerFullStorjAddress);
+
+   httpGet_async("http://ip-api.com/json/"+farmerIPDomain, function(ipinfo_json) {
+
+     ipinfo_obj = JSON.parse(ipinfo_json);
+
+    country_name = ipinfo_obj.country;
+    country_code = ipinfo_obj.countryCode.toLowerCase();
+
+    var farmerUrlLabel = document.getElementById("farmer_url");
+    var countryNameLabel = document.getElementById("farmer_country");
+
+    farmerUrlLabel.innerHTML = farmerFullStorjAddress;
+    countryNameLabel.innerHTML = country_name + "&nbsp;&nbsp;<img src='/static/assets/countries/"+country_code+".png' height='25'>";
+
+
+    });
+
+
+
+}
+
+function initFileProperties() {
+
+var splitted = window.location.pathname.split('public_download_gateway/');
+           public_hash_download = splitted[1].split("/")[0];
+
+ //file_properties_json = httpGet("http://localhost:5000/get_public_file_properties/"+public_hash_download);
+ httpGet_async("http://localhost:5000/get_public_file_properties/"+public_hash_download, function(file_properties_json) {
+    // do something after async_function completes and invokes this callback
+     file_properties_obj = JSON.parse(file_properties_json);
+
+ var fileNameLabel = document.getElementById("file_name_label");
+ var fileSizeHumanLabel = document.getElementById("file_size_label");
+ var fileSizeLabel = document.getElementById("file_size_bytes_label");
+ var fileUploadDateLabel = document.getElementById("file_upload_date_label");
+
+ fileSizeBytes = file_properties_obj.file_size;
+
+ fileNameLabel.innerHTML = file_properties_obj.file_name;
+ fileSizeHumanLabel.innerHTML = file_properties_obj.file_size_human;
+ fileSizeLabel.innerHTML = "("+file_properties_obj.file_size+" bytes)";
+ fileUploadDateLabel.innerHTML = file_properties_obj.file_upload_date;
+
+ document.getElementById('downloadbt').disabled = false;
+         //    document.getElementById('previewbt').disabled = false;
+});
+
+
+
+}
+
+ String.prototype.toHHMMSS = function () {
+    var sec_num = parseInt(this, 10); // don't forget the second param
+    var hours   = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    return hours+':'+minutes+':'+seconds;
+}
+
+            function begin_file_downloading() {
+            var splitted = window.location.pathname.split('public_download_gateway/');
+            public_hash_download = splitted[1].split("/")[0];
+                setCurrentDownloadStatus("Requesting file pointers...");
+                 document.getElementById('downloadbt').disabled = true;
+                httpGet_async("http://localhost:5000/public_download_get_farmers/"+public_hash_download, function(farmer_address) {
+
+                 setCurrentDownloadStatus("Initializing farmer details...");
+                updateSourceFarmerDetails(farmer_address);
+                download_shard(farmer_address);
+
+
+                });
+
+            }
+
+            function download_shard(farmer_address) {
+            console.log(farmer_address);
+            var x=new XMLHttpRequest();
+
+
+      // report progress events
+      var started_at = new Date();
+    //  fileSizeBytes = 5380009;
+x.addEventListener("progress", function(event) {
+ var loaded = event.loaded;
+ var total = fileSizeBytes;
+
+        var percentComplete = event.loaded / fileSizeBytes;
+        // ...
+        console.log(percentComplete);
+        percentComplete = percentComplete*100;
+        var progressBar = document.getElementById("download_progressbar");
+        var downloadProgressPercentIndicator = document.getElementById("download_progress_percent");
+        var downloadSpeedRemainingTimeIndicator = document.getElementById("download_speed_remaining");
+progressBar.value = percentComplete;
+downloadProgressPercentIndicator.innerHTML = parseFloat(percentComplete).toFixed(1)+"%";
+
+var seconds_elapsed =   ( new Date().getTime() - started_at.getTime() )/1000;
+                var bytes_per_second =  seconds_elapsed ? loaded / seconds_elapsed : 0 ;
+                var Kbytes_per_second = bytes_per_second / 1000 ;
+                var kbytes_per_second = bytes_per_second / 1024 ;
+                var remaining_bytes =   total - loaded;
+                var seconds_remaining = seconds_elapsed ? remaining_bytes / bytes_per_second : 'calculating' ;
+
+
+
+downloadSpeedRemainingTimeIndicator.innerHTML = "Remaining time: "+seconds_remaining.toString().toHHMMSS()+" @ "+Kbytes_per_second.toFixed(1)+"KB/s";
+console.log(seconds_remaining.toString().toHHMMSS());
+
+}, false);
+
+x.addEventListener("load", function(event) {
+
+       setCurrentDownloadStatus("Download completed!");
+        document.getElementById('downloadbt').disabled = false;
+
+}, false);
+	x.open("GET", farmer_address, true);
+	x.responseType = 'blob';
+	setCurrentDownloadStatus("Downloading file from farmer...");
+	var file_name = document.getElementById("file_name_label").innerHTML;
+	x.onload=function(e){download(x.response, document.getElementById("file_name_label").innerHTML, "image/jpg" ); }
+	x.send();
+
+
+
+
+
+
+shard_download_div = document.getElementById("shard_download_div");
+shard_download_div.innerHTML = "<a  data-saveas='koteczek.jpg' href='"+farmer_address+"' id='shard_download_link'>sdfsa</a>";
+//document.getElementById('shard_download_link').click(); //  use trick - download directly from farmer with changed file name
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ }
+
+        </script>
+
+        
+
+
+
+
+
+    <script type="text/javascript">
+  // Helper to convert AJAX response in to a BLOB
+  function dataToBlob(data, mimeString){
+    // convert data to ArrayBuffer
+    var buffer = new Int8Array(new ArrayBuffer(data.length));
+    for (var i = 0; i < data.length; i++){
+      buffer[i] = data.charCodeAt(i) & 0xff;
+    }
+
+    // http://stackoverflow.com/a/15302872/298053
+    try {
+      return new Blob([buffer],{type:mimeString});
+    } catch (e1) {
+      try {
+        var BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder;
+        if (e.name == 'TypeError' && window.BlobBuilder){
+          bb = new BlobBuilder();
+          bb.append([buffer.buffer]);
+          return bb.getBlob(mimeString);
+        } else if (e.name == 'InvalidStateError'){
+          return new Blob([buffer.buffer],{type:mimeString});
+        }
+      } catch (e2) {
+      }
+    }
+    return null;
+  }
+
+  // iterate over all the items that are marked as saveas
+  $('a[data-saveas]').each(function(){
+    var $this = $(this);
+
+    // Get the actual path and the destined name
+    var target = $this.prop('href'),
+        saveas = $this.data('data-saveas');
+
+    // make an ajax call to retrieve the resource
+    $.ajax({
+      url: target,
+      type: 'GET',
+      mimeType: 'text/plain; charset=x-user-defined'
+    }).done(function(data, textStatus, jqXHR){
+      var mimeString = jqXHR.getResponseHeader('Content-Type'),
+          blob = dataToBlob(data, mimeString);
+      if (blob){
+        // now modfy the anchor to use the blob instead of the default href
+        var filename = saveas,
+            href = (window.webkitURL || window.URL).createObjectURL(blob);
+        $this.prop({
+          'download': saveas,
+          'href': href,
+          'draggable': true
+        }).data({
+          'downloadurl': [mimeString, filename, href].join(':')
+        });
+      }
+    });
+  });
+</script>
+    </body>
+</html>

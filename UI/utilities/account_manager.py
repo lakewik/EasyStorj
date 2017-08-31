@@ -46,8 +46,15 @@ class AccountManager:
         return logged_in == '1'
 
     def logout(self):
-        self.__logger.debug('TODO')
-        self.__logger.debug('1')
+        print "Log out action"
+        root = ET.Element("account")
+        doc = ET.SubElement(root, "credentials")
+        ET.SubElement(doc, "login_email").text = "0"
+        ET.SubElement(doc, "password").text = "0"
+        ET.SubElement(doc, "logged_in").text = "0"
+        tree = ET.ElementTree(root)
+        tree.write(ACCOUNT_FILE)
+        return True
 
     def get_user_password(self):
         password = ""
@@ -75,3 +82,13 @@ class AccountManager:
             self.__logger.error('Credentials file not existing')
 
         return email
+
+    def validate_password_local(self, password):
+        password_hashed = str(hashlib.sha256(password.encode('ascii')).hexdigest())
+        password_from_config = self.get_user_password()
+
+        if password_from_config == password_hashed:
+            return True
+        else:
+            return False
+

@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %} File mirrors {% endblock %}
+{% set active_page = "dashboard" %}
+
+
+{% block content %}
+
+
+<article class="content item-editor-page">
+                    <div class="title-block">
+                        <h3 class="title"> File mirrors  <span class="sparkline bar" data-type="bar"></span> </h3>
+                    </div>
+                    <form name="item" action="/buckets/new" method="POST">
+                        <div class="card card-block">
+
+                            <div class="col col-xs-12 col-sm-12 col-md-12 col-xl-12 ">
+                                <div class="card sameheight-item" data-exclude="xs">
+                                    <div class="card-header card-header-sm bordered">
+                                        <div class="header-block">
+                                            <h3 class="title">Mirrors</h3>
+                                        </div>
+                                        <ul class="nav nav-tabs pull-left" role="tablist">
+                                            <li class="nav-item"> <a class="nav-link active" href="#available" role="tab" data-toggle="tab">Available mirrors</a> </li>
+                                            <li class="nav-item"> <a class="nav-link" href="#established" role="tab" data-toggle="tab">Established mirrors</a> </li>
+                                            <li class="nav-item"> <a class="nav-link" href="#geodistribution" role="tab" data-toggle="tab">Geographical distribution</a> </li>
+
+                                        </ul>
+                                    </div>
+                                    <div class="card-block">
+                                        <div class="tab-content">
+                                            <div role="tabpanel" class="tab-pane active fade in" id="available">
+
+<center> <img src="/static/assets/loader1.gif"> </center>
+
+
+                                            </div>
+
+                                            <div role="tabpanel" class="tab-pane  fade in" id="established">
+
+<center> <img src="/static/assets/loader1.gif"> </center>
+
+
+                                            </div>
+
+                                              <div role="tabpanel" class="tab-pane  fade in" id="geodistribution">
+ <center> <img src="/static/assets/loader1.gif"> </center>
+                                                  <div class="card-block">
+                                        <!-- Nav tabs -->
+                                        <div class="card-title-block">
+                                            <h3 class="title"> You can check  and analyze here geographical distribution of your file</h3>
+                                        </div>
+                                        <ul class="nav nav-tabs nav-tabs-bordered">
+                                            <li class="nav-item"> <a href="#home" class="nav-link active" data-target="#summary_geo" data-toggle="tab" aria-controls="home" role="tab">Summary</a> </li>
+                                            <li class="nav-item"> <a href="#profile" class="nav-link" data-target="#established_geo" aria-controls="profile" data-toggle="tab" role="tab">Established mirrors</a> </li>
+                                            <li class="nav-item"> <a href="#profile" class="nav-link" data-target="#available_geo" aria-controls="profile" data-toggle="tab" role="tab">Available mirrors</a> </li>
+
+										</ul>
+                                        <!-- Tab panes -->
+                                        <div class="tab-content tabs-bordered">
+                                            <div class="tab-pane fade in active" id="home">
+
+                                              <div class="card">
+                                    <div class="card-block">
+                                        <div class="card-title-block">
+                                            <h3 class="title"> Donut Chart Example </h3>
+                                        </div>
+                                        <section class="example">
+                                            <div id="morris-donut-chart"></div>
+                                        </section>
+                                    </div>
+                                </div>
+
+                                            </div>
+                                            <div class="tab-pane fade" id="profile">
+                                                <h4>Profile Tab</h4>
+                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+                                                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                                                    deserunt mollit anim id est laborum.</p>
+                                            </div>
+                                            <div class="tab-pane fade" id="messages">
+                                                <h4>Messages Tab</h4>
+                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+                                                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                                                    deserunt mollit anim id est laborum.</p>
+                                            </div>
+                                            <div class="tab-pane fade" id="settings">
+                                                <h4>Settings Tab</h4>
+                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+                                                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                                                    deserunt mollit anim id est laborum.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                </article>
+
+{% include 'sweetalert_imports.html' %}
+
+swal({
+  title: "Error!",
+  text: "Here's my error message!",
+  type: "error",
+  confirmButtonText: "Cool"
+});
+
+<li class="custom-icon">
+		<div class="ui">
+			<p>A message with a custom icon</p>
+			<button onclick='function(){
+
+};'>Try me!</button>
+		</div>
+		<pre><span class="attr">swal</span>({
+&nbsp;&nbsp;title: <span class="str">"Sweet!"</span>,
+&nbsp;&nbsp;text: <span class="str">"Here's a custom image."</span>,
+&nbsp;&nbsp;imageUrl: <span class="str">"images/thumbs-up.jpg"</span>
+});</pre>
+	</li>
+
+<script>
+
+function open_contract_details(payment_destination, renter_id, data_hash, payment_storage_price, store_end,
+                               renter_hd_key, renter_signature, store_begin, data_size, farmer_id,
+                               payment_download_price, version, renter_hd_key, farmer_signature, audit_count) {
+
+
+swal({
+		title: "Storage contract details",
+		text: `<div class="table-responsive">
+                                                <table class="table table-striped table-bordered table-hover">
+                                                    <thead>
+                                                        <tr>
+
+                                                            <th>Parameter</th>
+                                                            <th>Value</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><b>Payment destination</b></td>
+                                                            <td><a href="https://etherscan.io/address/`+payment_destination+`" target="_blank">`+payment_destination+`</a></td>
+
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Renter ID</b></td>
+                                                            <td>`+renter_id+`</td>
+
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Data hash</b></td>
+                                                            <td>`+data_hash+`</td>
+
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Payment storage price</b></td>
+                                                            <td>`+payment_storage_price+`</td>
+
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Store end</b></td>
+                                                            <td>`+store_end+`</td>
+
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Renter HD index</b></td>
+                                                            <td>`+renter_hd_key+`</td>
+
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Renter signature</b></td>
+                                                            <td>`+renter_signature+`</td>
+
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Store begin</b></td>
+                                                            <td>`+store_begin+`</td>
+
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Data size</b></td>
+                                                            <td>`+data_size+`</td>
+
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>Farmer ID</b></td>
+                                                            <td>`+farmer_id+`</td>
+
+                                                        </tr>
+                                                          <tr>
+                                                            <td><b>Payment download price</b></td>
+                                                            <td>`+payment_download_price+`</td>
+
+                                                        </tr>
+                                                          <tr>
+                                                            <td><b>Version</b></td>
+                                                            <td>`+version+`</td>
+
+                                                        </tr>
+                                                          <tr>
+                                                            <td><b>Renter hd key</b></td>
+                                                            <td>`+renter_hd_key+`</td>
+
+                                                        </tr>
+                                                          <tr>
+                                                            <td><b>Farmer signature</b></td>
+                                                            <td>`+farmer_signature+`</td>
+
+                                                        </tr>
+                                                          <tr>
+                                                            <td><b>Audit count</b></td>
+                                                            <td>`+audit_count+`</td>
+
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>`,
+		imageUrl: "/static/assets/storj-logo.png",
+  html: true
+	});
+
+}
+
+document.getElementById().onclick = function(){
+
+
+};</script>
+{% endblock %}

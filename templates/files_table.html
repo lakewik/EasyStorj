@@ -1,0 +1,95 @@
+           {% if playlist_features_enabled %}
+                                                           {%  set display_mode = "3"  %}
+
+
+{% else %}
+            {% if public_features_enabled %}
+
+                                                            {%  set display_mode = "4"  %}
+                                                             {% endif %}
+{% endif %}
+         <div class="table-responsive">
+                                                <table class="table table-striped table-bordered table-hover" id="files_list">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Name</th>
+                                                            <th>Size</th>
+                                                            <th>Upload date</th>
+                                                            <th>File ID</th>
+                                                               {% if public_features_enabled %}
+
+                                                             <th>Public file hash</th>
+                                                             {% endif %}
+                                                              <th>...</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                        {% set i = 0 %}
+                                                        {% set cnt = [0] %}
+                                                        {% for file in files_list %}
+
+                                                           {% if cnt.append(cnt.pop() + 1) %}{% endif %}
+                                                        <tr>
+                                                              <td>{{ cnt[0] }}</td>
+                                                            <td>{{ file['filename'] }}</td>
+                                                            <td>{{ file['size_human_formatted'] }}</td>
+                                                            <td>{{ file['created'] }}</td>
+                                                            <td>{{ file['id'] }}</td>
+ {% if public_features_enabled %}
+                                                            {% if  public_file_sharing_manager.is_file_public(bucket_id, file['id']) %}
+                                                            <td>
+                                                                <a href="/public_download_gateway/{{ public_file_sharing_manager.get_public_file_hash(bucket_id, file['id']) }}"  style="width: 23%;">
+                                                                {{ public_file_sharing_manager.get_public_file_hash(bucket_id, file['id']) }}</a></td>
+                                                             {% else  %}
+                                                               <td>---</td>
+                                                            {% endif %}
+
+                                                            {% endif %}
+
+                                                             <td> <a href="item-editor.html" class="btn btn-primary btn-sm rounded" style="width: 23.5%;"><em class="fa fa-download"></em></a>
+
+
+                                                             <a href="/file_mirrors/{{ bucket_id }}_{{ file['id'] }}" class="btn btn-warning btn-sm rounded" style="width: 23%;"><em class="fa fa-sitemap"></em></a>
+
+
+
+
+                                    {% if public_features_enabled %}
+
+                                          {% if  public_file_sharing_manager.is_file_public(bucket_id, file['id']) %}
+                                                          {% if playlist_features_enabled %}
+                                                             <a href="#" onclick="insert_file_to_playlist_db('{{ public_file_sharing_manager.get_public_file_hash(bucket_id, file['id']) }}', '{{ bucket_id }}')" class="btn btn-info btn-sm rounded" style="width: 23.5%;"><em class="fa fa-plus"></em></a>
+                                                            {% endif %}
+
+
+                                                            {% else  %}
+
+
+
+ <a href="#" onclick="make_file_public('{{ bucket_id }}', '{{ file['id'] }}', '{{ file['filename'] }}', '{{ file['size'] }}', '{{ file['created'] }}', '{{ display_mode }}')" class="btn btn-info btn-sm rounded" style="width: 23.5%;"><em class="fa fa-globe"></em></a>
+
+
+
+
+
+                                                            {% endif %}
+
+
+
+                                                            {% endif %}
+
+
+                                                                                 <a href="item-editor.html" class="btn btn-danger btn-sm rounded" style="width: 23%;">
+            				<em class="fa fa-times"></em>
+            			</a>
+                                                             </td>
+
+                                                        </tr>
+
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>

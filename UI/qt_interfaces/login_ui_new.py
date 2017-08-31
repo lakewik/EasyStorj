@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_Login(object):
     def setupUi(self, Login):
         Login.setObjectName(_fromUtf8("Login"))
-        Login.resize(327, 391)
+        Login.resize(327, 454)
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 255, 255))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -49,7 +49,7 @@ class Ui_Login(object):
         Login.setAutoFillBackground(False)
         Login.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.login_bt = QtGui.QPushButton(Login)
-        self.login_bt.setGeometry(QtCore.QRect(185, 335, 121, 41))
+        self.login_bt.setGeometry(QtCore.QRect(185, 400, 121, 41))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(16)
@@ -87,7 +87,7 @@ class Ui_Login(object):
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.cancel_bt = QtGui.QPushButton(Login)
-        self.cancel_bt.setGeometry(QtCore.QRect(20, 335, 106, 41))
+        self.cancel_bt.setGeometry(QtCore.QRect(20, 400, 106, 41))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Lato"))
         font.setPointSize(16)
@@ -139,6 +139,24 @@ class Ui_Login(object):
         self.password.setText(_fromUtf8(""))
         self.password.setEchoMode(QtGui.QLineEdit.Password)
         self.password.setObjectName(_fromUtf8("password"))
+        self.label_5 = QtGui.QLabel(Login)
+        self.label_5.setGeometry(QtCore.QRect(20, 320, 286, 31))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Lato"))
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_5.setFont(font)
+        self.label_5.setObjectName(_fromUtf8("label_5"))
+        self.bridge_url = QtGui.QLineEdit(Login)
+        self.bridge_url.setGeometry(QtCore.QRect(20, 350, 286, 31))
+        self.bridge_url.setStyleSheet(_fromUtf8("QLineEdit{\n"
+"  padding: 3px;\n"
+"  color: #2683ff;\n"
+"  font-size: 15px;\n"
+"  border: 1px solid #2683ff;\n"
+"}"))
+        self.bridge_url.setObjectName(_fromUtf8("bridge_url"))
 
         self.retranslateUi(Login)
         QtCore.QMetaObject.connectSlotsByName(Login)
@@ -152,5 +170,7 @@ class Ui_Login(object):
         self.label.setText(_translate("Login", "<html><head/><body><p align=\"center\"><span style=\" color:#555555;\">Email Address</span></p></body></html>", None))
         self.cancel_bt.setText(_translate("Login", "CANCEL", None))
         self.label_2.setText(_translate("Login", "<html><head/><body><p align=\"center\"><span style=\" color:#555555;\">Password</span></p></body></html>", None))
+        self.label_5.setText(_translate("Login", "<html><head/><body><p align=\"center\"><span style=\" color:#555555;\">Bridge URL</span></p></body></html>", None))
+        self.bridge_url.setText(_translate("Login", "https://api.storj.io", None))
 
 import resources_rc
