@@ -12,13 +12,17 @@ The layout has been designed by @Davasny (https://github.com/Davasny)
 
 
 ## Honor supporters 
-**[You can support me by donating CryptoCurrency](#support)**
+**[You can support me by donating CryptoCurrency](#support)** 
  - Will Topping
  - Meije Sibbel
+ - Kevin J Baird
+ - Colton Marino
+
+(list ordered by donation time)
  
 ## Download
-- Portable binary package for Linux: https://github.com/lakewik/storj-gui-client/releases/download/0.1.5/storj-gui-linux-0.1.5
-- Portable binary package for Windows: https://github.com/lakewik/storj-gui-client/releases/download/0.1.7/storj-gui-0.1.7.exe
+- Portable binary package for Linux: https://github.com/lakewik/storj_gui_client/releases/download/0.1.9/storj-gui-client-v.0.1.9-linux
+- Portable binary package for Windows: https://github.com/lakewik/storj_gui_client/releases/download/0.1.9/storj-gui-client-0.1.9.exe
 
 
 ## How to run (Alpha version)
@@ -62,7 +66,7 @@ Please note that this software is currently in Alpha Version.
 I will be grateful for donations:
 
 - BTC and SJCX: `1LWMe1AuQSNQq6zUEtC8vMaV3LhS8r1uFw`
-- Ethereum (ETH): `0x58056c2c0e9adafe15fe20337bbcdcc1bb5dd4b5`
+- Ethereum (ETH) and STORJ Token: `0x61688e7822327C30B6AcC26F737941Deca787033`
 - Monero {For very anonymous donations} (XMR): `42VP4x4CRtwf9PXD3J73ntQHb2f2BYHVR75ovjeSNWzRF4X34mdf367VWD74kD4zDT3ReY6t5uQxAC9FWCPnMQjpQ3xFsV9`.  
 
 *Thank you very much for your support!*
