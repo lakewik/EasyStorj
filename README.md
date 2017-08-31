@@ -21,8 +21,8 @@ The layout has been designed by @Davasny (https://github.com/Davasny)
 (list ordered by donation time)
  
 ## Download
-- Portable binary package for Linux: https://github.com/lakewik/storj_gui_client/releases/download/0.1.9/storj-gui-client-v.0.1.9-linux
-- Portable binary package for Windows: https://github.com/lakewik/storj_gui_client/releases/download/0.1.9/storj-gui-client-0.1.9.exe
+- Portable binary package for Linux: https://github.com/lakewik/storj_gui_client/releases/download/0.1.9.2/storj-gui-client-v0.1.9.2-linux.zip
+- Portable binary package for Windows: https://github.com/lakewik/storj_gui_client/releases/download/0.1.9.2/storj-gui-client-v0.1.9.2-windows.zip
 
 
 ## How to run (Alpha version)
@@ -46,6 +46,13 @@ $ cd storj-gui-client
 - [X] Creating new user in network
 - [X] Improve uploader
 - [X] Improve downloader
+
+## OwnStorj
+- [X] Public file sharing
+- [X] Playlist manager
+- [X] Video and audio streaming
+- [X] Mirrors and geographical location analyzer
+- [X] Buckets and files manager
 
 ## To do (planned features):
 - [ ] Working as a background service
