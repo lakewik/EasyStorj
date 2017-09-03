@@ -29,7 +29,8 @@ class ClientConfigurationUI(QtGui.QMainWindow):
                                self.close)
 
         # open path select
-        QtCore.QObject.connect(self.client_configuration_ui.crypto_keys_location_select_bt,
+        QtCore.QObject.connect(self.client_configuration_ui.
+                               crypto_keys_location_select_bt,
                                QtCore.SIGNAL('clicked()'),
                                self.select_crypto_keys_path)
 
@@ -44,7 +45,8 @@ class ClientConfigurationUI(QtGui.QMainWindow):
                                self.handle_clear_logs_action)
 
         # restore to default settings
-        QtCore.QObject.connect(self.client_configuration_ui.restore_to_default_bt,
+        QtCore.QObject.connect(self.client_configuration_ui.
+                               restore_to_default_bt,
                                QtCore.SIGNAL('clicked()'),
                                self.reset_settings_to_default)
 
