@@ -37,7 +37,8 @@ class LoginUI(QtGui.QMainWindow):
         # Take login action
         self.email = str(self.login_ui.email.text()).strip()
         self.password = str(self.login_ui.password.text()).strip()
-        self.bridge_api_url = str(self.login_ui.bridge_url.text()).strip()  # get bridge api url
+        # get bridge api url
+        self.bridge_api_url = str(self.login_ui.bridge_url.text()).strip()
 
         if self.bridge_api_url == "":
             self.bridge_api_url = DEFAULT_BRIDGE_API_URL
@@ -72,7 +73,7 @@ class LoginUI(QtGui.QMainWindow):
                                        QtGui.QMessageBox.Ok)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
-                self.__logger.info('User {} succesfully logged in'.format(self.email))
+                self.__logger.info('User %s succesfully logged in' % self.email)
                 self.main_ui_window = MainUI(self)
                 self.main_ui_window.show()
                 self.close()
