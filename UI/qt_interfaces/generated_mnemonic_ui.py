@@ -281,7 +281,7 @@ class Ui_MnemonicGenerated(object):
         MnemonicGenerated.setWindowTitle(_translate("MnemonicGenerated", "Generate mnemonic key - Storj GUI Client", None))
         self.file_name.setText(_translate("MnemonicGenerated", "<html><head/><body><p><span style=\" font-size:18pt;\">Your generated encryption key - mnemonic</span></p></body></html>", None))
         self.copy_to_clipboard.setText(_translate("MnemonicGenerated", "COPY TO CLIPBOARD", None))
-        self.file_name_2.setText(_translate("MnemonicGenerated", "<html><head/><body><p align=\"center\">Please save your key in secure location! </p><p align=\"center\">Without correct encryptio key your files cannot be recovered!</p><p align=\"center\"><span style=\" text-decoration: underline;\">Warning! Lost encrytpion key cannot be recovered!</span></p></body></html>", None))
+        self.file_name_2.setText(_translate("MnemonicGenerated", "<html><head/><body><p align=\"center\">Please save your key in secure location! </p><p align=\"center\">Without correct encryption key your files cannot be recovered!</p><p align=\"center\"><span style=\" text-decoration: underline;\">Warning! Lost encrytpion key cannot be recovered!</span></p></body></html>", None))
         self.apply_bt.setText(_translate("MnemonicGenerated", "I SAVED MY ENCRYPTION KEY IN SECURE LOCATION, LET\'S GO!", None))
         self.generate_new_key.setText(_translate("MnemonicGenerated", "GENERATE NEW KEY", None))
 
