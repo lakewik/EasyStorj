@@ -67,14 +67,16 @@ class RegisterUI(QtGui.QMainWindow):
                                     'Please fill out all fields!')
 
         if success:
-            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success",
-                                       "Successfully registered in Storj Distributed Storage Network! "
-                                       "Now, you must verify your email by"
-                                       "clicking the link that has been sent to you. "
-                                       "Then you can login", QtGui.QMessageBox.Ok)
-            logger.debug("New user registrated")
-            logger.debug("Email: " + self.email)
-            logger.debug("Password: " + self.password)
+            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Success',
+                                       'Successfully registered to Storj!'
+                                       'Verify your email by clicking on the'
+                                       'link that was sent to you.'
+                                       'Then, you can login.',
+                                       QtGui.QMessageBox.Ok)
+
+            logger.debug('New user registrated')
+            logger.debug('Email: %s' % self.email)
+            logger.debug('Password: %s' % self.password)
             result = msgBox.exec_()
             if result == QtGui.QMessageBox.Ok:
                 self.login_window = LoginUI(self)
