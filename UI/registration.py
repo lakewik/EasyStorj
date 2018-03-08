@@ -20,7 +20,8 @@ class RegisterUI(QtGui.QMainWindow):
         self.register_ui.password.setEchoMode(QtGui.QLineEdit.Password)
         self.register_ui.password_2.setEchoMode(QtGui.QLineEdit.Password)
 
-        QtCore.QObject.connect(self.register_ui.register_bt, QtCore.SIGNAL("clicked()"),
+        QtCore.QObject.connect(self.register_ui.register_bt,
+                               QtCore.SIGNAL('clicked()'),
                                self.register)  # validate and register user
 
     def register(self):
@@ -30,37 +31,40 @@ class RegisterUI(QtGui.QMainWindow):
         self.password_repeat = self.register_ui.password_2.text()
         self.bridge_api_url = str(self.register_ui.bridge_url.text()).strip()  # get bridge api url
 
-        if self.bridge_api_url == "":
+        if len(self.bridge_api_url) < 6:  # xxx.yy
             self.bridge_api_url = 'https://api.storj.io/'
 
         self.tools = Tools()
         success = False
-        if self.email != "" and self.password != "" and self.password_repeat != "":
+        if self.email != '' and self.password != '' and self.password_repeat != '':
             if self.password == self.password_repeat:
                 if (self.tools.check_email(self.email)):
                     # take login action
                     try:
-                        self.storj_client = storj.Client(None, "", api_url=self.bridge_api_url).user_create(str(self.email).strip(), str(self.password).strip())
+                        self.storj_client = storj.Client(None, '', storj_bridge=self.bridge_api_url).user_create(str(self.email).strip(), str(self.password).strip())
                         success = True
                     except storj.exception.StorjBridgeApiError as e:
                         j = json.loads(str(e))
-                        if j[0]["error"] == "Email is already registered":
-                            QtGui.QMessageBox.about(self, "Warning",
-                                                    "User with this e-mail is \
+                        if j[0]['error'] == 'Email is already registered':
+                            QtGui.QMessageBox.about(self, 'Warning',
+                                                    'User with this e-mail is \
                                                     already registered! Please \
                                                     login or try a different \
-                                                    e-mail!")
+                                                    e-mail!')
                         else:
-                            QtGui.QMessageBox.about(self, "Unhandled exception", "Exception: " + str(e))
+                            QtGui.QMessageBox.about(self, 'Unhandled exception',
+                                                    'Exception: ' + str(e))
                 else:
-                    QtGui.QMessageBox.about(self, "Warning",
-                                            "Your e-mail seems to be invalid! Please check e-mail and try again")
+                    QtGui.QMessageBox.about(self, 'Warning', 'Your e-mail \
+                                            seems to be invalid! Please check \
+                                            e-mail and try again')
             else:
-                QtGui.QMessageBox.about(self, "Warning",
-                                        "Given passwords are different! Please check and try again!")
+                QtGui.QMessageBox.about(self, 'Warning',
+                                        'Given passwords are different! Please\
+                                        check and try again!')
         else:
-            QtGui.QMessageBox.about(self, "Warning",
-                                    "Please fill out all fields!")
+            QtGui.QMessageBox.about(self, 'Warning',
+                                    'Please fill out all fields!')
 
         if success:
             msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Information, "Success",
