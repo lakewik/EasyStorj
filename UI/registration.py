@@ -24,6 +24,10 @@ class RegisterUI(QtGui.QMainWindow):
                                QtCore.SIGNAL('clicked()'),
                                self.register)  # validate and register user
 
+        QtCore.QObject.connect(self.register_ui.cancel_bt,
+                               QtCore.SIGNAL('clicked()'),
+                               self.close)  # close window
+
     def register(self):
         # validate fields
         self.email = self.register_ui.email.text()
