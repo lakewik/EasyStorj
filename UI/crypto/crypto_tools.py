@@ -3,7 +3,7 @@ import base64
 import hashlib
 import hmac
 import storj
-import pyaes
+# import pyaes
 from functools import reduce
 
 from cryptography.hazmat.backends import default_backend

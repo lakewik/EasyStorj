@@ -14,7 +14,8 @@ class StorjEngine:
             self.password = self.account_manager.get_user_password()
             self.email = self.account_manager.get_user_email()
             # initialize Storj
-            max_bridge_request_timeout = self.conf_manager.get_max_bridge_request_timeout()
+            max_bridge_request_timeout = self.conf_manager.\
+                get_max_bridge_request_timeout()
             bridge_api_url = self.conf_manager.get_bridge_api_url()
             self.storj_client = storj.Client(email=self.email,
                                              password=self.password,

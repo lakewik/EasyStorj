@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 from qt_interfaces.crypto_keys_manager_ui import Ui_KeyManager
 
 
